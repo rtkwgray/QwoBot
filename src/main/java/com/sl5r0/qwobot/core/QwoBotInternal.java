@@ -12,8 +12,11 @@ import com.sl5r0.qwobot.domain.Channel;
 import com.sl5r0.qwobot.domain.User;
 import com.sl5r0.qwobot.plugins.Logger;
 import com.sl5r0.qwobot.plugins.PluginInfo;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
+import org.pircbotx.exception.IrcException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -21,12 +24,23 @@ import java.util.regex.Pattern;
 public class QwoBotInternal extends PircBotX implements QwoBot {
     private final EventBus eventBus = new EventBus();
     private final Set<Plugin> loadedPlugins = Sets.newHashSet();
+    private final HierarchicalConfiguration config;
 
-    public QwoBotInternal() {
+    public QwoBotInternal(HierarchicalConfiguration config) {
         super();
-        this.getListenerManager().addListener(new QwoBotListener(eventBus));
+        this.config = config;
         this.loadedPlugins.add(new Logger(this));
         this.loadedPlugins.add(new PluginInfo(this));
+        this.getListenerManager().addListener(new QwoBotListener(eventBus));
+    }
+
+    public final void start() throws IrcException, IOException {
+        this.setName(config.getString("bot.nick"));
+        this.setLogin(config.getString("bot.nick"));
+        this.setVerbose(config.getBoolean("options.verbose"));
+        this.setAutoReconnect(config.getBoolean("options.autoReconnect"));
+        this.connect(config.getString("server.host"), config.getInt("server.port"));
+        this.joinChannel(config.getString("server.channel.name"));
     }
 
     @Override
