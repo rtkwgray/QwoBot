@@ -1,13 +1,13 @@
 <configuration>
     <bot>
-        <nick>QwoBot</nick>
+        <nick>Slowbot</nick>
     </bot>
     <options>
         <autoReconnect>true</autoReconnect>
         <verbose>true</verbose>
     </options>
     <server>
-        <host>example.com</host>
+        <host>linode.ev98.ca</host>
         <port>6667</port>
         <channel>
             <name>#qwobot</name>

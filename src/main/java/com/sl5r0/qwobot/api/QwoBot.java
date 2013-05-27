@@ -17,4 +17,6 @@ public interface QwoBot {
     public void sendMessageToUser(User user, String message);
 
     public void sendMessageToChannel(Channel channel, String message);
+
+    public void sendMessageToAllChannels(String message);
 }

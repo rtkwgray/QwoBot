@@ -12,6 +12,7 @@ import com.sl5r0.qwobot.domain.Channel;
 import com.sl5r0.qwobot.domain.User;
 import com.sl5r0.qwobot.plugins.Logger;
 import com.sl5r0.qwobot.plugins.PluginInfo;
+import com.sl5r0.qwobot.plugins.Twitter;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
@@ -31,6 +32,7 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         this.config = config;
         this.loadedPlugins.add(new Logger(this));
         this.loadedPlugins.add(new PluginInfo(this));
+        this.loadedPlugins.add(new Twitter(this));
         this.getListenerManager().addListener(new QwoBotListener(eventBus));
     }
 
@@ -75,6 +77,11 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         for (String line : splitByNewline(message)) {
             sendMessage(getChannel(channel.name), line);
         }
+    }
+
+    @Override
+    public void sendMessageToAllChannels(String message) {
+        sendMessage(config.getString("server.channel.name"), message);
     }
 
     private List<String> splitByNewline(String message) {
