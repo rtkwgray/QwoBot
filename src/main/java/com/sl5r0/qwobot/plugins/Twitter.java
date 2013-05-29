@@ -18,7 +18,12 @@ public class Twitter extends QwoBotPlugin {
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                bot().sendMessageToAllChannels(Colors.OLIVE + status.getUser().getScreenName() + ": " + status.getText());
+            	long statusID = status.getUser().getId();
+            	
+            	if(!status.isRetweet() && (statusID == WR_RECORD_TWITTER_ID || statusID == QW0RUM_TWITTER_ID))
+            	{
+            		bot().sendMessageToAllChannels(Colors.OLIVE + status.getUser().getScreenName() + ": " + status.getText());
+            	}
             }
 
             @Override
