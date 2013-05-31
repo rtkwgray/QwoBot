@@ -43,6 +43,9 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         this.setAutoReconnect(config.getBoolean("options.autoReconnect"));
         this.connect(config.getString("server.host"), config.getInt("server.port"));
         this.joinChannel(config.getString("server.channel.name"));
+
+        // TODO: move this to configuration value.
+        this.setMessageDelay(250);
     }
 
     @Override
