@@ -16,8 +16,10 @@ public class Twitter extends QwoBotPlugin {
     private static final long WR_RECORD_TWITTER_ID = 37104970;
     private static final long QW0RUM_TWITTER_ID = 1460330023;
     private static final String FOLLOW_TRIGGER = "!follow";
+    private static final String UNFOLLOW_TRIGGER = "!unfollow";
     private static final String TWEET_COLOR = Colors.BLUE;
     private final Set<Long> following = Sets.newHashSet(WR_RECORD_TWITTER_ID, QW0RUM_TWITTER_ID);
+    private final Set<String> triggers = Sets.newHashSet(FOLLOW_TRIGGER, UNFOLLOW_TRIGGER);
     private final TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 
     public Twitter(QwoBot qwoBot) {
@@ -29,25 +31,50 @@ public class Twitter extends QwoBotPlugin {
     @Subscribe
     public void processMessageEvent(MessageEvent event) {
         final List<String> params = getParametersFromEvent(event);
-        if (params.size() != 2 || !params.get(0).equals(FOLLOW_TRIGGER)) {
+        if (params.size() != 2 || !triggers.contains(params.get(0))) {
             return;
         }
 
-        final twitter4j.Twitter twitter = TwitterFactory.getSingleton();
-        final String twitterHandle = params.get(1);
+        final String trigger = params.get(0);
 
-        long twitterId;
-        try {
-            twitterId = twitter.showUser(twitterHandle).getId();
-        } catch (TwitterException e) {
-            bot().sendMessageToAllChannels("Sorry, I couldn't add " + twitterHandle + " to my follows.");
-            bot().sendMessageToAllChannels("The username may be invalid, or Twitter could be down.");
-            return;
+        if(trigger == FOLLOW_TRIGGER) {
+            final twitter4j.Twitter twitter = TwitterFactory.getSingleton();
+            final String twitterHandle = params.get(1);
+
+            long twitterId;
+            try {
+                twitterId = twitter.showUser(twitterHandle).getId();
+            } catch (TwitterException e) {
+                bot().sendMessageToAllChannels("Sorry, I couldn't add " + twitterHandle + " to my follows.");
+                bot().sendMessageToAllChannels("The username may be invalid, or Twitter could be down.");
+                return;
+            }
+
+            bot().sendMessageToAllChannels("Now following " + twitterHandle + " in this channel.");
+            following.add(twitterId);
+            listen();
+        } else if(trigger == UNFOLLOW_TRIGGER) {
+            final twitter4j.Twitter twitter = TwitterFactory.getSingleton();
+            final String twitterHandle = params.get(1);
+
+            long twitterId;
+            try {
+                twitterId = twitter.showUser(twitterHandle).getId();
+            } catch (TwitterException e) {
+                bot().sendMessageToAllChannels("Sorry, I can't find the twitter user " + twitterHandle + ".");
+                bot().sendMessageToAllChannels("The username may be invalid, or Twitter could be down.");
+                return;
+            }
+
+            if(!following.contains(twitterId)) {
+                bot().sendMessageToAllChannels("Sorry, " + twitterHandle + " is not being followed in this channel.");
+                return;
+            }
+
+            following.remove(twitterId);
+            bot().sendMessageToAllChannels(twitterHandle + " has been unfollowed in this channel.");
+            listen();
         }
-
-        bot().sendMessageToAllChannels("Now following " + twitterHandle + " in this channel.");
-        following.add(twitterId);
-        listen();
     }
 
     public void listen() {
