@@ -40,7 +40,8 @@ public class Twitter extends QwoBotPlugin {
         try {
             twitterId = twitter.showUser(twitterHandle).getId();
         } catch (TwitterException e) {
-            bot().sendMessageToAllChannels("Uh oh, something went wrong: " + e.getLocalizedMessage());
+            bot().sendMessageToAllChannels("Sorry, I couldn't add " + twitterHandle + " to my follows.");
+            bot().sendMessageToAllChannels("The username may be invalid, or Twitter could be down.");
             return;
         }
 
