@@ -13,4 +13,11 @@
             <name>#qwobot</name>
         </channel>
     </server>
+    <plugins>
+        <reddit>
+            <username>reddituser</username>
+            <password>redditpass</password>
+            <subreddit>subreddit</subreddit>
+        </reddit>
+    </plugins>
 </configuration>

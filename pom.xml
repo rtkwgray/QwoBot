@@ -48,6 +48,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-parent</artifactId>
+            <version>1.17.0-rc</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.17.0-rc</version>
+        </dependency>
+        <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
             <version>3.0.3</version>

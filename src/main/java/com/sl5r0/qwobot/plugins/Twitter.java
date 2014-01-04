@@ -24,7 +24,11 @@ public class Twitter extends QwoBotPlugin {
     public Twitter(QwoBot qwoBot) {
         super(qwoBot);
         this.twitterStream.addListener(new TwitterListener());
-        this.listen();
+        try {
+            this.listen();
+        } catch (IllegalStateException e) {
+            System.err.println("Twitter credentials missing. Do you have a twitter4j.properties file?");
+        }
     }
 
     @Subscribe
@@ -77,10 +81,7 @@ public class Twitter extends QwoBotPlugin {
 
     public long twitterIdForUser(String twitterHandle) throws TwitterException {
         final twitter4j.Twitter twitter = TwitterFactory.getSingleton();
-
-        long twitterId = twitter.showUser(twitterHandle).getId();
-
-        return twitterId;
+        return twitter.showUser(twitterHandle).getId();
     }
 
     public void listen() {
