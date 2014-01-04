@@ -12,6 +12,7 @@ import com.sl5r0.qwobot.domain.Channel;
 import com.sl5r0.qwobot.domain.User;
 import com.sl5r0.qwobot.plugins.Logger;
 import com.sl5r0.qwobot.plugins.PluginInfo;
+import com.sl5r0.qwobot.plugins.Reddit;
 import com.sl5r0.qwobot.plugins.Twitter;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
@@ -33,6 +34,11 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         this.loadedPlugins.add(new Logger(this));
         this.loadedPlugins.add(new PluginInfo(this));
         this.loadedPlugins.add(new Twitter(this));
+        this.loadedPlugins.add(new Reddit(this,
+                config.getString("plugins.reddit.username"),
+                config.getString("plugins.reddit.password"),
+                config.getString("plugins.reddit.subreddit")
+        ));
         this.getListenerManager().addListener(new QwoBotListener(eventBus));
     }
 
