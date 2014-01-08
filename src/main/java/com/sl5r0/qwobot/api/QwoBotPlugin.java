@@ -32,7 +32,7 @@ public abstract class QwoBotPlugin implements Plugin {
     }
 
     protected static List<String> getParametersFromEvent(MessageEvent event) {
-        Matcher matcher = PARAMETER_PATTERN.matcher(event.message);
+        Matcher matcher = PARAMETER_PATTERN.matcher(event.message());
         List<String> parameters = Lists.newArrayList();
         while (matcher.find()) {
             if (matcher.group(1) != null) {

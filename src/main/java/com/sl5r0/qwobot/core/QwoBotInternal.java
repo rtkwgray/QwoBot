@@ -34,11 +34,13 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         this.loadedPlugins.add(new Logger(this));
         this.loadedPlugins.add(new PluginInfo(this));
         this.loadedPlugins.add(new Twitter(this));
-        this.loadedPlugins.add(new Reddit(this,
-                config.getString("plugins.reddit.username"),
-                config.getString("plugins.reddit.password"),
-                config.getString("plugins.reddit.subreddit")
-        ));
+        Reddit redditPlugin = new Reddit(this, config.getString("plugins.reddit.subreddit"));
+        try {
+            redditPlugin.loginToReddit(config.getString("plugins.reddit.username"), config.getString("plugins.reddit.password"));
+            this.loadedPlugins.add(redditPlugin);
+        } catch (IOException e) {
+            System.err.println("Can't login to reddit. Plugin disabled.");
+        }
         this.getListenerManager().addListener(new QwoBotListener(eventBus));
     }
 
