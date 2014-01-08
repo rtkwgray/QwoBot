@@ -10,10 +10,7 @@ import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
 import com.sl5r0.qwobot.domain.Channel;
 import com.sl5r0.qwobot.domain.User;
-import com.sl5r0.qwobot.plugins.Logger;
-import com.sl5r0.qwobot.plugins.PluginInfo;
-import com.sl5r0.qwobot.plugins.Reddit;
-import com.sl5r0.qwobot.plugins.Twitter;
+import com.sl5r0.qwobot.plugins.*;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
@@ -41,6 +38,7 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         } catch (IOException e) {
             System.err.println("Can't login to reddit. Plugin disabled.");
         }
+        this.loadedPlugins.add(new BitCoinPriceChecker(this));
         this.getListenerManager().addListener(new QwoBotListener(eventBus));
     }
 

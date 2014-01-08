@@ -24,7 +24,7 @@ public class BitCoinPriceChecker extends QwoBotPlugin {
     private static final GenericUrl BITPAY_URL = new GenericUrl("https://bitpay.com/api/rates");
     private static final String CHANNEL_TRIGGER = "!btc";
 
-    protected BitCoinPriceChecker(QwoBot qwoBot) {
+    public BitCoinPriceChecker(QwoBot qwoBot) {
         super(qwoBot);
     }
 
