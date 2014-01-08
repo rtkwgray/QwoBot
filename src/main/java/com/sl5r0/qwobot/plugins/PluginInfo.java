@@ -52,18 +52,18 @@ public class PluginInfo extends QwoBotPlugin {
 
         switch (parameters.get(1)) {
             case LIST_OPTION:
-                sendPluginListToUser(event.user);
+                sendPluginListToUser(event.user());
                 break;
 
             case HELP_OPTION:
                 if (parameters.size() >= 3) {
-                    sendPluginHelpToUser(event.user, parameters.get(2));
+                    sendPluginHelpToUser(event.user(), parameters.get(2));
                 }
                 break;
 
             case CONFIG_OPTION:
                 if (parameters.size() >= 3) {
-                    sendPluginConfigToUser(event.user, parameters.get(2));
+                    sendPluginConfigToUser(event.user(), parameters.get(2));
                 }
         }
     }

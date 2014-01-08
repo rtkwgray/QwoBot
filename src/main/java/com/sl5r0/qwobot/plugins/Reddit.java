@@ -9,6 +9,8 @@ import com.google.common.eventbus.Subscribe;
 import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
 import com.sl5r0.qwobot.domain.MessageEvent;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,28 +22,34 @@ public class Reddit extends QwoBotPlugin {
     private final HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory(new RedditRequestInitializer());
     private String cookie, modHash, subreddit;
 
-    public Reddit(QwoBot qwoBot, String username, String password, String subreddit) {
+    public Reddit(QwoBot qwoBot, String subreddit) {
         super(qwoBot);
         this.subreddit = subreddit;
-        try {
-            loginToReddit(username, password);
-        } catch (IOException e) {
-            System.err.println("Reddit login failed. The plugin is now disabled.");
-        }
     }
 
     @Subscribe
     public void processMessageEvent(MessageEvent event) {
-        if (event.message.startsWith("http")) {
+        String message = event.message();
+        if (message.startsWith("http")) {
             try {
-                new URL(event.message);
+                new URL(message);
             } catch (MalformedURLException e) {
                 // Not a valid URL, skip this one.
                 return;
             }
 
+            String title;
             try {
-                postLink(event.user.nick + "'s link", event.message);
+                Document document = Jsoup.connect(message).get();
+                title = document.title();
+            } catch (IOException e) {
+                // It didn't work, so reset the title.
+                title = event.user().nick + "'s link";
+            }
+
+            try {
+
+                postLink(title, message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -54,7 +62,7 @@ public class Reddit extends QwoBotPlugin {
         httpRequest.execute();
     }
 
-    private void loginToReddit(String username, String password) throws IOException {
+    public void loginToReddit(String username, String password) throws IOException {
         GenericUrl url = new GenericUrl(REDDIT_BASE_URL + "api/login");
         HttpRequest httpRequest = requestFactory.buildPostRequest(url, new UrlEncodedContent(new RedditLoginRequest(username, password)));
         RedditResponse redditResponse;
