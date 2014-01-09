@@ -1,6 +1,6 @@
 package com.sl5r0.qwobot.plugins;
 
-import com.sl5r0.qwobot.api.QwoBot;
+import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.domain.MessageEvent;
 import org.junit.Before;
 import org.junit.Test;

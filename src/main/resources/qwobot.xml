@@ -5,6 +5,7 @@
     <options>
         <autoReconnect>true</autoReconnect>
         <verbose>true</verbose>
+        <messageDelay>250</messageDelay>
     </options>
     <server>
         <host>irc.example.com</host>

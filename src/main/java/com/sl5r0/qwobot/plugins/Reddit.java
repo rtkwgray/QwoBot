@@ -6,8 +6,8 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Key;
 import com.google.common.eventbus.Subscribe;
-import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
+import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.domain.MessageEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -95,7 +95,7 @@ public class Reddit extends QwoBotPlugin {
         @Override
         public void initialize(HttpRequest request) {
             if (cookie != null) {
-                request.getHeaders().setCookie("reddit_session="+cookie);
+                request.getHeaders().setCookie("reddit_session=" + cookie);
             }
             if (modHash != null) {
                 request.getHeaders().set("X-Modhash", modHash);
@@ -111,24 +111,33 @@ public class Reddit extends QwoBotPlugin {
             this.passwd = passwd;
         }
 
-        @Key("api_type") String apiType = "json";
-        @Key boolean rem = true;
-        @Key String user;
-        @Key String passwd;
+        @Key("api_type")
+        String apiType = "json";
+        @Key
+        boolean rem = true;
+        @Key
+        String user;
+        @Key
+        String passwd;
     }
 
     public static class RedditLoginResponse {
-        @Key List<String> errors;
-        @Key RedditLoginData data;
+        @Key
+        List<String> errors;
+        @Key
+        RedditLoginData data;
     }
 
     public static class RedditResponse {
-        @Key RedditLoginResponse json;
+        @Key
+        RedditLoginResponse json;
     }
 
     public static class RedditLoginData {
-        @Key String modhash;
-        @Key String cookie;
+        @Key
+        String modhash;
+        @Key
+        String cookie;
     }
 
     public static class RedditSubmitRequest {
@@ -138,12 +147,19 @@ public class Reddit extends QwoBotPlugin {
             this.url = url;
         }
 
-        @Key String api_type = "json";
-        @Key String kind = "link";
-        @Key boolean resubmit = true;
-        @Key boolean save = false;
-        @Key String sr;
-        @Key String title;
-        @Key String url;
+        @Key
+        String api_type = "json";
+        @Key
+        String kind = "link";
+        @Key
+        boolean resubmit = true;
+        @Key
+        boolean save = false;
+        @Key
+        String sr;
+        @Key
+        String title;
+        @Key
+        String url;
     }
 }

@@ -5,13 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+import com.google.inject.Inject;
 import com.sl5r0.qwobot.api.Plugin;
-import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
-import com.sl5r0.qwobot.domain.Channel;
 import com.sl5r0.qwobot.domain.User;
 import com.sl5r0.qwobot.plugins.*;
-import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
 
@@ -20,12 +18,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class QwoBotInternal extends PircBotX implements QwoBot {
+public class QwoBot extends PircBotX {
     private final EventBus eventBus = new EventBus();
     private final Set<Plugin> loadedPlugins = Sets.newHashSet();
-    private final HierarchicalConfiguration config;
+    private final BotConfiguration config;
 
-    public QwoBotInternal(HierarchicalConfiguration config) {
+    @Inject
+    public QwoBot(BotConfiguration config) {
         super();
         this.config = config;
         this.loadedPlugins.add(new Logger(this));
@@ -49,46 +48,23 @@ public class QwoBotInternal extends PircBotX implements QwoBot {
         this.setAutoReconnect(config.getBoolean("options.autoReconnect"));
         this.connect(config.getString("server.host"), config.getInt("server.port"));
         this.joinChannel(config.getString("server.channel.name"));
-
-        // TODO: move this to configuration value.
-        this.setMessageDelay(250);
+        this.setMessageDelay(config.getLong("options.messageDelay"));
     }
 
-    @Override
     public void registerPlugin(QwoBotPlugin qwoBotPlugin) {
         eventBus.register(qwoBotPlugin);
     }
 
-    @Override
-    public User getUserDetails(String nick) {
-        return new User(getUser(nick));
-    }
-
-    @Override
-    public Channel getChannelDetails(String name) {
-        return new Channel(getChannel(name));
-    }
-
-    @Override
     public Set<Plugin> getLoadedPlugins() {
         return ImmutableSet.copyOf(loadedPlugins);
     }
 
-    @Override
     public void sendMessageToUser(User user, String message) {
         for (String line : splitByNewline(message)) {
             sendMessage(getUser(user.nick), line);
         }
     }
 
-    @Override
-    public void sendMessageToChannel(Channel channel, String message) {
-        for (String line : splitByNewline(message)) {
-            sendMessage(getChannel(channel.name), line);
-        }
-    }
-
-    @Override
     public void sendMessageToAllChannels(String message) {
         sendMessage(config.getString("server.channel.name"), message);
     }

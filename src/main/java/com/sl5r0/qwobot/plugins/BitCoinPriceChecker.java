@@ -12,8 +12,8 @@ import com.google.api.client.util.Key;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.Subscribe;
-import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
+import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.domain.MessageEvent;
 
 import java.io.IOException;
