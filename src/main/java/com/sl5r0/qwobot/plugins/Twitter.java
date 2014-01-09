@@ -3,8 +3,8 @@ package com.sl5r0.qwobot.plugins;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.primitives.Longs;
-import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
+import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.domain.MessageEvent;
 import org.pircbotx.Colors;
 import twitter4j.*;
@@ -42,7 +42,7 @@ public class Twitter extends QwoBotPlugin {
         final String twitterHandle = params.get(1);
         long twitterId;
 
-        switch(params.get(0)) {
+        switch (params.get(0)) {
             case FOLLOW_TRIGGER:
                 try {
                     twitterId = twitterIdForUser(twitterHandle);
@@ -64,7 +64,7 @@ public class Twitter extends QwoBotPlugin {
                     return;
                 }
 
-                if(!following.contains(twitterId)) {
+                if (!following.contains(twitterId)) {
                     bot().sendMessageToAllChannels("Sorry, " + twitterHandle + " is not being followed in this channel.");
                     return;
                 }

@@ -4,8 +4,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.sl5r0.qwobot.api.Plugin;
-import com.sl5r0.qwobot.api.QwoBot;
 import com.sl5r0.qwobot.api.QwoBotPlugin;
+import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.domain.MessageEvent;
 import com.sl5r0.qwobot.domain.User;
 
