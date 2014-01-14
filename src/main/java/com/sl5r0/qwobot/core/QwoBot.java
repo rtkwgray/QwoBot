@@ -1,43 +1,22 @@
 package com.sl5r0.qwobot.core;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import com.sl5r0.qwobot.api.Plugin;
-import com.sl5r0.qwobot.api.QwoBotPlugin;
-import com.sl5r0.qwobot.domain.User;
-import com.sl5r0.qwobot.plugins.*;
+import com.sl5r0.qwobot.plugins.PluginManager;
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 public class QwoBot extends PircBotX {
     private final EventBus eventBus = new EventBus();
-    private final Set<Plugin> loadedPlugins = Sets.newHashSet();
     private final BotConfiguration config;
+    private final PluginManager pluginManager;
 
     @Inject
-    public QwoBot(BotConfiguration config) {
-        super();
-        this.config = config;
-        this.loadedPlugins.add(new Logger(this));
-        this.loadedPlugins.add(new PluginInfo(this));
-        this.loadedPlugins.add(new Twitter(this));
-        Reddit redditPlugin = new Reddit(this, config.getString("plugins.reddit.subreddit"));
-        try {
-            redditPlugin.loginToReddit(config.getString("plugins.reddit.username"), config.getString("plugins.reddit.password"));
-            this.loadedPlugins.add(redditPlugin);
-        } catch (IOException e) {
-            System.err.println("Can't login to reddit. Plugin disabled.");
-        }
-        this.loadedPlugins.add(new BitCoinPriceChecker(this));
+    public QwoBot(BotConfiguration configuration, PluginManager pluginManager, EventBus eventBus) {
+        this.config = configuration;
+        this.pluginManager = pluginManager;
         this.getListenerManager().addListener(new QwoBotListener(eventBus));
     }
 
@@ -49,27 +28,6 @@ public class QwoBot extends PircBotX {
         this.connect(config.getString("server.host"), config.getInt("server.port"));
         this.joinChannel(config.getString("server.channel.name"));
         this.setMessageDelay(config.getLong("options.messageDelay"));
-    }
-
-    public void registerPlugin(QwoBotPlugin qwoBotPlugin) {
-        eventBus.register(qwoBotPlugin);
-    }
-
-    public Set<Plugin> getLoadedPlugins() {
-        return ImmutableSet.copyOf(loadedPlugins);
-    }
-
-    public void sendMessageToUser(User user, String message) {
-        for (String line : splitByNewline(message)) {
-            sendMessage(getUser(user.nick), line);
-        }
-    }
-
-    public void sendMessageToAllChannels(String message) {
-        sendMessage(config.getString("server.channel.name"), message);
-    }
-
-    private List<String> splitByNewline(String message) {
-        return Lists.newArrayList(Splitter.on(Pattern.compile("\n")).split(message));
+        pluginManager.initializePlugins();
     }
 }

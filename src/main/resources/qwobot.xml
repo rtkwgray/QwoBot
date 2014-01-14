@@ -20,5 +20,8 @@
             <password>redditpass</password>
             <subreddit>subreddit</subreddit>
         </reddit>
+        <twitter>
+            <channel>#echochannel</channel>
+        </twitter>
     </plugins>
 </configuration>
