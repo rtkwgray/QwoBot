@@ -1,8 +1,8 @@
 package com.sl5r0.qwobot.core;
 
 import com.google.common.eventbus.EventBus;
-import com.sl5r0.qwobot.domain.MessageEvent;
 import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
 
 public class QwoBotListener extends ListenerAdapter {
     private final EventBus eventBus;
@@ -12,7 +12,7 @@ public class QwoBotListener extends ListenerAdapter {
     }
 
     @Override
-    public void onMessage(org.pircbotx.hooks.events.MessageEvent event) throws Exception {
-        eventBus.post(new MessageEvent(event));
+    public void onMessage(MessageEvent event) throws Exception {
+        eventBus.post(event);
     }
 }
