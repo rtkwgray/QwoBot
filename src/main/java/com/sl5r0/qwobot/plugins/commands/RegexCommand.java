@@ -20,12 +20,10 @@ public abstract class RegexCommand extends MessageCommand {
     @Subscribe
     public final void execute(MessageEvent event) {
         final Matcher matcher = pattern.matcher(event.getMessage());
-        if (matcher.matches()) {
-            final List<String> matches = newArrayList();
-            while(matcher.find()) {
-                matches.add(matcher.group());
-            }
-            execute(event, matches);
+        final List<String> matches = newArrayList();
+        while(matcher.find()) {
+            matches.add(matcher.group());
         }
+        execute(event, matches);
     }
 }

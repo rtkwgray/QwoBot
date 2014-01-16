@@ -27,6 +27,7 @@ public class PostLinkToReddit extends RegexCommand {
     @Override
     protected void execute(MessageEvent event, List<String> arguments) {
         for (String url : arguments) {
+            log.info("Creating Reddit post for: " + url);
             String title;
             try {
                 title = getTitle(url);

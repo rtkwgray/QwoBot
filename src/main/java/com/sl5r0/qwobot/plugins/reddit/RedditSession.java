@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 class RedditSession {
     private static final String BASE_URL = "https://ssl.reddit.com/";
     private static final GenericUrl LOGIN_URL = new GenericUrl(BASE_URL + "api/login");
@@ -29,10 +31,11 @@ class RedditSession {
         try {
             final HttpRequest request = requestFactory.buildPostRequest(LOGIN_URL, new UrlEncodedContent(loginRequest));
             final RedditResponse response = request.execute().parseAs(RedditResponse.class);
-            requestInitializer.setCookie(response.getCookie());
-            requestInitializer.setModHash(response.getModHash());
+            requestInitializer.setCookie(checkNotNull(response.getCookie(), "Reddit cookie was null"));
+            requestInitializer.setModHash(checkNotNull(response.getModHash(), "Reddit modhash was null."));
         } catch (IOException e) {
             log.warn("Could not login to Reddit", e);
+            throw new RuntimeException(e);
         }
     }
 

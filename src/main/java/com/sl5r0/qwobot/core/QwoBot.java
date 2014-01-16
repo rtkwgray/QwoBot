@@ -1,15 +1,18 @@
 package com.sl5r0.qwobot.core;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.sl5r0.qwobot.plugins.PluginManager;
+import org.pircbotx.Colors;
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
 
 import java.io.IOException;
 
+@Singleton
 public class QwoBot extends PircBotX {
-    private final EventBus eventBus = new EventBus();
     private final BotConfiguration config;
     private final PluginManager pluginManager;
 
@@ -24,10 +27,17 @@ public class QwoBot extends PircBotX {
         this.setName(config.getString("bot.nick"));
         this.setLogin(config.getString("bot.nick"));
         this.setVerbose(config.getBoolean("options.verbose"));
-        this.setAutoReconnect(config.getBoolean("options.autoReconnect"));
+        this.setAutoReconnect(config.getBoolean("options.auto-reconnect"));
         this.connect(config.getString("server.host"), config.getInt("server.port"));
         this.joinChannel(config.getString("server.channel.name"));
-        this.setMessageDelay(config.getLong("options.messageDelay"));
+        this.setMessageDelay(config.getLong("options.message-delay"));
         pluginManager.initializePlugins();
     }
+
+    public static final ImmutableMap<String, String> IRC_COLORS = ImmutableMap.<String, String>builder()
+            .put("blue", Colors.BLUE)
+            .put("cyan", Colors.CYAN)
+            .put("green", Colors.GREEN)
+            .put("magenta", Colors.MAGENTA)
+            .build();
 }

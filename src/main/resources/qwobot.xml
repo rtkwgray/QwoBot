@@ -3,9 +3,9 @@
         <nick>QwoBot</nick>
     </bot>
     <options>
-        <autoReconnect>true</autoReconnect>
-        <verbose>true</verbose>
-        <messageDelay>250</messageDelay>
+        <auto-reconnect>true</auto-reconnect>
+        <verbose>false</verbose>
+        <message-delay>250</message-delay>
     </options>
     <server>
         <host>irc.example.com</host>
@@ -16,12 +16,18 @@
     </server>
     <plugins>
         <reddit>
-            <username>reddituser</username>
-            <password>redditpass</password>
-            <subreddit>subreddit</subreddit>
+            <username></username>
+            <password></password>
+            <subreddit>subreddit to post to</subreddit>
         </reddit>
         <twitter>
-            <channel>#echochannel</channel>
+            <channel>#qwobot</channel>
+            <oauth>
+                <consumer-key></consumer-key>
+                <consumer-secret></consumer-secret>
+                <access-token></access-token>
+                <access-token-secret></access-token-secret>
+            </oauth>
         </twitter>
     </plugins>
 </configuration>
