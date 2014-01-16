@@ -1,7 +1,6 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
-import org.pircbotx.Channel;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +15,10 @@ public class FollowUser extends PrefixCommand {
     private static final Logger log = LoggerFactory.getLogger(FollowUser.class);
     private static final String TRIGGER = "!follow";
     private final TwitterState twitter;
-    private final Channel channel;
 
-    public FollowUser(TwitterState twitterState, Channel channel) {
+    public FollowUser(TwitterState twitterState) {
         super(TRIGGER);
         this.twitter = twitterState;
-        this.channel = channel;
     }
 
     @Override
@@ -32,18 +29,19 @@ public class FollowUser extends PrefixCommand {
             try {
                 twitter.follow(twitterHandle);
                 newFollows.add(twitterHandle);
+                log.info("Now following " + newFollows);
             } catch (TwitterException e) {
-                log.warn("Couldn't follow " + twitterHandle, e);
                 failedFollows.add(twitterHandle);
+                log.warn("Couldn't follow " + twitterHandle, e);
             }
         }
 
         if (!newFollows.isEmpty()) {
-            channel.sendMessage("Now following: " + newFollows);
+            event.getChannel().sendMessage("Now following: " + newFollows);
         }
 
         if (!failedFollows.isEmpty()) {
-            channel.sendMessage("Couldn't follow: " + newFollows);
+            event.getChannel().sendMessage("Couldn't follow: " + newFollows);
         }
     }
 

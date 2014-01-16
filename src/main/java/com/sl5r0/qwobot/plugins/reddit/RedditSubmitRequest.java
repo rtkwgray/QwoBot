@@ -17,7 +17,7 @@ public class RedditSubmitRequest {
     boolean resubmit = true;
     @Key
     boolean save = false;
-    @Key("subreddit")
+    @Key
     String subreddit;
     @Key
     String title;

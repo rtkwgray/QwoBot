@@ -1,7 +1,6 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
-import org.pircbotx.Channel;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +15,10 @@ public class UnfollowUser extends PrefixCommand {
     private static final Logger log = LoggerFactory.getLogger(UnfollowUser.class);
     private static final String TRIGGER = "!unfollow";
     private final TwitterState twitter;
-    private final Channel channel;
 
-    public UnfollowUser(TwitterState twitterState, Channel channel) {
+    public UnfollowUser(TwitterState twitterState) {
         super(TRIGGER);
         this.twitter = twitterState;
-        this.channel = channel;
     }
 
     @Override
@@ -39,11 +36,11 @@ public class UnfollowUser extends PrefixCommand {
         }
 
         if (!newUnfollows.isEmpty()) {
-            channel.sendMessage("Now unfollowing: " + newUnfollows);
+            event.getChannel().sendMessage("Now unfollowing: " + newUnfollows);
         }
 
         if (!failedUnfollows.isEmpty()) {
-            channel.sendMessage("Couldn't unfollow: " + newUnfollows);
+            event.getChannel().sendMessage("Couldn't unfollow: " + newUnfollows);
         }
     }
 

@@ -11,8 +11,8 @@ import twitter4j.StatusListener;
 
 class TwitterListener implements StatusListener {
     private static final Logger log = LoggerFactory.getLogger(TwitterListener.class);
-    private static final String TWEET_COLOR = Colors.BLUE;
     private final Channel channel;
+    private String tweetColor = Colors.BLUE;
 
     TwitterListener(Channel channel) {
         this.channel = channel;
@@ -20,7 +20,7 @@ class TwitterListener implements StatusListener {
 
     @Override
     public void onStatus(Status status) {
-        channel.sendMessage(TWEET_COLOR + status.getUser().getScreenName() + ": " + status.getText());
+        channel.sendMessage(tweetColor + status.getUser().getScreenName() + ": " + status.getText());
     }
 
     @Override
@@ -42,5 +42,9 @@ class TwitterListener implements StatusListener {
     @Override
     public void onException(Exception ex) {
         log.error("Twitter exception occurred", ex);
+    }
+
+    public void setTweetColor(String tweetColor) {
+        this.tweetColor = tweetColor;
     }
 }

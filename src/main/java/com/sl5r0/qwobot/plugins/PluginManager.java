@@ -7,6 +7,7 @@ import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.plugins.bitcoin.BitCoinPriceChecker;
 import com.sl5r0.qwobot.plugins.commands.Command;
+import com.sl5r0.qwobot.plugins.reddit.Reddit;
 import com.sl5r0.qwobot.plugins.twitter.TwitterFeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class PluginManager {
 
         // TODO: don't hard-code this.
         try {
-//            registerPlugin(new Reddit(configuration.configurationAt("plugins.reddit")));
+            registerPlugin(new Reddit(configuration));
         } catch (RuntimeException e) {
             log.error("Couldn't load Reddit plugin", e);
         }
@@ -45,9 +46,8 @@ public class PluginManager {
             log.error("Couldn't load BitCoin price checker", e);
         }
 
-        final String twitterChannel = configuration.getString("plugins.twitter.channel");
         try {
-            registerPlugin(new TwitterFeed(bot.getChannel(twitterChannel)));
+            registerPlugin(new TwitterFeed(configuration, bot));
         } catch (RuntimeException e) {
             log.error("Couldn't load Twitter plugin", e);
         }
