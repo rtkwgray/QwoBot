@@ -50,10 +50,10 @@ public class TwitterFeed extends Plugin {
 
         final TwitterFactory twitterFactory = new TwitterFactory(twitterConfiguration);
         final TwitterStream twitterStream = new TwitterStreamFactory(twitterConfiguration).getInstance();
-        final TwitterListener listener = new TwitterListener(channel);
+        final TwitterState twitterState = new TwitterState(twitterFactory.getInstance(), twitterStream);
+        final TwitterListener listener = new TwitterListener(twitterState, channel);
         twitterStream.addListener(listener);
 
-        final TwitterState twitterState = new TwitterState(twitterFactory.getInstance(), twitterStream);
         commands.add(new FollowUser(twitterState));
         commands.add(new UnfollowUser(twitterState));
         commands.add(new ChangeTweetColor(listener));

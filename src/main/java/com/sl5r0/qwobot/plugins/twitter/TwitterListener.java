@@ -12,15 +12,20 @@ import twitter4j.StatusListener;
 class TwitterListener implements StatusListener {
     private static final Logger log = LoggerFactory.getLogger(TwitterListener.class);
     private final Channel channel;
+    private final TwitterState twitterState;
     private String tweetColor = Colors.BLUE;
 
-    TwitterListener(Channel channel) {
+    TwitterListener(TwitterState twitterState, Channel channel) {
         this.channel = channel;
+        this.twitterState = twitterState;
     }
 
     @Override
     public void onStatus(Status status) {
-        channel.sendMessage(tweetColor + status.getUser().getScreenName() + ": " + status.getText());
+        // Don't display messages that aren't from people we're following.
+        if (twitterState.getFollows().contains(status.getUser().getId())) {
+            channel.sendMessage(tweetColor + status.getUser().getScreenName() + ": " + status.getText());
+        }
     }
 
     @Override
