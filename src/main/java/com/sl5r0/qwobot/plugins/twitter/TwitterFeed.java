@@ -39,6 +39,7 @@ public class TwitterFeed extends Plugin {
                     .setOAuthAccessTokenSecret(pluginConfig.getString("oauth.access-token-secret"))
                     .setIncludeRTsEnabled(false)
                     .setUserStreamRepliesAllEnabled(false)
+                    .setIncludeMyRetweetEnabled(false)
                     .setUseSSL(true)
                     .build();
 
