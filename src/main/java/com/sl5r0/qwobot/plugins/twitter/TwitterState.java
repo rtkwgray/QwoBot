@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Longs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ public class TwitterState {
     private static final Logger log = LoggerFactory.getLogger(TwitterState.class);
     private final Twitter twitter;
     private final TwitterStream twitterStream;
-    private final Set<Long> following = newHashSet();
+    private final Set<Long> follows = newHashSet();
 
     TwitterState(Twitter twitter, TwitterStream twitterStream) {
         this.twitter = twitter;
@@ -25,20 +26,24 @@ public class TwitterState {
     }
 
     void follow(String handle) throws TwitterException {
-        following.add(getTwitterUserIdForHandle(handle));
+        follows.add(getTwitterUserIdForHandle(handle));
         log.info("Followed user: " + handle);
         listen();
     }
 
     void unfollow(String handle) throws TwitterException {
-        following.remove(getTwitterUserIdForHandle(handle));
+        follows.remove(getTwitterUserIdForHandle(handle));
         log.info("Unfollowed user: " + handle);
         listen();
     }
 
+    Set<Long> getFollows() {
+        return ImmutableSet.copyOf(follows);
+    }
+
     private void listen() {
-        if (!following.isEmpty()) {
-            twitterStream.filter(new FilterQuery(Longs.toArray(following)));
+        if (!follows.isEmpty()) {
+            twitterStream.filter(new FilterQuery(Longs.toArray(follows)));
         }
     }
 
