@@ -14,7 +14,9 @@ public class Reddit extends Plugin {
 
     public Reddit(BotConfiguration config) {
         final HierarchicalConfiguration pluginConfig = config.configurationAt("plugins.reddit");
-        final RedditSession redditSession = new RedditSession(new NetHttpTransport());
+        final RedditSession redditSession = new RedditSession(new NetHttpTransport(),
+                new RedditRequestInitializer(pluginConfig.getString("username")));
+
         redditSession.login(pluginConfig.getString("username"), pluginConfig.getString("password"));
         commands.add(new PostLinkToReddit(redditSession, pluginConfig.getString("subreddit")));
     }

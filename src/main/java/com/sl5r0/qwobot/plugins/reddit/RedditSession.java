@@ -25,9 +25,9 @@ class RedditSession {
     // be handled in a different way (maybe detecting login failure).
     private boolean isLoggedIn = false;
 
-    RedditSession(NetHttpTransport netHttpTransport) {
-        requestInitializer = new RedditRequestInitializer();
-        requestFactory = netHttpTransport.createRequestFactory(requestInitializer);
+    RedditSession(NetHttpTransport netHttpTransport, RedditRequestInitializer redditRequestInitializer) {
+        this.requestInitializer = redditRequestInitializer;
+        this.requestFactory = netHttpTransport.createRequestFactory(requestInitializer);
     }
 
     void login(String username, String password) {
