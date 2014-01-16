@@ -46,6 +46,7 @@ class RedditSession {
 
     void postLink(String subReddit, String title, String url) throws IOException {
         if (!isLoggedIn) {
+            log.warn("Can't post " + url + " to " + subReddit + " because we're not logged in.");
             return;
         }
 
