@@ -21,6 +21,10 @@ class RedditSession {
     private final HttpRequestFactory requestFactory;
     private final RedditRequestInitializer requestInitializer;
 
+    // TODO: get rid of this flag. It's just to stop Reddit from being spammed if we're not logged in, but it should
+    // be handled in a different way (maybe detecting login failure).
+    private boolean isLoggedIn = false;
+
     RedditSession(NetHttpTransport netHttpTransport) {
         requestInitializer = new RedditRequestInitializer();
         requestFactory = netHttpTransport.createRequestFactory(requestInitializer);
@@ -33,6 +37,7 @@ class RedditSession {
             final RedditResponse response = request.execute().parseAs(RedditResponse.class);
             requestInitializer.setCookie(checkNotNull(response.getCookie(), "Reddit cookie was null"));
             requestInitializer.setModHash(checkNotNull(response.getModHash(), "Reddit modhash was null."));
+            isLoggedIn = true;
         } catch (IOException e) {
             log.warn("Could not login to Reddit", e);
             throw new RuntimeException(e);
@@ -40,6 +45,10 @@ class RedditSession {
     }
 
     void postLink(String subReddit, String title, String url) throws IOException {
+        if (!isLoggedIn) {
+            return;
+        }
+
         final RedditSubmitRequest submitRequest = new RedditSubmitRequest(subReddit, title, url);
         final HttpRequest request = requestFactory.buildPostRequest(SUBMIT_URL, new UrlEncodedContent(submitRequest));
         request.execute();
