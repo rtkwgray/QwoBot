@@ -14,6 +14,6 @@ public class RedditLoginRequest {
     boolean rem = true;
     @Key
     String user;
-    @Key("password")
+    @Key("passwd")
     String password;
 }
