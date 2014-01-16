@@ -5,10 +5,12 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.common.util.concurrent.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,17 +22,22 @@ class RedditSession {
 
     private final HttpRequestFactory requestFactory;
     private final RedditRequestInitializer requestInitializer;
+    private final RateLimiter rateLimiter;
+    private final Executor requestExecutor;
 
     // TODO: get rid of this flag. It's just to stop Reddit from being spammed if we're not logged in, but it should
     // be handled in a different way (maybe detecting login failure).
     private boolean isLoggedIn = false;
 
-    RedditSession(NetHttpTransport netHttpTransport, RedditRequestInitializer redditRequestInitializer) {
+    RedditSession(NetHttpTransport netHttpTransport, RedditRequestInitializer redditRequestInitializer, RateLimiter rateLimiter, Executor requestExecutor) {
         this.requestInitializer = redditRequestInitializer;
+        this.requestExecutor = requestExecutor;
         this.requestFactory = netHttpTransport.createRequestFactory(requestInitializer);
+        this.rateLimiter = rateLimiter;
     }
 
     void login(String username, String password) {
+        log.info("Logging into Reddit as " + username);
         final RedditLoginRequest loginRequest = new RedditLoginRequest(username, password);
         try {
             final HttpRequest request = requestFactory.buildPostRequest(LOGIN_URL, new UrlEncodedContent(loginRequest));
@@ -38,12 +45,14 @@ class RedditSession {
             requestInitializer.setCookie(checkNotNull(response.getCookie(), "Reddit cookie was null"));
             requestInitializer.setModHash(checkNotNull(response.getModHash(), "Reddit modhash was null."));
             isLoggedIn = true;
+            log.info("Successfully logged in to Reddit");
         } catch (IOException e) {
             log.warn("Could not login to Reddit", e);
             throw new RuntimeException(e);
         }
     }
 
+    // TODO: move this so that we can report failure to the channel instead of just the log file.
     void postLink(String subReddit, String title, String url) throws IOException {
         if (!isLoggedIn) {
             log.warn("Can't post " + url + " to " + subReddit + " because we're not logged in.");
@@ -51,7 +60,22 @@ class RedditSession {
         }
 
         final RedditSubmitRequest submitRequest = new RedditSubmitRequest(subReddit, title, url);
+        log.debug("Created " + submitRequest);
+
         final HttpRequest request = requestFactory.buildPostRequest(SUBMIT_URL, new UrlEncodedContent(submitRequest));
-        request.execute();
+
+        log.debug("Submitting reddit post for " + url + " to executor.");
+        requestExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                rateLimiter.acquire();
+                try {
+                    request.execute();
+                    log.debug("Posted reddit link: " + submitRequest.url);
+                } catch (IOException e) {
+                    log.error("Could not submit Reddit post", e);
+                }
+            }
+        });
     }
 }
