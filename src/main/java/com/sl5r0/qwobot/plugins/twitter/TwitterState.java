@@ -12,12 +12,16 @@ import twitter4j.TwitterStream;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.pircbotx.Colors.BLUE;
 
 public class TwitterState {
     private static final Logger log = LoggerFactory.getLogger(TwitterState.class);
     private final Twitter twitter;
     private final TwitterStream twitterStream;
     private final Set<Long> follows = newHashSet();
+    private boolean showingRetweets = false;
+    private boolean showingReplies = false;
+    private String tweetColor = BLUE;
 
     TwitterState(Twitter twitter, TwitterStream twitterStream) {
         this.twitter = twitter;
@@ -35,6 +39,30 @@ public class TwitterState {
         follows.remove(getTwitterUserIdForHandle(handle));
         log.info("Unfollowed user: " + handle);
         listen();
+    }
+
+    boolean isShowingReplies() {
+        return showingReplies;
+    }
+
+    void setShowingReplies(boolean showingReplies) {
+        this.showingReplies = showingReplies;
+    }
+
+    boolean isShowingRetweets() {
+        return showingRetweets;
+    }
+
+    void setShowingRetweets(boolean showingRetweets) {
+        this.showingRetweets = showingRetweets;
+    }
+
+    String getTweetColor() {
+        return tweetColor;
+    }
+
+    void setTweetColor(String tweetColor) {
+        this.tweetColor = tweetColor;
     }
 
     Set<Long> getFollows() {

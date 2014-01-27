@@ -11,11 +11,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ChangeTweetColor extends PrefixCommand {
     private static final String TRIGGER = "!tweetcolor";
-    private final TwitterListener twitterListener;
+    private final TwitterState twitterState;
 
-    public ChangeTweetColor(TwitterListener twitterListener) {
+    public ChangeTweetColor(TwitterState twitterState) {
         super(TRIGGER);
-        this.twitterListener = checkNotNull(twitterListener);
+        this.twitterState = checkNotNull(twitterState);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class ChangeTweetColor extends PrefixCommand {
         final Map<String, String> colorMap = QwoBot.IRC_COLORS;
         final String newColor = arguments.get(0);
         if (colorMap.containsKey(newColor)) {
-            twitterListener.setTweetColor(colorMap.get(newColor));
+            twitterState.setTweetColor(colorMap.get(newColor));
         }
     }
 
