@@ -1,6 +1,7 @@
 package com.sl5r0.qwobot.plugins.commands;
 
 import com.google.common.eventbus.Subscribe;
+import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
@@ -24,7 +25,12 @@ public abstract class PrefixCommand extends MessageCommand {
     @Subscribe
     public final void execute(MessageEvent event) {
         if (event.getMessage().startsWith(prefix)) {
-            execute(event, parseArguments(event.getMessage()));
+            try {
+                execute(event, parseArguments(event.getMessage()));
+            } catch (CommandExecutionException e) {
+                event.getChannel().sendMessage(e.getMessage());
+                event.getChannel().sendMessage("Usage: " + getHelp());
+            }
         }
     }
 
@@ -42,5 +48,9 @@ public abstract class PrefixCommand extends MessageCommand {
         }
         parameters.remove(prefix);
         return parameters;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }
