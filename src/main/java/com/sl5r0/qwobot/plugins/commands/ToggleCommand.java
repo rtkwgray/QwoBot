@@ -8,8 +8,6 @@ import java.util.List;
  * A command that accepts "on" and "off" values as arguments. Additional arguments are ignored.
  */
 public abstract class ToggleCommand extends PrefixCommand {
-    public static final String OFF = "OFF";
-    public static final String ON = "ON";
 
     public ToggleCommand(String prefix) {
         super(prefix);
@@ -23,12 +21,12 @@ public abstract class ToggleCommand extends PrefixCommand {
             throwParsingError();
         }
 
-        final String newValue = arguments.get(0).toLowerCase();
+        final String newValue = arguments.get(0).toUpperCase();
         switch (newValue) {
-            case OFF:
+            case "OFF":
                 execute(event, false);
                 break;
-            case ON:
+            case "ON":
                 execute(event, true);
                 break;
             default:
@@ -38,7 +36,6 @@ public abstract class ToggleCommand extends PrefixCommand {
 
     @Override
     public final String getHelp() {
-        return getPrefix() + " <" + ON + "|" + OFF + ">";
+        return getPrefix() + " <on|off>";
     }
-
 }
