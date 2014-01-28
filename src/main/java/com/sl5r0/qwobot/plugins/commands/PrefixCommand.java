@@ -46,7 +46,7 @@ public abstract class PrefixCommand extends MessageCommand {
                 parameters.add(matcher.group(3));
             }
         }
-        parameters.remove(prefix);
+        parameters.remove(0);
         return parameters;
     }
 

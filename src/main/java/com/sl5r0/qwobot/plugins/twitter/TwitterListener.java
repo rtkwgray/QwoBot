@@ -25,7 +25,7 @@ class TwitterListener implements StatusListener {
             return;
         }
 
-        final boolean statusIsReply = twitterState.getFollows().contains(status.getUser().getId());
+        final boolean statusIsReply = (status.getInReplyToStatusId() != -1 || status.getInReplyToUserId() != -1 || status.getInReplyToScreenName() != null);
         if (!twitterState.isShowingReplies() && statusIsReply) {
             return;
         }
