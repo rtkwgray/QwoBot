@@ -29,15 +29,15 @@ public class TwitterState {
 
     void follow(String handle) throws TwitterException {
         final User user = getTwitterUserFromHandle(handle);
-        follows.put(user.getId(), user.getName());
-        log.info("Followed user: " + user.getName());
+        follows.put(user.getId(), user.getScreenName());
+        log.info("Followed user: " + user.getScreenName());
         listen();
     }
 
     void unfollow(String handle) throws TwitterException {
         final User user = getTwitterUserFromHandle(handle);
         follows.remove(user.getId());
-        log.info("Unfollowed user: " + user.getName());
+        log.info("Unfollowed user: " + user.getScreenName());
         listen();
     }
 
