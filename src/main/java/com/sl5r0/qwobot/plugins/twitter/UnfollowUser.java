@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
+import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.slf4j.Logger;
@@ -35,12 +36,16 @@ public class UnfollowUser extends PrefixCommand {
             }
         }
 
-        if (!newUnfollows.isEmpty()) {
-            event.getChannel().sendMessage("Now unfollowing: " + newUnfollows);
-        }
-
         if (!failedUnfollows.isEmpty()) {
             event.getChannel().sendMessage("Couldn't unfollow: " + newUnfollows);
+        }
+
+        final Set<String> follows = twitter.getFollowHandles();
+        if (follows.isEmpty()) {
+            event.getChannel().sendMessage("Not following anybody.");
+        } else {
+            final String following = Joiner.on(", ").skipNulls().join(follows);
+            event.getChannel().sendMessage("Now following: " + following);
         }
     }
 
