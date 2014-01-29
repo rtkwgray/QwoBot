@@ -1,7 +1,7 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.sl5r0.qwobot.core.QwoBot;
-import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
+import com.sl5r0.qwobot.plugins.commands.ParameterTriggerCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class ChangeTweetColor extends PrefixCommand {
+public class ChangeTweetColor extends ParameterTriggerCommand {
     private static final String TRIGGER = "!tweetcolor";
     private final TwitterState twitterState;
 
@@ -19,7 +19,7 @@ public class ChangeTweetColor extends PrefixCommand {
     }
 
     @Override
-    protected void execute(MessageEvent event, List<String> arguments) {
+    public void execute(MessageEvent event, List<String> arguments) {
         final Map<String, String> colorMap = QwoBot.IRC_COLORS;
         final String newColor = arguments.get(0);
         if (colorMap.containsKey(newColor)) {

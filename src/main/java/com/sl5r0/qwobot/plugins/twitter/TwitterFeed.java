@@ -59,6 +59,7 @@ public class TwitterFeed extends Plugin {
         commands.add(new ChangeTweetColor(twitterState));
         commands.add(new ToggleReplies(twitterState));
         commands.add(new ToggleRetweets(twitterState));
+        commands.add(new ShowFollows(twitterState));
     }
 
     @Override
