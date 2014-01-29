@@ -7,13 +7,14 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.common.collect.ImmutableSet;
 import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.copyOf;
 
 class FetchBitcoinPrices extends PrefixCommand {
     private static final String CHANNEL_TRIGGER = "!btc";
@@ -27,7 +28,7 @@ class FetchBitcoinPrices extends PrefixCommand {
     });
 
     FetchBitcoinPrices() {
-        super(CHANNEL_TRIGGER);
+        super(CHANNEL_TRIGGER, TO_LOWERCASE);
     }
 
     public String getHelp() {
@@ -37,8 +38,13 @@ class FetchBitcoinPrices extends PrefixCommand {
     @Override
     protected void execute(MessageEvent event, List<String> arguments) {
         try {
-            final Set<String> currencies = ImmutableSet.copyOf(arguments);
-            event.getBot().sendMessage(event.getChannel(), getBitCoinPrices().filterBy(currencies).toString());
+            final Set<String> currencies = copyOf(arguments);
+            final BitCoinPrices bitCoinPrices = getBitCoinPrices().filterBy(currencies);
+            if (bitCoinPrices.isEmpty()) {
+                event.getChannel().sendMessage("Sorry, I couldn't find any data.");
+            } else {
+                event.getChannel().sendMessage(bitCoinPrices.toString());
+            }
         } catch (IOException e) {
             event.getBot().sendMessage(event.getChannel(), "Couldn't fetch prices right now. Try again later.");
         }

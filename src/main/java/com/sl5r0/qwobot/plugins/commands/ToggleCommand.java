@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class ToggleCommand extends PrefixCommand {
 
     public ToggleCommand(String prefix) {
-        super(prefix);
+        super(prefix, TO_LOWERCASE);
     }
 
     protected abstract void execute(MessageEvent event, boolean value);
@@ -21,12 +21,12 @@ public abstract class ToggleCommand extends PrefixCommand {
             throwParsingError();
         }
 
-        final String newValue = arguments.get(0).toUpperCase();
+        final String newValue = arguments.get(0);
         switch (newValue) {
-            case "OFF":
+            case "off":
                 execute(event, false);
                 break;
-            case "ON":
+            case "on":
                 execute(event, true);
                 break;
             default:
