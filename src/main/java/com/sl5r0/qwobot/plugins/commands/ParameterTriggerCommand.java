@@ -2,7 +2,6 @@ package com.sl5r0.qwobot.plugins.commands;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.eventbus.Subscribe;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import org.pircbotx.hooks.events.MessageEvent;
 
@@ -10,30 +9,28 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 
 /**
- * A command that is executed when a message matches a specific prefix.
+ * A command that is executed when a message matches a specific trigger.
  */
-public abstract class PrefixCommand extends MessageCommand {
+public abstract class ParameterTriggerCommand extends TriggerCommand implements ParameterCommand {
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(^[\"\\S]+)|(\"?\\S+)");
-    private final String prefix;
     private final Optional<Function<String, String>> argumentMutator;
 
-    public PrefixCommand(String prefix) {
+    public ParameterTriggerCommand(String prefix) {
         this(prefix, null);
     }
 
-    public PrefixCommand(String prefix, Function<String, String> argumentMutator) {
-        this.prefix = checkNotNull(prefix);
+    public ParameterTriggerCommand(String prefix, Function<String, String> argumentMutator) {
+        super(prefix);
         this.argumentMutator = Optional.fromNullable(argumentMutator);
     }
 
-    @Subscribe
-    public final void execute(MessageEvent event) {
-        if (event.getMessage().startsWith(prefix)) {
+    @Override
+    public final void triggered(MessageEvent event) {
+        if (event.getMessage().startsWith(getTrigger())) {
             try {
                 execute(event, parseArguments(event.getMessage()));
             } catch (CommandExecutionException e) {
@@ -61,10 +58,6 @@ public abstract class PrefixCommand extends MessageCommand {
         } else {
             return parameters;
         }
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 
     protected static final Function<String, String> TO_LOWERCASE = new Function<String, String>() {

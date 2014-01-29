@@ -1,7 +1,7 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
-import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
+import com.sl5r0.qwobot.plugins.commands.ParameterTriggerCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 
-public class UnfollowUser extends PrefixCommand {
+public class UnfollowUser extends ParameterTriggerCommand {
     private static final Logger log = LoggerFactory.getLogger(UnfollowUser.class);
     private static final String TRIGGER = "!unfollow";
     private final TwitterState twitter;
@@ -23,7 +23,7 @@ public class UnfollowUser extends PrefixCommand {
     }
 
     @Override
-    protected void execute(MessageEvent event, List<String> arguments) {
+    public void execute(MessageEvent event, List<String> arguments) {
         final Set<String> newUnfollows = newHashSet();
         final Set<String> failedUnfollows = newHashSet();
         for (String twitterHandle : arguments) {
@@ -47,6 +47,8 @@ public class UnfollowUser extends PrefixCommand {
             final String following = Joiner.on(", ").skipNulls().join(follows);
             event.getChannel().sendMessage("Now following: " + following);
         }
+
+        twitter.restartStream();
     }
 
     @Override

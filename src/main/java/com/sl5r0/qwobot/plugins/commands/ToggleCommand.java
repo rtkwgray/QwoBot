@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * A command that accepts "on" and "off" values as arguments. Additional arguments are ignored.
  */
-public abstract class ToggleCommand extends PrefixCommand {
+public abstract class ToggleCommand extends ParameterTriggerCommand {
 
     public ToggleCommand(String prefix) {
         super(prefix, TO_LOWERCASE);
@@ -16,7 +16,7 @@ public abstract class ToggleCommand extends PrefixCommand {
     protected abstract void execute(MessageEvent event, boolean value);
 
     @Override
-    protected final void execute(MessageEvent event, List<String> arguments) {
+    public final void execute(MessageEvent event, List<String> arguments) {
         if (arguments.size() < 1) {
             throwParsingError();
         }
@@ -36,6 +36,6 @@ public abstract class ToggleCommand extends PrefixCommand {
 
     @Override
     public final String getHelp() {
-        return getPrefix() + " <on|off>";
+        return getTrigger() + " <on|off>";
     }
 }

@@ -7,7 +7,7 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.sl5r0.qwobot.plugins.commands.PrefixCommand;
+import com.sl5r0.qwobot.plugins.commands.ParameterTriggerCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
 
-class FetchBitcoinPrices extends PrefixCommand {
+class FetchBitcoinPrices extends ParameterTriggerCommand {
     private static final String CHANNEL_TRIGGER = "!btc";
     private static final GenericUrl BITPAY_URL = new GenericUrl("https://bitpay.com/api/rates");
 
@@ -36,7 +36,7 @@ class FetchBitcoinPrices extends PrefixCommand {
     }
 
     @Override
-    protected void execute(MessageEvent event, List<String> arguments) {
+    public void execute(MessageEvent event, List<String> arguments) {
         try {
             final Set<String> currencies = copyOf(arguments);
             final BitCoinPrices bitCoinPrices = getBitCoinPrices().filterBy(currencies);
