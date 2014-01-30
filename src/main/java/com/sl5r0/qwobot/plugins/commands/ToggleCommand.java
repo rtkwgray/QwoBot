@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * A command that accepts "on" and "off" values as arguments. Additional arguments are ignored.
  */
-public abstract class ToggleCommand extends ParameterTriggerCommand {
+public abstract class ToggleCommand extends ParameterizedTriggerCommand {
 
     public ToggleCommand(String prefix) {
         super(prefix, TO_LOWERCASE);

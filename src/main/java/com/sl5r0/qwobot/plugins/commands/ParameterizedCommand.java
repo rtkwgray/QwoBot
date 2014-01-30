@@ -4,6 +4,6 @@ import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
 
-public interface ParameterCommand {
+public interface ParameterizedCommand {
     public void execute(MessageEvent event, List<String> parameters);
 }

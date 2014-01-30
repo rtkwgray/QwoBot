@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class RegexCommand extends MessageCommand implements ParameterCommand {
+public abstract class RegexCommand extends MessageCommand implements ParameterizedCommand {
     private final Pattern pattern;
 
     public RegexCommand(Pattern pattern) {
@@ -23,6 +23,14 @@ public abstract class RegexCommand extends MessageCommand implements ParameterCo
         while(matcher.find()) {
             matches.add(matcher.group());
         }
-        execute(event, matches);
+
+        if (!matches.isEmpty()) {
+            execute(event, matches);
+        }
+    }
+
+    @Override
+    public String getHelp() {
+        return "regex(" + pattern + ")";
     }
 }

@@ -9,7 +9,7 @@ import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
 
-import static com.sl5r0.qwobot.plugins.commands.ParameterTriggerCommand.TO_LOWERCASE;
+import static com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand.TO_LOWERCASE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -21,14 +21,14 @@ public class ParameterTriggerCommandTest {
     public static final String EXCEPTION_MESSAGE = "exception message";
     private MessageEvent event;
     private Channel channel;
-    private TestParameterTriggerCommand command;
+    private TestParameterizedTriggerCommand command;
 
     @Before
     public void setUp() throws Exception {
         channel = mock(Channel.class);
         event = mock(MessageEvent.class);
         when(event.getChannel()).thenReturn(channel);
-        command = new TestParameterTriggerCommand();
+        command = new TestParameterizedTriggerCommand();
     }
 
     @Test
@@ -58,7 +58,7 @@ public class ParameterTriggerCommandTest {
     @Test
     public void ensureThatMutatorIsAppliedToAllArguments() throws Exception {
         when(event.getMessage()).thenReturn(TRIGGER + " SOMETHING UPPERCASE");
-        command = new TestParameterTriggerCommand(TO_LOWERCASE);
+        command = new TestParameterizedTriggerCommand(TO_LOWERCASE);
         command.triggered(event);
 
         assertThat(command.lastArguments, hasSize(2));
@@ -99,7 +99,7 @@ public class ParameterTriggerCommandTest {
 
     @Test
     public void ensureExceptionsAreHandledCorreclty() throws Exception {
-        ExceptionThrowingParameterTriggerCommand command = new ExceptionThrowingParameterTriggerCommand();
+        ExceptionThrowingParameterizedTriggerCommand command = new ExceptionThrowingParameterizedTriggerCommand();
         command.triggered(event);
 
         verify(channel).sendMessage(EXCEPTION_MESSAGE);
@@ -116,15 +116,15 @@ public class ParameterTriggerCommandTest {
         assertThat(command.lastArguments.get(0), equalTo(TRIGGER));
     }
 
-    private static class TestParameterTriggerCommand extends ParameterTriggerCommand {
+    private static class TestParameterizedTriggerCommand extends ParameterizedTriggerCommand {
         private MessageEvent lastEvent;
         private List<String> lastArguments;
 
-        public TestParameterTriggerCommand() {
+        public TestParameterizedTriggerCommand() {
             super(TRIGGER);
         }
 
-        public TestParameterTriggerCommand(Function<String, String> mutator) {
+        public TestParameterizedTriggerCommand(Function<String, String> mutator) {
             super(TRIGGER, mutator);
         }
 
@@ -135,8 +135,8 @@ public class ParameterTriggerCommandTest {
         }
     }
 
-    private static class ExceptionThrowingParameterTriggerCommand extends ParameterTriggerCommand {
-        public ExceptionThrowingParameterTriggerCommand() {
+    private static class ExceptionThrowingParameterizedTriggerCommand extends ParameterizedTriggerCommand {
+        public ExceptionThrowingParameterizedTriggerCommand() {
             super(TRIGGER);
         }
 

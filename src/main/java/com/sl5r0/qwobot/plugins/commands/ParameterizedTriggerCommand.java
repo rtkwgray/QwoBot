@@ -16,15 +16,15 @@ import static com.google.common.collect.Lists.transform;
 /**
  * A command that is executed when a message matches a specific trigger.
  */
-public abstract class ParameterTriggerCommand extends TriggerCommand implements ParameterCommand {
+public abstract class ParameterizedTriggerCommand extends TriggerCommand implements ParameterizedCommand {
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(^[\"\\S]+)|(\"?\\S+)");
     private final Optional<Function<String, String>> argumentMutator;
 
-    public ParameterTriggerCommand(String prefix) {
+    public ParameterizedTriggerCommand(String prefix) {
         this(prefix, null);
     }
 
-    public ParameterTriggerCommand(String prefix, Function<String, String> argumentMutator) {
+    public ParameterizedTriggerCommand(String prefix, Function<String, String> argumentMutator) {
         super(prefix);
         this.argumentMutator = Optional.fromNullable(argumentMutator);
     }
