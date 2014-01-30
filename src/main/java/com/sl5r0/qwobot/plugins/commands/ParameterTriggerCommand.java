@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import org.pircbotx.hooks.events.MessageEvent;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,13 +31,18 @@ public abstract class ParameterTriggerCommand extends TriggerCommand implements 
 
     @Override
     public final void triggered(MessageEvent event) {
-        if (event.getMessage().startsWith(getTrigger())) {
-            try {
-                execute(event, parseArguments(event.getMessage()));
-            } catch (CommandExecutionException e) {
-                event.getChannel().sendMessage(e.getMessage());
-                event.getChannel().sendMessage("Usage: " + getHelp());
+        try {
+            if (event.getMessage() == null || event.getMessage().trim().equals(getTrigger())) {
+                execute(event, Collections.<String>emptyList());
+            } else {
+                // Remove the trigger and leading space from the message (it's not a parameter, and can be fetched with
+                // getTrigger() if needed).
+                final String messageWithoutTrigger = event.getMessage().substring(getTrigger().length() + 1);
+                execute(event, parseArguments(messageWithoutTrigger));
             }
+        } catch (CommandExecutionException e) {
+            event.getChannel().sendMessage(e.getMessage());
+            event.getChannel().sendMessage("Usage: " + getHelp());
         }
     }
 
@@ -52,7 +58,7 @@ public abstract class ParameterTriggerCommand extends TriggerCommand implements 
                 parameters.add(matcher.group(3));
             }
         }
-        parameters.remove(0);
+
         if (argumentMutator.isPresent()) {
             return transform(parameters, argumentMutator.get());
         } else {

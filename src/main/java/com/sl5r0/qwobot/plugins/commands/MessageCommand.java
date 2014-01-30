@@ -9,7 +9,7 @@ public abstract class MessageCommand implements Command {
     @Subscribe
     protected abstract void onMessageEvent(MessageEvent event);
 
-    protected final void throwParsingError() {
+    protected final void throwParsingError() throws CommandExecutionException {
         throw new CommandExecutionException("Sorry, I don't understand.");
     }
 }
