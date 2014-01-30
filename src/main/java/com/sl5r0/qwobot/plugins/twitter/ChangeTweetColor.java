@@ -1,7 +1,7 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.sl5r0.qwobot.core.QwoBot;
-import com.sl5r0.qwobot.plugins.commands.ParameterTriggerCommand;
+import com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class ChangeTweetColor extends ParameterTriggerCommand {
+public class ChangeTweetColor extends ParameterizedTriggerCommand {
     private static final String TRIGGER = "!tweetcolor";
     private final TwitterState twitterState;
 
