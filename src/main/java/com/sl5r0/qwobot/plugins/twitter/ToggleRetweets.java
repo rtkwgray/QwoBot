@@ -16,9 +16,9 @@ public class ToggleRetweets extends ToggleCommand {
     protected void execute(MessageEvent event, boolean retweetsEnabled) {
         twitterState.setShowingRetweets(retweetsEnabled);
         if (retweetsEnabled) {
-            event.getChannel().sendMessage("Retweets are now enabled.");
+            event.getChannel().send().message("Retweets are now enabled.");
         } else {
-            event.getChannel().sendMessage("Retweets are now disabled.");
+            event.getChannel().send().message("Retweets are now disabled.");
         }
     }
 }

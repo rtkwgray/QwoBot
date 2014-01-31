@@ -41,8 +41,8 @@ public abstract class ParameterizedTriggerCommand extends TriggerCommand impleme
                 execute(event, parseArguments(messageWithoutTrigger));
             }
         } catch (CommandExecutionException e) {
-            event.getChannel().sendMessage(e.getMessage());
-            event.getChannel().sendMessage("Usage: " + getHelp());
+            event.getChannel().send().message(e.getMessage());
+            event.getChannel().send().message("Usage: " + getHelp());
         }
     }
 

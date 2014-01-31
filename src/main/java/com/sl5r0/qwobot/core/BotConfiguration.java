@@ -2,6 +2,8 @@ package com.sl5r0.qwobot.core;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.pircbotx.Configuration;
+import org.pircbotx.hooks.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,5 +25,20 @@ public class BotConfiguration extends XMLConfiguration {
             final String key = configurationKeys.next();
             log.info(key + " => " + getString(key));
         }
+    }
+
+    public Configuration<QwoBot> toPircBotXConfiguration(Listener<QwoBot> listener) {
+        return new Configuration.Builder<QwoBot>()
+                .setServerHostname(getString("server.host"))
+                .setServerPort(getInt("server.port"))
+                .setName(getString("bot.nick"))
+                .setLogin(getString("bot.nick"))
+                .setAutoReconnect(getBoolean("options.auto-reconnect"))
+                .setAutoSplitMessage(true)
+                .setShutdownHookEnabled(true)
+                .addListener(listener)
+                .addAutoJoinChannel(getString("server.channel.name"))
+                .setMessageDelay(getLong("options.message-delay"))
+                .buildConfiguration();
     }
 }

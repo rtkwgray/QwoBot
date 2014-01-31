@@ -38,15 +38,15 @@ public class FollowUser extends ParameterizedTriggerCommand {
         }
 
         if (!failedFollows.isEmpty()) {
-            event.getChannel().sendMessage("Couldn't follow: " + newFollows);
+            event.getChannel().send().message("Couldn't follow: " + newFollows);
         }
 
         final Set<String> follows = twitter.getFollowHandles();
         if (follows.isEmpty()) {
-            event.getChannel().sendMessage("Not following anybody.");
+            event.getChannel().send().message("Not following anybody.");
         } else {
             final String following = Joiner.on(", ").skipNulls().join(follows);
-            event.getChannel().sendMessage("Now following: " + following);
+            event.getChannel().send().message("Now following: " + following);
         }
 
         twitter.restartStream();
