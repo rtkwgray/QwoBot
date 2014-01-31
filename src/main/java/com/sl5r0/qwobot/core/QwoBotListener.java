@@ -4,7 +4,7 @@ import com.google.common.eventbus.EventBus;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 
-public class QwoBotListener extends ListenerAdapter {
+public class QwoBotListener extends ListenerAdapter<QwoBot> {
     private final EventBus eventBus;
 
     public QwoBotListener(EventBus eventBus) {

@@ -12,8 +12,19 @@
         </encoder>
     </appender>
 
+    <appender name="ircLog" class="ch.qos.logback.core.FileAppender">
+        <file>logs/irc.log</file>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="com.sl5r0" level="INFO">
         <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="org.pircbotx" level="DEBUG">
+        <appender-ref ref="ircLog"/>
     </logger>
 
     <root level="DEBUG">

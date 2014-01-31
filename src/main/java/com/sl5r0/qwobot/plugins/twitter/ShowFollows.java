@@ -14,7 +14,7 @@ public class ShowFollows extends TriggerCommand {
 
     @Override
     protected void triggered(MessageEvent event) {
-        event.getChannel().sendMessage("Currently following: " + twitterState.followsToString());
+        event.getChannel().send().message("Currently following: " + twitterState.followsToString());
     }
 
     @Override

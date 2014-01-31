@@ -16,9 +16,9 @@ public class ToggleReplies extends ToggleCommand {
     protected void execute(MessageEvent event, boolean repliesEnabled) {
         twitterState.setShowingReplies(repliesEnabled);
         if (repliesEnabled) {
-            event.getChannel().sendMessage("Twitter replies are now enabled.");
+            event.getChannel().send().message("Twitter replies are now enabled.");
         } else {
-            event.getChannel().sendMessage("Twitter replies are now disabled.");
+            event.getChannel().send().message("Twitter replies are now disabled.");
         }
     }
 }

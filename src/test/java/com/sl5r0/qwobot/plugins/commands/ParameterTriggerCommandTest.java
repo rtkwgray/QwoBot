@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pircbotx.Channel;
 import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.output.OutputChannel;
 
 import java.util.List;
 
@@ -20,12 +21,14 @@ public class ParameterTriggerCommandTest {
     private static final String TRIGGER = "trigger";
     public static final String EXCEPTION_MESSAGE = "exception message";
     private MessageEvent event;
-    private Channel channel;
+    private OutputChannel outputChannel;
     private TestParameterizedTriggerCommand command;
 
     @Before
     public void setUp() throws Exception {
-        channel = mock(Channel.class);
+        outputChannel = mock(OutputChannel.class);
+        final Channel channel = mock(Channel.class);
+        when(channel.send()).thenReturn(outputChannel);
         event = mock(MessageEvent.class);
         when(event.getChannel()).thenReturn(channel);
         command = new TestParameterizedTriggerCommand();
@@ -102,9 +105,9 @@ public class ParameterTriggerCommandTest {
         ExceptionThrowingParameterizedTriggerCommand command = new ExceptionThrowingParameterizedTriggerCommand();
         command.triggered(event);
 
-        verify(channel).sendMessage(EXCEPTION_MESSAGE);
-        verify(channel).sendMessage("Usage: " + command.getHelp());
-        verifyNoMoreInteractions(channel);
+        verify(outputChannel).message(EXCEPTION_MESSAGE);
+        verify(outputChannel).message("Usage: " + command.getHelp());
+        verifyNoMoreInteractions(outputChannel);
     }
 
     @Test

@@ -37,15 +37,15 @@ public class UnfollowUser extends ParameterizedTriggerCommand {
         }
 
         if (!failedUnfollows.isEmpty()) {
-            event.getChannel().sendMessage("Couldn't unfollow: " + newUnfollows);
+            event.getChannel().send().message("Couldn't unfollow: " + newUnfollows);
         }
 
         final Set<String> follows = twitter.getFollowHandles();
         if (follows.isEmpty()) {
-            event.getChannel().sendMessage("Not following anybody.");
+            event.getChannel().send().message("Not following anybody.");
         } else {
             final String following = Joiner.on(", ").skipNulls().join(follows);
-            event.getChannel().sendMessage("Now following: " + following);
+            event.getChannel().send().message("Now following: " + following);
         }
 
         twitter.restartStream();

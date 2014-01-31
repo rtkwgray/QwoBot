@@ -41,12 +41,12 @@ class FetchBitcoinPrices extends ParameterizedTriggerCommand {
             final Set<String> currencies = copyOf(arguments);
             final BitCoinPrices bitCoinPrices = getBitCoinPrices().filterBy(currencies);
             if (bitCoinPrices.isEmpty()) {
-                event.getChannel().sendMessage("Sorry, I couldn't find any data.");
+                event.getChannel().send().message("Sorry, I couldn't find any data.");
             } else {
-                event.getChannel().sendMessage(bitCoinPrices.toString());
+                event.getChannel().send().message(bitCoinPrices.toString());
             }
         } catch (IOException e) {
-            event.getBot().sendMessage(event.getChannel(), "Couldn't fetch prices right now. Try again later.");
+            event.getChannel().send().message("Couldn't fetch prices right now. Try again later.");
         }
     }
 

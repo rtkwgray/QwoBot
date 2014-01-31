@@ -43,7 +43,7 @@ public class TwitterFeed extends Plugin {
                     .setUseSSL(true)
                     .build();
 
-            channel = bot.getChannel(pluginConfig.getString("channel"));
+            channel = bot.getUserChannelDao().getChannel(pluginConfig.getString("channel"));
         } catch (NoSuchElementException e) {
             throw new PluginInitializationException("Twitter credentials are missing", e);
         }
