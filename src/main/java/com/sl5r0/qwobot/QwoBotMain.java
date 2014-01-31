@@ -1,6 +1,6 @@
 package com.sl5r0.qwobot;
 
-import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.core.QwoBotModule;
