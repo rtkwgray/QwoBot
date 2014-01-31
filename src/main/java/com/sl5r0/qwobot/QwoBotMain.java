@@ -1,44 +1,33 @@
 package com.sl5r0.qwobot;
 
-import com.google.common.base.Optional;
-import com.google.inject.Guice;
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
-import com.google.inject.ProvisionException;
-import com.google.inject.spi.Message;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.core.QwoBotModule;
-import org.pircbotx.exception.IrcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.collect.Iterables.getFirst;
+import static com.google.inject.Guice.createInjector;
 
 public class QwoBotMain {
     private static final Logger log = LoggerFactory.getLogger(QwoBotMain.class);
-    public static void main(String[] args) throws IOException, IrcException {
-        Injector guice = Guice.createInjector(new QwoBotModule());
+    private final QwoBot qwoBot;
 
+    @VisibleForTesting
+    QwoBotMain(Injector guice) {
+        qwoBot = guice.getInstance(QwoBot.class);
+    }
+
+    @VisibleForTesting
+    void initialize() throws Exception {
         try {
-            guice.getInstance(QwoBot.class).start();
-        } catch (ProvisionException e) {
-            log.debug("Stack trace: ", e);
-            printHelpfulLogMessageAndExit(e);
+            qwoBot.start();
+        } catch (Exception e) {
+            log.error("Something went wrong during startup", e);
         }
     }
 
-    private static void printHelpfulLogMessageAndExit(ProvisionException exception) {
-        final Optional<Message> cause = fromNullable(getFirst(exception.getErrorMessages(), null));
-        if (cause.isPresent()) {
-            // We don't want to rethrow this exception.
-            //noinspection ThrowableResultOfMethodCallIgnored
-            final Throwable failureReason = cause.get().getCause();
-            log.error(failureReason.getMessage());
-        } else {
-            log.error("An unknown error has occurred during startup. Check debug.log for more information.");
-        }
-        System.exit(1);
+    public static void main(String[] args) throws Exception {
+        new QwoBotMain(createInjector(new QwoBotModule())).initialize();
     }
 }

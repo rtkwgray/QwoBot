@@ -19,15 +19,8 @@
         </encoder>
     </appender>
 
-    <logger name="com.sl5r0" level="INFO">
-        <appender-ref ref="console"/>
+    <logger name="com.sl5r0" level="DEBUG">
+        <appender-ref ref="debugLog"/>
+        <appender-ref ref="console" />
     </logger>
-
-    <logger name="org.pircbotx" level="DEBUG">
-        <appender-ref ref="ircLog"/>
-    </logger>
-
-    <root level="DEBUG">
-        <appender-ref ref="debugLog" />
-    </root>
 </configuration>

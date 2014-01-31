@@ -21,7 +21,7 @@ public class QwoBot extends PircBotX {
         this.pluginManager = pluginManager;
     }
 
-    public final void start() throws IrcException, IOException {
+    public void start() throws IrcException, IOException {
         this.connect();
         pluginManager.initializePlugins();
     }
