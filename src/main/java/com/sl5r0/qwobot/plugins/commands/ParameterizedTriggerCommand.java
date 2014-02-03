@@ -30,7 +30,7 @@ public abstract class ParameterizedTriggerCommand extends TriggerCommand impleme
     }
 
     @Override
-    public final void triggered(MessageEvent event) {
+    protected final void triggered(MessageEvent event) {
         try {
             if (event.getMessage() == null || event.getMessage().trim().equals(getTrigger())) {
                 execute(event, Collections.<String>emptyList());

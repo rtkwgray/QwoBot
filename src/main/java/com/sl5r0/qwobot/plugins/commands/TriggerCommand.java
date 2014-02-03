@@ -17,7 +17,7 @@ public abstract class TriggerCommand extends MessageCommand {
     }
 
     @Override
-    protected final void onMessageEvent(MessageEvent event) {
+    public final void onMessageEvent(MessageEvent event) {
         if (event.getMessage().startsWith(trigger)) {
             triggered(event);
         }
