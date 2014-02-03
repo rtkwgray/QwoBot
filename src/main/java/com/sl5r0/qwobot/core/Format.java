@@ -67,6 +67,7 @@ public enum Format {
                     colorQueue.add(color);
                     colorized.append(color).append(currentCharacter);
                 }
+                colorized.append(Colors.NORMAL);
                 return colorized.toString();
             }
         };
@@ -76,7 +77,7 @@ public enum Format {
         return new Function<String, String>() {
             @Override
             public String apply(String input) {
-                return color + input;
+                return color + input + Colors.NORMAL;
             }
         };
     }
