@@ -18,4 +18,9 @@ public class BitCoinPriceChecker extends Plugin {
     public String getVersion() {
         return "1.0.0";
     }
+
+    @Override
+    public String getName() {
+        return "BitCoin";
+    }
 }
