@@ -7,13 +7,18 @@ import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.plugins.bitcoin.BitCoinPriceChecker;
 import com.sl5r0.qwobot.plugins.commands.Command;
+import com.sl5r0.qwobot.plugins.exceptions.PluginNotRegisteredException;
+import com.sl5r0.qwobot.plugins.help.Help;
 import com.sl5r0.qwobot.plugins.reddit.Reddit;
 import com.sl5r0.qwobot.plugins.twitter.TwitterFeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Set;
 
+import static com.google.api.client.util.Maps.newHashMap;
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.newHashSet;
 
 public class PluginManager {
@@ -22,6 +27,7 @@ public class PluginManager {
     private final EventBus eventBus;
     private final Provider<QwoBot> botProvider;
     private final BotConfiguration configuration;
+    private final Map<String, Set<Command>> pluginCommands = newHashMap();
 
     @Inject
     public PluginManager(BotConfiguration configuration, Provider<QwoBot> botProvider, EventBus eventBus) {
@@ -51,6 +57,12 @@ public class PluginManager {
         } catch (RuntimeException e) {
             log.error("Couldn't load Twitter plugin", e);
         }
+
+        try {
+            registerPlugin(new Help(this));
+        } catch (RuntimeException e) {
+            log.error("Couldn't load Twitter plugin", e);
+        }
     }
 
     public void registerPlugin(Plugin plugin) {
@@ -61,9 +73,26 @@ public class PluginManager {
 
         log.info("Loading plugin: " + plugin);
         registeredPlugins.add(plugin);
-        for (Command command : plugin.getCommands()) {
+
+        final Set<Command> commands = plugin.getCommands();
+        pluginCommands.put(plugin.getName().toLowerCase(), commands);
+
+        for (Command command : commands) {
             eventBus.register(command);
             log.debug("Registered command: " + command.getHelp());
         }
+    }
+
+    // TODO: test for duplicate plugin names
+    public Set<String> getRegisteredPlugins() {
+        return copyOf(pluginCommands.keySet());
+    }
+
+    public Set<Command> getCommandsForPlugin(String pluginName) throws PluginNotRegisteredException {
+        if (!pluginCommands.containsKey(pluginName)) {
+            throw new PluginNotRegisteredException();
+        }
+
+        return copyOf(pluginCommands.get(pluginName));
     }
 }
