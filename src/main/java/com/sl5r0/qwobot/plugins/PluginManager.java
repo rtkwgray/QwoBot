@@ -1,12 +1,13 @@
 package com.sl5r0.qwobot.plugins;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.sl5r0.qwobot.core.BotConfiguration;
-import com.sl5r0.qwobot.core.QwoBot;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.sl5r0.qwobot.plugins.bitcoin.BitCoinPriceChecker;
 import com.sl5r0.qwobot.plugins.commands.Command;
+import com.sl5r0.qwobot.plugins.exceptions.DuplicatePluginException;
 import com.sl5r0.qwobot.plugins.exceptions.PluginNotRegisteredException;
 import com.sl5r0.qwobot.plugins.help.Help;
 import com.sl5r0.qwobot.plugins.reddit.Reddit;
@@ -14,61 +15,48 @@ import com.sl5r0.qwobot.plugins.twitter.TwitterFeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.api.client.util.Maps.newHashMap;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.newHashSet;
 
+@Singleton
 public class PluginManager {
     private static final Set<Plugin> registeredPlugins = newHashSet();
     private static final Logger log = LoggerFactory.getLogger(PluginManager.class);
     private final EventBus eventBus;
-    private final Provider<QwoBot> botProvider;
-    private final BotConfiguration configuration;
+    private final Injector injector;
     private final Map<String, Set<Command>> pluginCommands = newHashMap();
+    private final List<Class<? extends Plugin>> pluginsToLoad = ImmutableList.<Class<? extends Plugin>>builder()
+            .add(Reddit.class)
+            .add(TwitterFeed.class)
+            .add(BitCoinPriceChecker.class)
+            .add(Help.class)
+            .build();
 
     @Inject
-    public PluginManager(BotConfiguration configuration, Provider<QwoBot> botProvider, EventBus eventBus) {
-        this.botProvider = botProvider;
-        this.configuration = configuration;
-        this.eventBus = eventBus;
+    public PluginManager(Injector injector, EventBus eventBus) {
+        this.eventBus = checkNotNull(eventBus, "eventBus cannot be null");
+        this.injector = checkNotNull(injector, "injector cannot be null");
     }
 
     public void initializePlugins() {
-        final QwoBot bot = botProvider.get();
-
-        // TODO: don't hard-code this.
-        try {
-            registerPlugin(new Reddit(configuration));
-        } catch (RuntimeException e) {
-            log.error("Couldn't load Reddit plugin", e);
-        }
-
-        try {
-            registerPlugin(new BitCoinPriceChecker());
-        } catch (RuntimeException e) {
-            log.error("Couldn't load BitCoin price checker", e);
-        }
-
-        try {
-            registerPlugin(new TwitterFeed(configuration, bot));
-        } catch (RuntimeException e) {
-            log.error("Couldn't load Twitter plugin", e);
-        }
-
-        try {
-            registerPlugin(new Help(this));
-        } catch (RuntimeException e) {
-            log.error("Couldn't load Twitter plugin", e);
+        for (Class<? extends Plugin> pluginClass : pluginsToLoad) {
+            try {
+                registerPlugin(injector.getInstance(pluginClass));
+            } catch (RuntimeException | DuplicatePluginException e) {
+                log.error("Couldn't load plugin " + pluginClass.getSimpleName(), e);
+            }
         }
     }
 
-    public void registerPlugin(Plugin plugin) {
+    private void registerPlugin(Plugin plugin) throws DuplicatePluginException {
         if (registeredPlugins.contains(plugin)) {
-            log.warn(plugin.getName() + " plugin was already loaded.");
-            return;
+            throw new DuplicatePluginException(plugin.getName() + " is already loaded");
         }
 
         log.info("Loading plugin: " + plugin);

@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
+import com.google.inject.Inject;
 import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.plugins.Plugin;
@@ -22,8 +23,10 @@ import static com.google.common.collect.Sets.newHashSet;
 public class TwitterFeed extends Plugin {
     private static final Set<Command> commands = newHashSet();
 
+    @Inject
     public TwitterFeed(BotConfiguration botConfiguration, QwoBot bot) {
-        checkNotNull(bot);
+        checkNotNull(bot, "bot cannot be null");
+        checkNotNull(botConfiguration, "botConfiguration cannot be null");
 
         final HierarchicalConfiguration pluginConfig = botConfiguration.configurationAt("plugins.twitter");
         pluginConfig.setThrowExceptionOnMissing(true);
