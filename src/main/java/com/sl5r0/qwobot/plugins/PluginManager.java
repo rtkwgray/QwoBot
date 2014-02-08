@@ -1,17 +1,16 @@
 package com.sl5r0.qwobot.plugins;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.plugins.bitcoin.BitCoinPriceChecker;
+import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.exceptions.DuplicatePluginException;
 import com.sl5r0.qwobot.plugins.exceptions.PluginNotRegisteredException;
-import com.sl5r0.qwobot.plugins.help.Help;
-import com.sl5r0.qwobot.plugins.reddit.Reddit;
-import com.sl5r0.qwobot.plugins.twitter.TwitterFeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,21 +30,22 @@ public class PluginManager {
     private final EventBus eventBus;
     private final Injector injector;
     private final Map<String, Set<Command>> pluginCommands = newHashMap();
-    private final List<Class<? extends Plugin>> pluginsToLoad = ImmutableList.<Class<? extends Plugin>>builder()
-            .add(Reddit.class)
-            .add(TwitterFeed.class)
-            .add(BitCoinPriceChecker.class)
-            .add(Help.class)
-            .build();
+    private final List<Optional<Class<? extends Plugin>>> pluginsToLoad;
 
     @Inject
-    public PluginManager(Injector injector, EventBus eventBus) {
+    public PluginManager(Injector injector, EventBus eventBus, BotConfiguration configuration) {
+        this.pluginsToLoad = Lists.transform(configuration.getList("plugins.plugin[@class]"), toPluginClass);
         this.eventBus = checkNotNull(eventBus, "eventBus cannot be null");
         this.injector = checkNotNull(injector, "injector cannot be null");
     }
 
     public void initializePlugins() {
         for (Class<? extends Plugin> pluginClass : pluginsToLoad) {
+
+            if (pluginClass == null) {
+                continue;
+            }
+
             try {
                 registerPlugin(injector.getInstance(pluginClass));
             } catch (RuntimeException | DuplicatePluginException e) {
@@ -83,4 +83,22 @@ public class PluginManager {
 
         return copyOf(pluginCommands.get(pluginName));
     }
+
+    private static final Function<Object, Class<? extends Plugin>> toPluginClass = new Function<Object, Optional<Class<? extends Plugin>>>() {
+        public Optional<Class<? extends Plugin>> apply(Object o) {
+            try {
+                Class<?> pluginClass = Class.forName(o.toString());
+                if (Plugin.class.isAssignableFrom(pluginClass)) {
+                    Class<? extends Plugin> castedClass = pluginClass.asSubclass(Plugin.class);
+                    return Optional.of(pluginClass.asSubclass(Plugin.class));
+                } else {
+                    log.error("Specified plugin class " + o.toString() + " doesn't extend Plugin and will not be loaded");
+                    return null;
+                }
+            } catch (ClassNotFoundException e) {
+                log.error("Plugin class not found: " + o.toString(), e);
+                return null;
+            }
+        }
+    };
 }
