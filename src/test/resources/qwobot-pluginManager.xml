@@ -1,0 +1,7 @@
+<configuration>
+    <plugins>
+        <plugin class="com.sl5r0.qwobot.plugins.TestPlugin"/>
+        <plugin class="com.sl5r0.qwobot.plugins.TestPlugin"/>
+        <plugin class="com.sl5r0.qwobot.plugins.AnotherTestPlugin"/>
+    </plugins>
+</configuration>

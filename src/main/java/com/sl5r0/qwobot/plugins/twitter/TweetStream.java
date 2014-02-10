@@ -20,11 +20,11 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 
-public class TwitterFeed extends Plugin {
+public class TweetStream extends Plugin {
     private static final Set<Command> commands = newHashSet();
 
     @Inject
-    public TwitterFeed(BotConfiguration botConfiguration, QwoBot bot) {
+    public TweetStream(BotConfiguration botConfiguration, QwoBot bot) {
         checkNotNull(bot, "bot cannot be null");
         checkNotNull(botConfiguration, "botConfiguration cannot be null");
 
@@ -73,10 +73,5 @@ public class TwitterFeed extends Plugin {
     @Override
     public String getVersion() {
         return "1.0.0";
-    }
-
-    @Override
-    public String getName() {
-        return "Twitter";
     }
 }

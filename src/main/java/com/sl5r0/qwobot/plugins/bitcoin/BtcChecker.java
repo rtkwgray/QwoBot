@@ -6,7 +6,7 @@ import com.sl5r0.qwobot.plugins.commands.Command;
 
 import java.util.Set;
 
-public class BitCoinPriceChecker extends Plugin {
+public class BtcChecker extends Plugin {
     private static final Set<Command> COMMANDS = ImmutableSet.<Command>of(new FetchBitcoinPrices());
 
     @Override
@@ -17,10 +17,5 @@ public class BitCoinPriceChecker extends Plugin {
     @Override
     public String getVersion() {
         return "1.0.0";
-    }
-
-    @Override
-    public String getName() {
-        return "BitCoin";
     }
 }
