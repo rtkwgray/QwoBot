@@ -14,12 +14,11 @@ public abstract class Plugin {
 
     public abstract String getVersion();
 
-    public String getName() {
+    public final String getName() {
         return getClass().getSimpleName();
     }
 
     public String toString() {
         return getName() + " v" + getVersion();
     }
-
 }
