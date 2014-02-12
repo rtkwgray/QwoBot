@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.plugins.commands;
 
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -14,7 +15,9 @@ public abstract class TriggerCommand extends MessageCommand {
         this.trigger = checkNotNull(trigger, "trigger cannot be null");
     }
 
-    protected final String getTrigger() {
+    // TODO: some tests require this to be mocked. It really should be "protected final"
+    @VisibleForTesting
+    public String getTrigger() {
         return trigger;
     }
 

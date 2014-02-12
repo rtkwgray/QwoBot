@@ -1,6 +1,6 @@
 package com.sl5r0.qwobot.plugins.commands;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.pircbotx.hooks.events.MessageEvent;
@@ -23,16 +23,17 @@ public class CompoundCommandTest {
 
     @Before
     public void setUp() throws Exception {
-        command = new CompoundCommand(TRIGGER, ImmutableMap.of(
-                PARAMETERIZED_COMMAND, parameterizedCommand,
-                TRIGGER_COMMAND, triggerCommand
-        ));
+        when(parameterizedCommand.getTrigger()).thenReturn(PARAMETERIZED_COMMAND);
+        when(triggerCommand.getTrigger()).thenReturn(TRIGGER_COMMAND);
+        command = new CompoundCommand(TRIGGER, ImmutableSet.of(parameterizedCommand, triggerCommand));
     }
 
     @Test
     public void ensureParametersAreCorrectlyPassedWhenSubcommandIsParameterizedCommand() throws Exception {
         command.execute(event, newArrayList(PARAMETERIZED_COMMAND, "param2"));
         verify(parameterizedCommand).execute(event, newArrayList("param2"));
+        verify(parameterizedCommand).getTrigger();
+        verify(triggerCommand).getTrigger();
         verifyNoMoreInteractions(triggerCommand);
     }
 
@@ -40,6 +41,8 @@ public class CompoundCommandTest {
     public void ensureEventIsCorrectlyPassedWhenSubcommandIsTriggerCommand() throws Exception {
         command.execute(event, newArrayList(TRIGGER_COMMAND, "param2"));
         verify(triggerCommand).onMessageEvent(event);
+        verify(triggerCommand).getTrigger();
+        verify(parameterizedCommand).getTrigger();
         verifyNoMoreInteractions(parameterizedCommand);
     }
 
@@ -50,6 +53,6 @@ public class CompoundCommandTest {
 
     @Test (expected = NullPointerException.class)
     public void ensureTriggerCannotBeNull() throws Exception {
-        new CompoundCommand(null, Collections.<String, TriggerCommand>emptyMap());
+        new CompoundCommand(null, Collections.<TriggerCommand>emptySet());
     }
 }
