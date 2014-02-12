@@ -8,9 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "entities")
-public class TestEntity {
+@Table(name = "users")
+public class User {
     private long id;
+    private String nick;
 
     @Id
     @GeneratedValue(generator="increment")
@@ -19,8 +20,11 @@ public class TestEntity {
         return id;
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public void setId(long id) {
-        this.id = id;
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 }
