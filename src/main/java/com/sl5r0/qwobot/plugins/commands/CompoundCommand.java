@@ -1,24 +1,32 @@
 package com.sl5r0.qwobot.plugins.commands;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Iterables.tryFind;
 
 public class CompoundCommand extends ParameterizedTriggerCommand {
     private final Map<String, TriggerCommand> commands;
 
-    public CompoundCommand(String trigger, Map<String, TriggerCommand> commands) {
+    public CompoundCommand(String trigger, Set<TriggerCommand> commands) {
         super(trigger);
-        this.commands = copyOf(checkNotNull(commands, "commands cannot be null"));
+        checkNotNull(commands, "commands cannot be null");
+        this.commands = Maps.uniqueIndex(commands, new Function<TriggerCommand, String>() {
+            @Override
+            public String apply(TriggerCommand input) {
+                return input.getTrigger();
+            }
+        });
     }
 
     @Override
