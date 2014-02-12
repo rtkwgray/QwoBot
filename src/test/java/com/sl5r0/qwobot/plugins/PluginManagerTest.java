@@ -1,23 +1,11 @@
 package com.sl5r0.qwobot.plugins;
 
 import com.google.common.eventbus.EventBus;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.sl5r0.qwobot.core.BotConfiguration;
-import com.sl5r0.qwobot.plugins.qbux.TestEntity;
-import org.h2.Driver;
 import org.hamcrest.Matchers;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.dialect.H2Dialect;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
-import static com.sl5r0.qwobot.helpers.UnitTestHelpers.configFromResource;
+import static com.sl5r0.qwobot.core.TestModule.testInjector;
 import static com.sl5r0.qwobot.plugins.AnotherTestPlugin.COMMAND;
 import static com.sl5r0.qwobot.plugins.TestPlugin.COMMAND_1;
 import static com.sl5r0.qwobot.plugins.TestPlugin.COMMAND_2;
@@ -27,14 +15,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class PluginManagerTest {
-    private final Injector injector = Guice.createInjector(new TestModule());
     private final EventBus eventBus = mock(EventBus.class);
     private PluginManager pluginManager;
 
     @Before
     public void setUp() throws Exception {
-        final BotConfiguration botConfiguration = configFromResource("qwobot-pluginManager.xml");
-        pluginManager = new PluginManager(injector, eventBus, new PluginClassResolver(botConfiguration));
+        pluginManager = testInjector()
+                .withConfiguration("qwobot-pluginManager.xml")
+                .withEventBus(eventBus)
+                .instanceOf(PluginManager.class);
     }
 
     @Test
@@ -63,25 +52,31 @@ public class PluginManagerTest {
 
     @Test
     public void testName() throws Exception {
-        Configuration configuration = new Configuration();
-        configuration = configuration.setProperty("hibernate.connection.url", "jdbc:h2:datastores/test2");
-        configuration = configuration.setProperty("hibernate.connection.driver_class", Driver.class.getCanonicalName());
-        configuration = configuration.setProperty("hibernate.dialect", H2Dialect.class.getCanonicalName());
-        configuration = configuration.setProperty("hibernate.hbm2ddl.auto", "update"); // create schema if it doesn't exist
-        configuration = configuration.addAnnotatedClass(TestEntity.class);
-        StandardServiceRegistryBuilder bootstrapServiceRegistryBuilder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-        SessionFactory sessionFactory = configuration.buildSessionFactory(bootstrapServiceRegistryBuilder.build());
+//        Injector injector = Guice.createInjector(new TestModule());
+//        SessionFactory sessionFactory = injector.getInstance(SessionFactoryCreator.class).sessionFactoryFor("testdb", "com.sl5r0.qwobot.plugins.qbux");
+//        Session session = sessionFactory.openSession();
+//        session.beginTransaction();
+//        session.save(new User());
+//        session.save(new User());
+//        session.save(new User());
+//        session.getTransaction().commit();
+//
+//        List list = session.createCriteria(User.class).list();
+//        System.out.println(1);
+//        System.out.println(list);
+//
+//        sessionFactory.close();
+//        Configuration configuration = new Configuration();
+//        configuration = configuration.setProperty("hibernate.connection.url", "jdbc:h2:datastores/test2");
+//        configuration = configuration.setProperty("hibernate.connection.driver_class", Driver.class.getCanonicalName());
+//        configuration = configuration.setProperty("hibernate.dialect", H2Dialect.class.getCanonicalName());
+//        configuration = configuration.setProperty("hibernate.hbm2ddl.auto", "update"); // create schema if it doesn't exist
+//        configuration = configuration.addAnnotatedClass(User.class);
+//        StandardServiceRegistryBuilder bootstrapServiceRegistryBuilder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+//        SessionFactory sessionFactory = configuration.buildSessionFactory(bootstrapServiceRegistryBuilder.build());
+//
+//
+//
 
-
-
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(new TestEntity());
-        session.save(new TestEntity());
-        session.save(new TestEntity());
-        session.getTransaction().commit();
-
-        List list = session.createCriteria(TestEntity.class).list();
-        System.out.println(list);
     }
 }

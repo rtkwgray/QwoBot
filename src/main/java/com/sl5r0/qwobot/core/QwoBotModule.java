@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.sl5r0.qwobot.persistence.SessionFactoryCreator;
 import org.apache.commons.configuration.ConfigurationException;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static com.sl5r0.qwobot.persistence.SessionFactoryCreator.SchemaRule.UPDATE;
 import static java.lang.annotation.ElementType.*;
 
 public class QwoBotModule extends AbstractModule {
@@ -20,13 +22,33 @@ public class QwoBotModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bindEventBus();
+    }
+
+    @Singleton
+    @Provides @BotConfigFile
+    public final File provideBotConfiguration() throws ConfigurationException {
+        return getBotConfigurationFile();
+    }
+
+    protected void bindEventBus() {
         bind(EventBus.class).asEagerSingleton();
     }
 
+    @BindingAnnotation
+    @Target({PARAMETER, METHOD, FIELD}) @Retention(RetentionPolicy.RUNTIME)
+    public @interface BotConfigFile {}
+
     @Provides
-    @Singleton
-    @BotConfigFile
-    public File provideBotConfiguration() throws ConfigurationException{
+    public final SessionFactoryCreator sessionFactoryCreator() {
+        return createSessionFactoryCreator();
+    }
+
+    protected SessionFactoryCreator createSessionFactoryCreator() {
+        return new SessionFactoryCreator("", UPDATE);
+    }
+
+    protected File getBotConfigurationFile() throws ConfigurationException {
         final String configFileLocation = System.getProperty(CONFIG_FILE_PROPERTY, DEFAULT_CONFIG_FILE);
         final File config = new File(configFileLocation);
         if (!config.exists()) {
@@ -35,7 +57,16 @@ public class QwoBotModule extends AbstractModule {
         return config;
     }
 
-    @BindingAnnotation
-    @Target({PARAMETER, METHOD, FIELD}) @Retention(RetentionPolicy.RUNTIME)
-    public @interface BotConfigFile {}
+//    Configuration configuration = new Configuration();
+//    configuration = configuration.setProperty("hibernate.connection.url", "jdbc:h2:datastores/test2");
+//    configuration = configuration.setProperty("hibernate.connection.driver_class", Driver.class.getCanonicalName());
+//    configuration = configuration.setProperty("hibernate.dialect", H2Dialect.class.getCanonicalName());
+//    configuration = configuration.setProperty("hibernate.hbm2ddl.auto", "update"); // create schema if it doesn't exist
+//    configuration = configuration.addAnnotatedClass(User.class);
+//    StandardServiceRegistryBuilder bootstrapServiceRegistryBuilder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+//    SessionFactory sessionFactory = configuration.buildSessionFactory(bootstrapServiceRegistryBuilder.build());
+
+
+
+
 }
