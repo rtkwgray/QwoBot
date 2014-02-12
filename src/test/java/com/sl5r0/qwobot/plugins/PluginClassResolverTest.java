@@ -1,11 +1,10 @@
 package com.sl5r0.qwobot.plugins;
 
-import com.sl5r0.qwobot.core.BotConfiguration;
-import com.sl5r0.qwobot.helpers.UnitTestHelpers;
 import org.junit.Test;
 
 import java.util.Set;
 
+import static com.sl5r0.qwobot.core.TestModule.testInjector;
 import static com.sl5r0.qwobot.helpers.ExtraMatchers.isClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -15,8 +14,9 @@ public class PluginClassResolverTest {
 
     @Test
     public void ensurePluginResolverCanFindValidPlugins() throws Exception {
-        final BotConfiguration botConfiguration = UnitTestHelpers.configFromResource("qwobot-pluginClassResolver.xml");
-        final PluginClassResolver resolver = new PluginClassResolver(botConfiguration);
+        final PluginClassResolver resolver = testInjector()
+                .withConfiguration("qwobot-pluginClassResolver.xml")
+                .instanceOf(PluginClassResolver.class);
 
         final Set<Class<? extends Plugin>> validPlugins = resolver.getValidPlugins();
         assertThat(validPlugins, hasSize(1));
