@@ -47,9 +47,4 @@ public class PostLinkToReddit extends RegexCommand {
     private String getTitle(String url) throws IOException {
         return Jsoup.connect(url).get().title();
     }
-
-    @Override
-    public String getHelp() {
-        return "regex(" + URL_REGEX + ")";
-    }
 }

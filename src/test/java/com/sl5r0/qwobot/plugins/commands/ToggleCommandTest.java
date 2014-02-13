@@ -10,6 +10,7 @@ import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class ToggleCommandTest {
 
@@ -34,19 +35,19 @@ public class ToggleCommandTest {
         assertThat(command.lastValue, equalTo(false));
     }
 
-    @Test (expected = CommandExecutionException.class)
+    @Test(expected = CommandExecutionException.class)
     public void ensureExceptionIsThrownWhenNoArgumentIsProvided() throws Exception {
         command.execute(null, Collections.<String>emptyList());
     }
 
-    @Test (expected = CommandExecutionException.class)
+    @Test(expected = CommandExecutionException.class)
     public void ensureExceptionIsThrownWhenInvalidArgument() throws Exception {
         command.execute(null, ImmutableList.of("invalid"));
     }
 
     @Test
     public void ensureGetHelpReturnsUsefulHelpMessage() throws Exception {
-        assertThat(command.getHelp(), equalTo(TRIGGER + " <on|off>"));
+        assertThat(command.getHelp(), contains(TRIGGER + " <on|off>"));
     }
 
     private static class TestToggleCommand extends ToggleCommand {

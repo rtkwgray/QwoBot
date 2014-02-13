@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singletonList;
 
 public class FollowUser extends ParameterizedTriggerCommand {
     private static final Logger log = LoggerFactory.getLogger(FollowUser.class);
@@ -53,7 +54,7 @@ public class FollowUser extends ParameterizedTriggerCommand {
     }
 
     @Override
-    public String getHelp() {
-        return TRIGGER + " <twitter handle> [ <twitter handle> ... ]";
+    public List<String> getHelp() {
+        return singletonList(TRIGGER + " <twitter handle> [ <twitter handle> ... ]");
     }
 }

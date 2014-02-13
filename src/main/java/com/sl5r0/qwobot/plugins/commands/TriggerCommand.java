@@ -3,7 +3,10 @@ package com.sl5r0.qwobot.plugins.commands;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import org.pircbotx.hooks.events.MessageEvent;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.singletonList;
 
 /**
  * A Command that is executed when the a message starts with the trigger.
@@ -29,8 +32,8 @@ public abstract class TriggerCommand extends MessageCommand {
     }
 
     @Override
-    public String getHelp() {
-        return trigger;
+    public List<String> getHelp() {
+        return singletonList(trigger);
     }
 
     protected abstract void triggered(MessageEvent event);

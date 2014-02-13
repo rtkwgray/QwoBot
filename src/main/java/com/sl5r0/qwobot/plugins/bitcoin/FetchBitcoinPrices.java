@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static java.util.Collections.singletonList;
 
 class FetchBitcoinPrices extends ParameterizedTriggerCommand {
     private static final String CHANNEL_TRIGGER = "!btc";
@@ -31,8 +32,8 @@ class FetchBitcoinPrices extends ParameterizedTriggerCommand {
         super(CHANNEL_TRIGGER, TO_LOWERCASE);
     }
 
-    public String getHelp() {
-        return CHANNEL_TRIGGER + " <currency type> [ <currency type> ... ]";
+    public List<String> getHelp() {
+        return singletonList(CHANNEL_TRIGGER + " <currency type> [ <currency type> ... ]");
     }
 
     @Override

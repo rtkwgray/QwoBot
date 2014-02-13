@@ -12,6 +12,8 @@ import org.pircbotx.hooks.events.MessageEvent;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Collections.singletonList;
+
 public class ShowPluginHelp extends ParameterizedTriggerCommand {
     private static final String TRIGGER = "!help";
     private final Provider<PluginManager> pluginManager;
@@ -37,12 +39,14 @@ public class ShowPluginHelp extends ParameterizedTriggerCommand {
 
         event.getUser().send().message("Commands for plugin: " + pluginName);
         for (Command command : commandsForPlugin) {
-            event.getUser().send().message(command.getHelp());
+            for (String helpLine : command.getHelp()) {
+                event.getUser().send().message(helpLine);
+            }
         }
     }
 
     @Override
-    public String getHelp() {
-        return TRIGGER + " <" + Joiner.on("|").join(pluginManager.get().getRegisteredPlugins()) + ">";
+    public List<String> getHelp() {
+        return singletonList(TRIGGER + " <" + Joiner.on("|").join(pluginManager.get().getRegisteredPlugins()) + ">");
     }
 }

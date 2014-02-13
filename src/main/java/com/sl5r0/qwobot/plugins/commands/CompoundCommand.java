@@ -16,6 +16,7 @@ import java.util.Set;
 import static com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Iterables.tryFind;
+import static com.google.common.collect.Lists.transform;
 
 public class CompoundCommand extends ParameterizedTriggerCommand {
     private final Map<String, TriggerCommand> commands;
@@ -59,6 +60,25 @@ public class CompoundCommand extends ParameterizedTriggerCommand {
 
     public Map<String, TriggerCommand> getCommands() {
         return copyOf(commands);
+    }
+
+    @Override
+    public List<String> getHelp() {
+        final ImmutableList.Builder<String> builder = ImmutableList.builder();
+        for (TriggerCommand command : commands.values()) {
+            final List<String> appendedHelp = transform(command.getHelp(), appendTrigger(getTrigger()));
+            builder.addAll(appendedHelp);
+        }
+        return builder.build();
+    }
+
+    private Function<String, String> appendTrigger(final String trigger) {
+        return new Function<String, String>() {
+            @Override
+            public String apply(String helpString) {
+                return trigger + " " + helpString;
+            }
+        };
     }
 
     private static Predicate<Map.Entry<String, TriggerCommand>> hasTrigger(final String trigger) {
