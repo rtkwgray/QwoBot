@@ -9,8 +9,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.regex.Pattern.compile;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +54,7 @@ public class RegexCommandTest {
 
     @Test
     public void ensureGetHelpReturnsRegex() throws Exception {
-        assertThat(command.getHelp(), equalTo("regex(" + REGEX + ")"));
+        assertThat(command.getHelp(), contains("regex(" + REGEX + ")"));
     }
 
     private static class TestRegexCommand extends RegexCommand {

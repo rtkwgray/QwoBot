@@ -4,6 +4,8 @@ import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 /**
  * A command that accepts "on" and "off" values as arguments. Additional arguments are ignored.
  */
@@ -35,7 +37,7 @@ public abstract class ToggleCommand extends ParameterizedTriggerCommand {
     }
 
     @Override
-    public final String getHelp() {
-        return getTrigger() + " <on|off>";
+    public final List<String> getHelp() {
+        return singletonList(getTrigger() + " <on|off>");
     }
 }

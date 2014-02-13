@@ -1,5 +1,7 @@
 package com.sl5r0.qwobot.plugins.commands;
 
+import java.util.List;
+
 public interface Command {
-    public String getHelp();
+    public List<String> getHelp();
 }

@@ -9,6 +9,7 @@ import org.pircbotx.hooks.events.MessageEvent;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.singletonList;
 
 public class ChangeTweetColor extends ParameterizedTriggerCommand {
     private static final String TRIGGER = "!tweetcolor";
@@ -31,7 +32,7 @@ public class ChangeTweetColor extends ParameterizedTriggerCommand {
     }
 
     @Override
-    public String getHelp() {
-        return TRIGGER + " <" + Joiner.on("|").join(Format.values()) + ">";
+    public List<String> getHelp() {
+        return singletonList(TRIGGER + " <" + Joiner.on("|").join(Format.values()) + ">");
     }
 }

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.singletonList;
 
 public abstract class RegexCommand extends MessageCommand implements ParameterizedCommand {
     private final Pattern pattern;
@@ -20,7 +21,7 @@ public abstract class RegexCommand extends MessageCommand implements Parameteriz
     public final void onMessageEvent(MessageEvent event) {
         final Matcher matcher = pattern.matcher(event.getMessage());
         final List<String> matches = newArrayList();
-        while(matcher.find()) {
+        while (matcher.find()) {
             matches.add(matcher.group());
         }
 
@@ -30,7 +31,7 @@ public abstract class RegexCommand extends MessageCommand implements Parameteriz
     }
 
     @Override
-    public String getHelp() {
-        return "regex(" + pattern + ")";
+    public final List<String> getHelp() {
+        return singletonList("regex(" + pattern + ")");
     }
 }

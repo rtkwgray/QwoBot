@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provider;
 import com.sl5r0.qwobot.plugins.PluginManager;
+import com.sl5r0.qwobot.plugins.TestCommand;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import com.sl5r0.qwobot.plugins.exceptions.PluginNotRegisteredException;
@@ -32,7 +33,7 @@ public class ShowPluginHelpTest {
                 return pluginManager;
             }
         };
-        final Command pluginCommand = new TestCommand();
+        final Command pluginCommand = new TestCommand(HELP_STRING);
         when(pluginManager.getCommandsForPlugin(PLUGIN_NAME)).thenReturn(ImmutableSet.of(pluginCommand));
         when(pluginManager.getCommandsForPlugin(UNREGISTERED_PLUGIN_NAME)).thenThrow(new PluginNotRegisteredException());
         command = new ShowPluginHelp(pluginManagerProvider);
@@ -54,12 +55,5 @@ public class ShowPluginHelpTest {
     @Test (expected = CommandExecutionException.class)
     public void ensureExceptionIsThrownWhenNoPluginIsSpecified() throws Exception {
         command.execute(event, Collections.<String>emptyList());
-    }
-
-    private static class TestCommand implements Command {
-        @Override
-        public String getHelp() {
-            return HELP_STRING;
-        }
     }
 }
