@@ -1,6 +1,10 @@
 package com.sl5r0.qwobot.plugins;
 
+import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.plugins.commands.Command;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.tree.ExpressionEngine;
+import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 
 import java.util.Set;
 
@@ -20,5 +24,19 @@ public abstract class Plugin {
 
     public String toString() {
         return getName() + " v" + getVersion();
+    }
+
+    protected final HierarchicalConfiguration getPluginConfiguration(BotConfiguration configuration) {
+        final ExpressionEngine originalExpressionEngine = configuration.getExpressionEngine();
+        configuration.setExpressionEngine(new XPathExpressionEngine());
+
+        final HierarchicalConfiguration pluginConfig;
+        try {
+            pluginConfig = configuration.configurationAt("plugins/plugin[@class='" + getClass().getCanonicalName() + "']");
+        } finally {
+            configuration.setExpressionEngine(originalExpressionEngine);
+        }
+
+        return pluginConfig;
     }
 }
