@@ -2,6 +2,7 @@ package com.sl5r0.qwobot.plugins.help;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sl5r0.qwobot.plugins.Plugin;
 import com.sl5r0.qwobot.plugins.PluginManager;
 import com.sl5r0.qwobot.plugins.commands.Command;
@@ -14,9 +15,9 @@ public class Help extends Plugin {
     private final Set<Command> commands;
 
     @Inject
-    public Help(PluginManager pluginManager) {
-        checkNotNull(pluginManager, "pluginManager cannot be null");
-        commands = ImmutableSet.<Command>of(new ShowPluginHelp(pluginManager));
+    public Help(Provider<PluginManager> pluginManagerProvider) {
+        checkNotNull(pluginManagerProvider, "pluginManagerProvider cannot be null");
+        commands = ImmutableSet.<Command>of(new ShowPluginHelp(pluginManagerProvider));
     }
 
     @Override

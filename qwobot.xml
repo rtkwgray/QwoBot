@@ -15,12 +15,12 @@
         </channel>
     </server>
     <plugins>
-        <reddit>
+        <plugin class="com.sl5r0.qwobot.plugins.reddit.Reddit">
             <username></username>
             <password></password>
             <subreddit>subreddit to post to</subreddit>
-        </reddit>
-        <twitter>
+        </plugin>
+        <plugin class="com.sl5r0.qwobot.plugins.twitter.TweetStream">
             <channel>#qwobot</channel>
             <oauth>
                 <consumer-key></consumer-key>
@@ -28,6 +28,9 @@
                 <access-token></access-token>
                 <access-token-secret></access-token-secret>
             </oauth>
-        </twitter>
+        </plugin>
+        <plugin class="com.sl5r0.qwobot.plugins.bitcoin.BtcChecker"/>
+        <plugin class="com.sl5r0.qwobot.plugins.help.Help"/>
+        <plugin class="com.sl5r0.qwobot.plugins.qbux.QBuxCasino"/>
     </plugins>
 </configuration>

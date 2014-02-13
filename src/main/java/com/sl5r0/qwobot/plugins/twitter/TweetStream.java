@@ -1,13 +1,13 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.core.QwoBot;
 import com.sl5r0.qwobot.plugins.Plugin;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.exceptions.PluginInitializationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.pircbotx.Channel;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
@@ -24,15 +24,15 @@ public class TweetStream extends Plugin {
     private static final Set<Command> commands = newHashSet();
 
     @Inject
-    public TweetStream(BotConfiguration botConfiguration, QwoBot bot) {
-        checkNotNull(bot, "bot cannot be null");
+    public TweetStream(BotConfiguration botConfiguration, Provider<QwoBot> botProvider) {
+        checkNotNull(botProvider, "botProvider cannot be null");
         checkNotNull(botConfiguration, "botConfiguration cannot be null");
 
-        final HierarchicalConfiguration pluginConfig = botConfiguration.configurationAt("plugins.twitter");
+        final HierarchicalConfiguration pluginConfig = getPluginConfiguration(botConfiguration);
         pluginConfig.setThrowExceptionOnMissing(true);
 
         final Configuration twitterConfiguration;
-        final Channel channel;
+        final String channel;
         try {
             twitterConfiguration = new ConfigurationBuilder()
                     .setDebugEnabled(pluginConfig.getBoolean("debug", false))
@@ -46,7 +46,7 @@ public class TweetStream extends Plugin {
                     .setUseSSL(true)
                     .build();
 
-            channel = bot.getUserChannelDao().getChannel(pluginConfig.getString("channel"));
+            channel = pluginConfig.getString("channel");
         } catch (NoSuchElementException e) {
             throw new PluginInitializationException("Twitter credentials are missing", e);
         }
@@ -54,7 +54,7 @@ public class TweetStream extends Plugin {
         final TwitterFactory twitterFactory = new TwitterFactory(twitterConfiguration);
         final TwitterStream twitterStream = new TwitterStreamFactory(twitterConfiguration).getInstance();
         final TwitterState twitterState = new TwitterState(twitterFactory.getInstance(), twitterStream);
-        final TwitterListener listener = new TwitterListener(twitterState, channel);
+        final TwitterListener listener = new TwitterListener(twitterState, channel, botProvider);
         twitterStream.addListener(listener);
 
         commands.add(new FollowUser(twitterState));

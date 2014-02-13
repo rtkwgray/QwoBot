@@ -1,6 +1,7 @@
 package com.sl5r0.qwobot.plugins.help;
 
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.inject.Provider;
 import com.sl5r0.qwobot.plugins.PluginManager;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand;
@@ -13,9 +14,9 @@ import java.util.Set;
 
 public class ShowPluginHelp extends ParameterizedTriggerCommand {
     private static final String TRIGGER = "!help";
-    private final PluginManager pluginManager;
+    private final Provider<PluginManager> pluginManager;
 
-    public ShowPluginHelp(PluginManager pluginManager) {
+    public ShowPluginHelp(Provider<PluginManager> pluginManager) {
         super(TRIGGER, TO_LOWERCASE);
         this.pluginManager = pluginManager;
     }
@@ -29,7 +30,7 @@ public class ShowPluginHelp extends ParameterizedTriggerCommand {
         final String pluginName = parameters.get(0);
         final Set<Command> commandsForPlugin;
         try {
-            commandsForPlugin = pluginManager.getCommandsForPlugin(pluginName);
+            commandsForPlugin = pluginManager.get().getCommandsForPlugin(pluginName);
         } catch (PluginNotRegisteredException e) {
             throw new CommandExecutionException("Couldn't find plugin: " + pluginName);
         }
@@ -42,6 +43,6 @@ public class ShowPluginHelp extends ParameterizedTriggerCommand {
 
     @Override
     public String getHelp() {
-        return TRIGGER + " <" + Joiner.on("|").join(pluginManager.getRegisteredPlugins()) + ">";
+        return TRIGGER + " <" + Joiner.on("|").join(pluginManager.get().getRegisteredPlugins()) + ">";
     }
 }
