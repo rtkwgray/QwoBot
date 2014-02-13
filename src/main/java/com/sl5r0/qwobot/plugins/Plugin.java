@@ -3,6 +3,7 @@ package com.sl5r0.qwobot.plugins;
 import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.tree.DefaultExpressionEngine;
 import org.apache.commons.configuration.tree.ExpressionEngine;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 
@@ -33,6 +34,7 @@ public abstract class Plugin {
         final HierarchicalConfiguration pluginConfig;
         try {
             pluginConfig = configuration.configurationAt("plugins/plugin[@class='" + getClass().getCanonicalName() + "']");
+            pluginConfig.setExpressionEngine(originalExpressionEngine);
         } finally {
             configuration.setExpressionEngine(originalExpressionEngine);
         }
