@@ -72,7 +72,9 @@ public class PluginManager {
         final Set<Command> commands = plugin.getCommands();
         for (Command command : commands) {
             eventBus.register(command);
-            log.debug("Registered command: " + command.getHelp());
+            for (String commandString : command.getHelp()) {
+                log.debug("Registered command: " + commandString);
+            }
         }
     }
 
