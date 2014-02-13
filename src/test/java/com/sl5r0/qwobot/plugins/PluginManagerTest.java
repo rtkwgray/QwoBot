@@ -49,34 +49,4 @@ public class PluginManagerTest {
         assertThat(pluginManager.getCommandsForPlugin("TestPlugin"), containsInAnyOrder(COMMAND_1, COMMAND_2));
         assertThat(pluginManager.getCommandsForPlugin("AnotherTestPlugin"), contains(COMMAND));
     }
-
-    @Test
-    public void testName() throws Exception {
-//        Injector injector = Guice.createInjector(new TestModule());
-//        SessionFactory sessionFactory = injector.getInstance(SessionFactoryCreator.class).sessionFactoryFor("testdb", "com.sl5r0.qwobot.plugins.qbux");
-//        Session session = sessionFactory.openSession();
-//        session.beginTransaction();
-//        session.save(new User());
-//        session.save(new User());
-//        session.save(new User());
-//        session.getTransaction().commit();
-//
-//        List list = session.createCriteria(User.class).list();
-//        System.out.println(1);
-//        System.out.println(list);
-//
-//        sessionFactory.close();
-//        Configuration configuration = new Configuration();
-//        configuration = configuration.setProperty("hibernate.connection.url", "jdbc:h2:datastores/test2");
-//        configuration = configuration.setProperty("hibernate.connection.driver_class", Driver.class.getCanonicalName());
-//        configuration = configuration.setProperty("hibernate.dialect", H2Dialect.class.getCanonicalName());
-//        configuration = configuration.setProperty("hibernate.hbm2ddl.auto", "update"); // create schema if it doesn't exist
-//        configuration = configuration.addAnnotatedClass(User.class);
-//        StandardServiceRegistryBuilder bootstrapServiceRegistryBuilder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-//        SessionFactory sessionFactory = configuration.buildSessionFactory(bootstrapServiceRegistryBuilder.build());
-//
-//
-//
-
-    }
 }
