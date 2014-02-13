@@ -8,7 +8,6 @@ import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.plugins.Plugin;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 
 import java.util.Set;
 
@@ -21,7 +20,6 @@ public class Reddit extends Plugin {
     @Inject
     public Reddit(BotConfiguration config) {
         checkNotNull(config, "config cannot be null");
-        config.setExpressionEngine(new XPathExpressionEngine());
         final HierarchicalConfiguration pluginConfig = getPluginConfiguration(config);
         final RedditRequestInitializer requestInitializer = new RedditRequestInitializer(pluginConfig.getString("username"));
         final RateLimiter rateLimiter = RateLimiter.create(0.5);

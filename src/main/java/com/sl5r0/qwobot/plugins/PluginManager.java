@@ -41,11 +41,18 @@ public class PluginManager {
         }
 
         for (Class<? extends Plugin> pluginClass : pluginClassResolver.getValidPlugins()) {
-            final Plugin plugin = injector.getInstance(pluginClass);
+            final Plugin plugin;
+            try {
+                plugin = injector.getInstance(pluginClass);
+            } catch (RuntimeException e) {
+                log.error("Error initializing plugin: " + pluginClass.getSimpleName(), e);
+                continue;
+            }
+
             try {
                 registerPlugin(plugin);
             } catch (RuntimeException | DuplicatePluginException e) {
-                log.warn("Could not register plugin: ", e);
+                log.error("Could not register plugin: ", e);
             }
         }
     }
