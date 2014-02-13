@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static com.sl5r0.qwobot.plugins.qbux.entities.User.findByNick;
+import static java.util.Collections.singletonList;
 
 public class Tip extends ParameterizedTriggerCommand {
     private static final Logger log = LoggerFactory.getLogger(Tip.class);
@@ -29,6 +30,11 @@ public class Tip extends ParameterizedTriggerCommand {
     public void execute(MessageEvent event, List<String> parameters) {
         if (parameters.size() < 2) {
             throw new CommandExecutionException("Invalid number of arguments.");
+        }
+
+        String reason = "";
+        if (parameters.size() == 3) {
+            reason = parameters.get(2);
         }
 
         final long tipAmount;
@@ -76,12 +82,17 @@ public class Tip extends ParameterizedTriggerCommand {
             session.save(toUser.get());
             session.save(fromUser.get());
             transaction.commit();
-            event.getChannel().send().message(from + " tipped " + to + " " + tipAmount + " QBUX! Good show!");
+            event.getChannel().send().message(from + " tipped " + to + " " + tipAmount + " QBUX " + reason);
         } catch (Exception e) {
             event.getChannel().send().message("Tipping failed for some reason :S");
             log.error("Couldn't send tip from " + from + " to " + to, e);
         } finally {
             session.close();
         }
+    }
+
+    @Override
+    public List<String> getHelp() {
+        return singletonList(getTrigger() + " <nick> <amount> [<reason>]");
     }
 }
