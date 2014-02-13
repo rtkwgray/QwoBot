@@ -44,7 +44,7 @@ public class PluginManager {
             final Plugin plugin = injector.getInstance(pluginClass);
             try {
                 registerPlugin(plugin);
-            } catch (DuplicatePluginException e) {
+            } catch (RuntimeException | DuplicatePluginException e) {
                 log.warn("Could not register plugin: ", e);
             }
         }
