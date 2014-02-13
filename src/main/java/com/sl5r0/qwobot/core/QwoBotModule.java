@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.core;
 
+import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -15,15 +16,14 @@ import java.lang.annotation.Target;
 
 import static com.sl5r0.qwobot.persistence.SessionFactoryCreator.SchemaRule.UPDATE;
 import static java.lang.annotation.ElementType.*;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class QwoBotModule extends AbstractModule {
     private static final String CONFIG_FILE_PROPERTY = "qwobot.config.file";
     private static final String DEFAULT_CONFIG_FILE = "qwobot.xml";
 
     @Override
-    protected void configure() {
-        bindEventBus();
-    }
+    protected void configure() { }
 
     @Singleton
     @Provides @BotConfigFile
@@ -31,8 +31,14 @@ public class QwoBotModule extends AbstractModule {
         return getBotConfigurationFile();
     }
 
-    protected void bindEventBus() {
-        bind(EventBus.class).asEagerSingleton();
+    protected EventBus getEventBus() {
+        return new AsyncEventBus(newFixedThreadPool(10));
+    }
+
+    @Singleton
+    @Provides
+    public EventBus provideEventBus() {
+        return getEventBus();
     }
 
     @BindingAnnotation

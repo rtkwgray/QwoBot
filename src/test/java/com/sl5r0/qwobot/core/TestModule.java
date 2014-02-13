@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.io.Resources.getResource;
 import static com.google.inject.Guice.createInjector;
-import static com.sl5r0.qwobot.persistence.SessionFactoryCreator.SchemaRule.CREATE_DROP;
+import static com.sl5r0.qwobot.persistence.SessionFactoryCreator.SchemaRule.CREATE;
 
 public class TestModule extends QwoBotModule {
     private final Optional<String> configurationLocation;
@@ -24,7 +24,7 @@ public class TestModule extends QwoBotModule {
 
     @Override
     protected SessionFactoryCreator createSessionFactoryCreator() {
-        return new SessionFactoryCreator("test", CREATE_DROP);
+        return new SessionFactoryCreator("test", CREATE);
     }
 
     @Override
@@ -40,12 +40,11 @@ public class TestModule extends QwoBotModule {
     }
 
     @Override
-    protected void bindEventBus() {
+    protected EventBus getEventBus() {
         if (eventBus.isPresent()) {
-            bind(EventBus.class).toInstance(eventBus.get());
-        } else {
-            super.bindEventBus();
+            return eventBus.get();
         }
+        return super.getEventBus();
     }
 
     public static ModuleBuilder testInjector() {

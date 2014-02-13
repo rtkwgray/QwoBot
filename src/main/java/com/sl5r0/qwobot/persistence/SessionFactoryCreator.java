@@ -21,8 +21,8 @@ public class SessionFactoryCreator {
         this.schemaRule = checkNotNull(schemaRule);
     }
 
-    public SessionFactory sessionFactoryFor(String databaseName, String entityBasePackage) {
-        final Reflections classScanner = new Reflections(entityBasePackage);
+    public SessionFactory sessionFactoryFor(String databaseName, Package entityBasePackage) {
+        final Reflections classScanner = new Reflections(entityBasePackage.getName());
         final Set<Class<?>> entityClasses = classScanner.getTypesAnnotatedWith(Entity.class);
 
         final Configuration configuration = new Configuration()
@@ -40,7 +40,7 @@ public class SessionFactoryCreator {
     }
 
     public static enum SchemaRule {
-        CREATE_DROP("create-drop"),
+        CREATE("create"),
         UPDATE("update");
 
         private final String propertyValue;
