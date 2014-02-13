@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Preconditions.checkArgument;
 
 @Entity
 @Table(name = "users")
@@ -42,7 +43,13 @@ public class User {
     }
 
     public void setBalance(long balance) {
+        checkArgument(balance >= 0, "cannot set balance to negative value");
         this.balance = balance;
+    }
+
+    public void modifyBalance(long amount) {
+        checkArgument(balance - amount >= 0, "cannot set balance to negative value");
+        this.balance += amount;
     }
 
     @Override

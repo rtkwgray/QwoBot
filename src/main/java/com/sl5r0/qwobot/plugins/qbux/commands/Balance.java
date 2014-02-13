@@ -1,11 +1,11 @@
 package com.sl5r0.qwobot.plugins.qbux.commands;
 
+import com.google.common.base.Optional;
 import com.sl5r0.qwobot.plugins.commands.TriggerCommand;
+import com.sl5r0.qwobot.plugins.qbux.entities.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.pircbotx.hooks.events.MessageEvent;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,10 +20,17 @@ public class Balance extends TriggerCommand {
 
     @Override
     public void triggered(MessageEvent event) {
-        Session session = sessionFactory.openSession();
-        List user = session.createQuery("select balance from User user where user.nick = :nick").setString("nick", event.getUser().getNick()).list();
-        for (Object o : user) {
-            System.out.println(o.toString());
+        final Session session = sessionFactory.openSession();
+        try {
+            final String nick = event.getUser().getNick();
+            final Optional<User> user = User.findByNick(nick, session);
+            if (user.isPresent()) {
+                event.getChannel().send().message("Current balance for " + nick + ": " + user.get().getBalance() + " QBUX");
+            } else {
+                event.getChannel().send().message("I don't have any record for " + nick + ". Are they registered?");
+            }
+        } finally {
+            session.close();
         }
     }
 }
