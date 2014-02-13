@@ -15,6 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Register extends TriggerCommand {
     private static final Logger log = LoggerFactory.getLogger(Register.class);
     private static final String TRIGGER = "register";
+    private static final int INITIAL_BALANCE = 100;
     private final SessionFactory sessionFactory;
 
     public Register(SessionFactory sessionFactory) {
@@ -29,7 +30,7 @@ public class Register extends TriggerCommand {
 
         final User user = new User();
         user.setNick(event.getUser().getNick());
-        user.setBalance(100);
+        user.setBalance(INITIAL_BALANCE);
 
         final Session session = sessionFactory.openSession();
         try {
@@ -38,6 +39,7 @@ public class Register extends TriggerCommand {
             try {
                 transaction.commit();
                 log.info("Successfully registered user: " + nick);
+                event.getChannel().send().message("Welcome to QBux! Here's " + user.getBalance() + " QBUX to get you started.");
             } catch (ConstraintViolationException e) {
                 event.getChannel().send().message("It looks like you already have an account.");
                 log.info("User already registered: " + nick);

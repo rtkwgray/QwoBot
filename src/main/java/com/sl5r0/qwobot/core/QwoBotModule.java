@@ -7,6 +7,7 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.persistence.SessionFactoryCreator;
+import com.sl5r0.qwobot.plugins.PluginManager;
 import org.apache.commons.configuration.ConfigurationException;
 
 import java.io.File;
@@ -23,7 +24,9 @@ public class QwoBotModule extends AbstractModule {
     private static final String DEFAULT_CONFIG_FILE = "qwobot.xml";
 
     @Override
-    protected void configure() { }
+    protected void configure() {
+        bind(PluginManager.class).asEagerSingleton();
+    }
 
     @Singleton
     @Provides @BotConfigFile
