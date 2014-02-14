@@ -6,11 +6,11 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.util.concurrent.RateLimiter;
+import com.sl5r0.qwobot.plugins.exceptions.LoginFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,20 +23,28 @@ class RedditSession {
     private final HttpRequestFactory requestFactory;
     private final RedditRequestInitializer requestInitializer;
     private final RateLimiter rateLimiter;
-    private final Executor requestExecutor;
+    private final String username;
+    private final String password;
 
-    // TODO: get rid of this flag. It's just to stop Reddit from being spammed if we're not logged in, but it should
-    // be handled in a different way (maybe detecting login failure).
-    private boolean isLoggedIn = false;
+    private boolean loggedIn = false;
+    private boolean loginAlreadyFailed = false;
 
-    RedditSession(NetHttpTransport netHttpTransport, RedditRequestInitializer redditRequestInitializer, RateLimiter rateLimiter, Executor requestExecutor) {
+    RedditSession(NetHttpTransport netHttpTransport, RedditRequestInitializer redditRequestInitializer,
+                  RateLimiter rateLimiter, String username, String password) {
+
         this.requestInitializer = redditRequestInitializer;
-        this.requestExecutor = requestExecutor;
+        this.username = username;
+        this.password = password;
         this.requestFactory = netHttpTransport.createRequestFactory(requestInitializer);
         this.rateLimiter = rateLimiter;
     }
 
-    void login(String username, String password) {
+    private void login() throws LoginFailedException {
+        if (loginAlreadyFailed) {
+            log.warn("Reddit login already failed. Will not retry.");
+            throw new LoginFailedException();
+        }
+
         log.info("Logging into Reddit as " + username);
         final RedditLoginRequest loginRequest = new RedditLoginRequest(username, password);
         try {
@@ -44,19 +52,22 @@ class RedditSession {
             final RedditResponse response = request.execute().parseAs(RedditResponse.class);
             requestInitializer.setCookie(checkNotNull(response.getCookie(), "Reddit cookie was null"));
             requestInitializer.setModHash(checkNotNull(response.getModHash(), "Reddit modhash was null."));
-            isLoggedIn = true;
-            log.info("Successfully logged in to Reddit");
+            log.info("Successfully logged in to Reddit as " + username);
+            loggedIn = true;
         } catch (IOException e) {
-            log.warn("Could not login to Reddit", e);
+            log.warn("Could not login to Reddit (credentials are probably wrong).", e);
+            loginAlreadyFailed = true;
             throw new RuntimeException(e);
         }
     }
 
-    // TODO: move this so that we can report failure to the channel instead of just the log file.
     void postLink(String subReddit, String title, String url) throws IOException {
-        if (!isLoggedIn) {
-            log.warn("Can't post " + url + " to " + subReddit + " because we're not logged in.");
-            return;
+        if (!loggedIn) {
+            try {
+                login();
+            } catch (LoginFailedException e) {
+                throw new IOException("not logged in to Reddit");
+            }
         }
 
         final RedditSubmitRequest submitRequest = new RedditSubmitRequest(subReddit, title, url);
@@ -65,17 +76,8 @@ class RedditSession {
         final HttpRequest request = requestFactory.buildPostRequest(SUBMIT_URL, new UrlEncodedContent(submitRequest));
 
         log.debug("Submitting reddit post for " + url + " to executor.");
-        requestExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                rateLimiter.acquire();
-                try {
-                    request.execute();
-                    log.debug("Posted reddit link: " + submitRequest.url);
-                } catch (IOException e) {
-                    log.error("Could not submit Reddit post", e);
-                }
-            }
-        });
+        rateLimiter.acquire();
+        request.execute();
+        log.debug("Posted reddit link: " + submitRequest.url);
     }
 }

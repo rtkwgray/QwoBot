@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.exceptions.DuplicatePluginException;
 import com.sl5r0.qwobot.plugins.exceptions.PluginNotRegisteredException;
+import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,6 @@ public class PluginManager {
         this.pluginClassResolver = checkNotNull(pluginClassResolver, "pluginClassResolver cannot be null");
         this.eventBus = checkNotNull(eventBus, "eventBus cannot be null");
         this.injector = checkNotNull(injector, "injector cannot be null");
-        initializePlugins();
     }
 
     public void initializePlugins() {
@@ -45,7 +45,11 @@ public class PluginManager {
             try {
                 plugin = injector.getInstance(pluginClass);
             } catch (RuntimeException e) {
-                log.error("Error initializing plugin: " + pluginClass.getSimpleName(), e);
+                if (e.getCause() != null && e.getCause() instanceof ConfigurationException) {
+                    log.error("Error initializing plugin: " + pluginClass.getSimpleName() + ": " + e.getCause().getMessage());
+                } else {
+                    log.error("Error initializing plugin: " + pluginClass.getSimpleName(), e);
+                }
                 continue;
             }
 
