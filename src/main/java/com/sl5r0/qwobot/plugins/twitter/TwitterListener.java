@@ -1,7 +1,5 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
-import com.google.inject.Provider;
-import com.sl5r0.qwobot.core.QwoBot;
 import org.pircbotx.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,14 +10,12 @@ import twitter4j.StatusListener;
 
 class TwitterListener implements StatusListener {
     private static final Logger log = LoggerFactory.getLogger(TwitterListener.class);
-    private final String channel;
+    private final Channel channel;
     private final TwitterState twitterState;
-    private final Provider<QwoBot> botProvider;
 
-    TwitterListener(TwitterState twitterState, String channel, Provider<QwoBot> botProvider) {
+    TwitterListener(TwitterState twitterState, Channel channel) {
         this.channel = channel;
         this.twitterState = twitterState;
-        this.botProvider = botProvider;
     }
 
     @Override
@@ -35,8 +31,7 @@ class TwitterListener implements StatusListener {
         }
 
         // If we didn't filter out this message, send it to the channel.
-        final Channel ircChannel = botProvider.get().getUserChannelDao().getChannel(channel);
-        ircChannel.send().message(twitterState.getTweetColor().format(status.getUser().getScreenName() + ": " + status.getText()));
+        channel.send().message(twitterState.getTweetColor().format(status.getUser().getScreenName() + ": " + status.getText()));
     }
 
     @Override

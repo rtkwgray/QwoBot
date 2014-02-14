@@ -1,11 +1,6 @@
 package com.sl5r0.qwobot.plugins;
 
-import com.sl5r0.qwobot.core.BotConfiguration;
 import com.sl5r0.qwobot.plugins.commands.Command;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.tree.DefaultExpressionEngine;
-import org.apache.commons.configuration.tree.ExpressionEngine;
-import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 
 import java.util.Set;
 
@@ -15,8 +10,15 @@ import java.util.Set;
  * into commands so that they can manipulate it.
  */
 public abstract class Plugin {
+    /**
+     * Plugins should use this method to initialize all commands.
+     * @return a set of {@link Command} to be registered.
+     */
     public abstract Set<Command> getCommands();
 
+    /**
+     * @return a string representing the plugin's version.
+     */
     public abstract String getVersion();
 
     public final String getName() {
@@ -25,20 +27,5 @@ public abstract class Plugin {
 
     public String toString() {
         return getName() + " v" + getVersion();
-    }
-
-    protected final HierarchicalConfiguration getPluginConfiguration(BotConfiguration configuration) {
-        final ExpressionEngine originalExpressionEngine = configuration.getExpressionEngine();
-        configuration.setExpressionEngine(new XPathExpressionEngine());
-
-        final HierarchicalConfiguration pluginConfig;
-        try {
-            pluginConfig = configuration.configurationAt("plugins/plugin[@class='" + getClass().getCanonicalName() + "']");
-            pluginConfig.setExpressionEngine(originalExpressionEngine);
-        } finally {
-            configuration.setExpressionEngine(originalExpressionEngine);
-        }
-
-        return pluginConfig;
     }
 }
