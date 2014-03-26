@@ -2,7 +2,7 @@ package com.sl5r0.qwobot.plugins.qbux.commands;
 
 import com.google.common.base.Optional;
 import com.sl5r0.qwobot.plugins.commands.TriggerCommand;
-import com.sl5r0.qwobot.plugins.qbux.entities.User;
+import com.sl5r0.qwobot.plugins.qbux.entities.OldQwobotUser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.pircbotx.hooks.events.MessageEvent;
@@ -22,8 +22,11 @@ public class Balance extends TriggerCommand {
     public void triggered(MessageEvent event) {
         final Session session = sessionFactory.openSession();
         try {
+//            Transaction tx = session.beginTransaction();
+//            session.createQuery("DELETE FROM User WHERE nick LIKE 'phil%'").executeUpdate();
+//            tx.commit();
             final String nick = event.getUser().getNick();
-            final Optional<User> user = User.findByNick(nick, session);
+            final Optional<OldQwobotUser> user = OldQwobotUser.findByNick(nick, session);
             if (user.isPresent()) {
                 event.getChannel().send().message("Current balance for " + nick + ": " + user.get().getBalance() + " QBUX");
             } else {

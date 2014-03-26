@@ -2,22 +2,17 @@
 <project version="4">
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
-    <list size="5">
+    <list size="7">
       <item index="0" class="java.lang.String" itemvalue="com.google.api.client.util.Key" />
       <item index="1" class="java.lang.String" itemvalue="com.google.common.eventbus.Subscribe" />
       <item index="2" class="java.lang.String" itemvalue="com.google.inject.Provides" />
-      <item index="3" class="java.lang.String" itemvalue="org.mockito.InjectMocks" />
-      <item index="4" class="java.lang.String" itemvalue="org.mockito.Mock" />
+      <item index="3" class="java.lang.String" itemvalue="com.sl5r0.qwobot.persistence.PersistenceConstructor" />
+      <item index="4" class="java.lang.String" itemvalue="org.hibernate.annotations.GenericGenerator" />
+      <item index="5" class="java.lang.String" itemvalue="org.mockito.InjectMocks" />
+      <item index="6" class="java.lang.String" itemvalue="org.mockito.Mock" />
     </list>
   </component>
   <component name="IdProvider" IDEtalkID="600AC60FE61A4DCA4CE69BFD1930A586" />
-  <component name="MavenProjectsManager">
-    <option name="originalFiles">
-      <list>
-        <option value="$PROJECT_DIR$/pom.xml" />
-      </list>
-    </option>
-  </component>
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>

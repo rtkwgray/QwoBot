@@ -10,7 +10,7 @@ import static com.sl5r0.qwobot.core.TestModule.testInjector;
 import static com.sl5r0.qwobot.helpers.UnitTestHelpers.*;
 import static org.mockito.Mockito.when;
 
-public class QBuxCasinoIntegrationTest {
+public class QBuxIntegrationTest {
     @Test
     public void testName() throws Exception {
         final EventBus eventBus = new EventBus();

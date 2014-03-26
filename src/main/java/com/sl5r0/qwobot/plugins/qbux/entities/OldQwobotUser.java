@@ -10,15 +10,15 @@ import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "accounts")
+public class OldQwobotUser {
     private long id;
     private String nick;
     private long balance = 0;
 
     @Id
-    @GeneratedValue(generator="increment")
-    @GenericGenerator(name="increment", strategy = "increment")
+    @GeneratedValue(generator = "increment")
+    @GenericGenerator(name = "increment", strategy = "increment")
     public long getId() {
         return id;
     }
@@ -48,21 +48,21 @@ public class User {
     }
 
     public void modifyBalance(long amount) {
-        checkArgument(balance - amount >= 0, "cannot set balance to negative value");
+        checkArgument(balance + amount >= 0, "cannot set balance to negative value");
         this.balance += amount;
     }
 
     @Override
     public String toString() {
-        return "User{" +
+        return "OldQwobotUser{" +
                 "id=" + id +
                 ", nick='" + nick + '\'' +
                 ", balance=" + balance +
                 '}';
     }
 
-    public static Optional<User> findByNick(String nick, Session session) {
-        final Object user = session.createQuery("from User user where user.nick = :nick").setString("nick", nick).uniqueResult();
-        return fromNullable(User.class.cast(user));
+    public static Optional<OldQwobotUser> findByNick(String nick, Session session) {
+        final Object user = session.createQuery("from OldQwobotUser user where user.nick = :nick").setString("nick", nick).uniqueResult();
+        return fromNullable(OldQwobotUser.class.cast(user));
     }
 }

@@ -18,6 +18,7 @@ public class TestModule extends QwoBotModule {
     private final Optional<EventBus> eventBus;
 
     public TestModule(String configurationLocation, EventBus eventBus) {
+        super("test");
         this.eventBus = fromNullable(eventBus);
         this.configurationLocation = fromNullable(configurationLocation);
     }
@@ -25,6 +26,11 @@ public class TestModule extends QwoBotModule {
     @Override
     protected SessionFactoryCreator createSessionFactoryCreator() {
         return new SessionFactoryCreator("test", CREATE);
+    }
+
+    @Override
+    protected String schemaCreationStrategy() {
+        return "create";
     }
 
     @Override

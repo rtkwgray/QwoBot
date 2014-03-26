@@ -29,6 +29,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="Qw0Bot" target="1.7" />
+      <module name="Qwobot" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -15,10 +15,10 @@ import static com.sl5r0.qwobot.core.QwoBotModule.BotConfigFile;
 //TODO: return copies of this so that it's not loaded every time from disk.
 public class BotConfiguration extends XMLConfiguration {
     private static final Logger log = LoggerFactory.getLogger(BotConfiguration.class);
-    private final QwoBotListener eventListener;
+    private final IrcEventDispatcher eventListener;
 
     @Inject
-    public BotConfiguration(@BotConfigFile File config, QwoBotListener eventListener) throws ConfigurationException {
+    public BotConfiguration(@BotConfigFile File config, IrcEventDispatcher eventListener) throws ConfigurationException {
         super(checkNotNull(config, "config cannot be null"));
         this.eventListener = checkNotNull(eventListener, "eventListener cannot be null");
         log.info("Loaded configuration from " + config.getAbsolutePath());
@@ -33,7 +33,7 @@ public class BotConfiguration extends XMLConfiguration {
                 .setAutoReconnect(getBoolean("options.auto-reconnect"))
                 .setAutoSplitMessage(true)
                 .setShutdownHookEnabled(true)
-                .addListener(eventListener)
+//                .addListener(eventListener)
                 .addAutoJoinChannel(getString("server.channel.name"))
                 .setMessageDelay(getLong("options.message-delay"))
                 .buildConfiguration();

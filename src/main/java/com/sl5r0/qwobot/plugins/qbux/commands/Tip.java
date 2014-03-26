@@ -3,7 +3,7 @@ package com.sl5r0.qwobot.plugins.qbux.commands;
 import com.google.common.base.Optional;
 import com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
-import com.sl5r0.qwobot.plugins.qbux.entities.User;
+import com.sl5r0.qwobot.plugins.qbux.entities.OldQwobotUser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.sl5r0.qwobot.plugins.qbux.entities.User.findByNick;
+import static com.sl5r0.qwobot.plugins.qbux.entities.OldQwobotUser.findByNick;
 import static java.util.Collections.singletonList;
 
 public class Tip extends ParameterizedTriggerCommand {
@@ -46,7 +46,7 @@ public class Tip extends ParameterizedTriggerCommand {
         }
 
         if (tipAmount < 0) {
-            event.getChannel().send().message("Theif!");
+            event.getChannel().send().message("Thief!");
             return;
         } else if (tipAmount == 0) {
             event.getChannel().send().message("How generous....");
@@ -59,7 +59,7 @@ public class Tip extends ParameterizedTriggerCommand {
 
         try {
             final Transaction transaction = session.beginTransaction();
-            final Optional<User> fromUser = findByNick(from, session);
+            final Optional<OldQwobotUser> fromUser = findByNick(from, session);
             if (!fromUser.isPresent()) {
                 event.getChannel().send().message("Couldn't find you, " + from);
                 return;
@@ -70,7 +70,7 @@ public class Tip extends ParameterizedTriggerCommand {
                 return;
             }
 
-            final Optional<User> toUser = findByNick(to, session);
+            final Optional<OldQwobotUser> toUser = findByNick(to, session);
             if (!toUser.isPresent()) {
                 event.getChannel().send().message("I don't know who you're trying to tip. Have they registered?");
                 return;
