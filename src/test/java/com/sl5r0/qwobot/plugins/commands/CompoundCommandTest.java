@@ -12,7 +12,6 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.sl5r0.qwobot.helpers.UnitTestHelpers.*;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -30,7 +29,7 @@ public class CompoundCommandTest {
     private CompoundCommand command;
     private ParameterizedTriggerCommand parameterizedCommand = mock(ParameterizedTriggerCommand.class);
     private TriggerCommand triggerCommand = mock(TriggerCommand.class);
-    private MessageEvent event = mockMessageEvent(mockUser(), mockChannel());
+    private MessageEvent event = mock(MessageEvent.class);//(mockUser(), mockChannel());
     private String expectedEventMessage;
 
     @Before

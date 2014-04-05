@@ -2,15 +2,17 @@ package com.sl5r0.qwobot.persistence;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.QwobotUser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import java.util.UUID;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@Singleton
 public class QwobotUserRepository {
     private final SessionFactory sessionFactory;
 
@@ -19,34 +21,34 @@ public class QwobotUserRepository {
         this.sessionFactory = checkNotNull(sessionFactory, "sessionFactory must not be null");
     }
 
-    public void save(final QwobotUser oldQwobotUser) {
-        new DatabaseOperation<QwobotUser>(sessionFactory) {
+    public QwobotUser save(final QwobotUser oldQwobotUser) {
+        return new DatabaseOperation<QwobotUser>(sessionFactory) {
             @Override
             protected QwobotUser doExecute(Session session) {
                 final Transaction transaction = session.beginTransaction();
-                session.save(oldQwobotUser);
+                session.saveOrUpdate(oldQwobotUser);
                 transaction.commit();
                 return oldQwobotUser;
             }
-        }.execute();
+        }.execute().get();
     }
 
-    public Optional<QwobotUser> findByHostMask(final String hostMask) {
-        return new DatabaseOperation<QwobotUser>(sessionFactory) {
+    public List<QwobotUser> allUsers() {
+        return new DatabaseOperation<List<QwobotUser>>(sessionFactory) {
             @Override
-            protected QwobotUser doExecute(Session session) {
-                return (QwobotUser) session.createQuery("from QwobotUser user where user.hostMask = :hostMask")
-                        .setString("hostMask", hostMask).uniqueResult();
+            protected List<QwobotUser> doExecute(Session session) {
+                //noinspection unchecked
+                return session.createQuery("from QwobotUser").list();
             }
-        }.execute();
+        }.execute().get();
     }
 
-    public Optional<QwobotUser> findByAuthenticationToken(final UUID authenticationToken) {
+    public Optional<QwobotUser> findByNick(final String nick) {
         return new DatabaseOperation<QwobotUser>(sessionFactory) {
             @Override
             protected QwobotUser doExecute(Session session) {
-                return (QwobotUser) session.createQuery("from QwobotUser user where user.authenticationToken = :authenticationToken")
-                        .setParameter("authenticationToken", authenticationToken).uniqueResult();
+                return (QwobotUser) session.createQuery("from QwobotUser user where user.nick = :nick")
+                        .setString("nick", nick).uniqueResult();
             }
         }.execute();
     }

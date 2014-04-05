@@ -14,7 +14,6 @@ import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.Collections;
 
-import static com.sl5r0.qwobot.helpers.UnitTestHelpers.*;
 import static org.mockito.Mockito.*;
 
 public class ShowPluginHelpTest {
@@ -37,7 +36,7 @@ public class ShowPluginHelpTest {
         when(pluginManager.getCommandsForPlugin(PLUGIN_NAME)).thenReturn(ImmutableSet.of(pluginCommand));
         when(pluginManager.getCommandsForPlugin(UNREGISTERED_PLUGIN_NAME)).thenThrow(new PluginNotRegisteredException());
         command = new ShowPluginHelp(pluginManagerProvider);
-        event = mockMessageEvent(mockUser(), mockChannel());
+        event = mock(MessageEvent.class);
     }
 
     @Test

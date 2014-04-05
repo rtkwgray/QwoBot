@@ -2,7 +2,6 @@ package com.sl5r0.qwobot.plugins.qbux;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.sl5r0.qwobot.persistence.SessionFactoryCreator;
 import com.sl5r0.qwobot.plugins.Plugin;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import com.sl5r0.qwobot.plugins.commands.CompoundCommand;
@@ -20,8 +19,8 @@ public class QBux extends Plugin {
     private final Set<Command> commands;
 
     @Inject
-    public QBux(SessionFactoryCreator sessionFactoryCreator) {
-        final SessionFactory sessionFactory = sessionFactoryCreator.sessionFactoryFor("qbux", getClass().getPackage());
+    public QBux(SessionFactory sessionFactoryCreator) {
+        final SessionFactory sessionFactory = sessionFactoryCreator;
         commands = ImmutableSet.<Command>of(new CompoundCommand(QBUX_TRIGGER, ImmutableSet.<TriggerCommand>builder()
                 .add(new Register(sessionFactory))
                 .add(new Balance(sessionFactory))

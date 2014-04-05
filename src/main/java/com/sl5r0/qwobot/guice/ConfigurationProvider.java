@@ -7,7 +7,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 
-import static com.sl5r0.qwobot.core.QwoBotModule.ConfigurationFilename;
+import static com.sl5r0.qwobot.guice.QwobotModule.ConfigurationFilename;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ConfigurationProvider implements Provider<Configuration> {

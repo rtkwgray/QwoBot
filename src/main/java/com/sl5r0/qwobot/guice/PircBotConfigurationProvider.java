@@ -4,10 +4,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sl5r0.qwobot.core.IrcEventDispatcher;
 import org.pircbotx.Configuration;
+import org.pircbotx.PircBotX;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class PircBotConfigurationProvider implements Provider<Configuration> {
+public class PircBotConfigurationProvider implements Provider<Configuration<PircBotX>> {
     private final Provider<org.apache.commons.configuration.Configuration> qwoBotConfiguration;
     private final IrcEventDispatcher eventDispatcher;
 
@@ -18,7 +19,7 @@ public class PircBotConfigurationProvider implements Provider<Configuration> {
     }
 
     @Override
-    public Configuration get() {
+    public Configuration<PircBotX> get() {
         final org.apache.commons.configuration.Configuration config = qwoBotConfiguration.get();
         return new Configuration.Builder<>()
                 .setServerHostname(config.getString("server.host"))

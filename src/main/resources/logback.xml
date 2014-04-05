@@ -1,7 +1,7 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
+            <pattern>%d %-5p [%c{1}] [%thread] %m%n</pattern>
         </encoder>
     </appender>
 
@@ -20,6 +20,10 @@
     </appender>
 
     <logger name="com.sl5r0" level="ALL" additivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="org.pircbotx" level="ALL" additivity="false">
         <appender-ref ref="console"/>
     </logger>
 

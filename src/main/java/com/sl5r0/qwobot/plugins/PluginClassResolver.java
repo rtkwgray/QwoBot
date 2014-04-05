@@ -1,8 +1,6 @@
 package com.sl5r0.qwobot.plugins;
 
 import com.google.common.base.Function;
-import com.google.inject.Inject;
-import com.sl5r0.qwobot.core.BotConfiguration;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -11,7 +9,6 @@ import java.util.Set;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Arrays.asList;
 
 public class PluginClassResolver {
     public static final String PLUGIN_CLASS_KEY = "plugins.plugin[@class]";
@@ -19,10 +16,10 @@ public class PluginClassResolver {
     private final Set<String> invalidPlugins = newHashSet();
     private final Set<Class<? extends Plugin>> validPlugins = newHashSet();
 
-    @Inject
-    public PluginClassResolver(BotConfiguration botConfiguration) {
-        resolvePlugins(asList(botConfiguration.getStringArray(PLUGIN_CLASS_KEY)));
-    }
+//    @Inject
+//    public PluginClassResolver(BotConfiguration botConfiguration) {
+//        resolvePlugins(asList(botConfiguration.getStringArray(PLUGIN_CLASS_KEY)));
+//    }
 
     public Set<Class<? extends Plugin>> getValidPlugins() {
         return copyOf(validPlugins);

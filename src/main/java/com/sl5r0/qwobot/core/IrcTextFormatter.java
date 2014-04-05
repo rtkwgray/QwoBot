@@ -13,7 +13,7 @@ import static com.google.common.collect.Queues.newArrayDeque;
  * Simply an enum to simplify use of the PircBotX Colors class.
  */
 @SuppressWarnings("UnusedDeclaration") // Don't care if they're not used.
-public enum Format {
+public enum IrcTextFormatter {
     NORMAL(Colors.NORMAL),
     BOLD(Colors.BOLD),
     UNDERLINE(Colors.UNDERLINE),
@@ -39,7 +39,7 @@ public enum Format {
 
     private final Function<String, String> formatter;
 
-    public static Format fromString(String color) {
+    public static IrcTextFormatter fromString(String color) {
         final String enumValue = color.toUpperCase();
         return valueOf(enumValue);
     }
@@ -48,11 +48,11 @@ public enum Format {
         return formatter.apply(string);
     }
 
-    private Format(String ircCode) {
+    private IrcTextFormatter(String ircCode) {
         this.formatter = applySingleColor(ircCode);
     }
 
-    private Format(List<String> colors) {
+    private IrcTextFormatter(List<String> colors) {
         this.formatter = applyMultipleColors(colors);
     }
 

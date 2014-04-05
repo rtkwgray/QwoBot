@@ -3,7 +3,7 @@ package com.sl5r0.qwobot.plugins.twitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.sl5r0.qwobot.core.QwoBot;
+import com.sl5r0.qwobot.QwoBot;
 import com.sl5r0.qwobot.plugins.ConfigurablePlugin;
 import com.sl5r0.qwobot.plugins.commands.Command;
 import org.pircbotx.Channel;
@@ -37,7 +37,7 @@ public class TweetStream extends ConfigurablePlugin {
         final TwitterFactory twitterFactory = new TwitterFactory(twitterConfiguration);
         final TwitterStream twitterStream = new TwitterStreamFactory(twitterConfiguration).getInstance();
         final TwitterState twitterState = new TwitterState(twitterFactory.getInstance(), twitterStream);
-        final Channel channel = botProvider.get().getUserChannelDao().getChannel(config.getString(CHANNEL));
+        final Channel channel = null;//botProvider.get().getUserChannelDao().getChannel(config.getString(CHANNEL));
         final TwitterListener listener = new TwitterListener(twitterState, channel);
 
         twitterStream.addListener(listener);

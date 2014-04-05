@@ -8,8 +8,8 @@ import org.pircbotx.hooks.events.MessageEvent;
 import twitter4j.Twitter;
 import twitter4j.TwitterStream;
 
-import static com.sl5r0.qwobot.core.Format.BLUE;
-import static com.sl5r0.qwobot.core.Format.GREEN;
+import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
+import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;

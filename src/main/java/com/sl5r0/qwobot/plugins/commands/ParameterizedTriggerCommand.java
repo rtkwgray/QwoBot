@@ -11,13 +11,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
 
 /**
  * A command that is executed when a message matches a specific trigger.
  */
 public abstract class ParameterizedTriggerCommand extends TriggerCommand implements ParameterizedCommand {
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(^[\"\\S]+)|(\"?\\S+)");
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
     private final Optional<Function<String, String>> argumentMutator;
 
     public ParameterizedTriggerCommand(String prefix) {
@@ -46,7 +45,7 @@ public abstract class ParameterizedTriggerCommand extends TriggerCommand impleme
         }
     }
 
-    private List<String> parseArguments(String message) {
+    public static List<String> parseArguments(String message) {
         final Matcher matcher = PARAMETER_PATTERN.matcher(message);
         final List<String> parameters = newArrayList();
         while (matcher.find()) {
@@ -59,11 +58,11 @@ public abstract class ParameterizedTriggerCommand extends TriggerCommand impleme
             }
         }
 
-        if (argumentMutator.isPresent()) {
-            return transform(parameters, argumentMutator.get());
-        } else {
+//        if (argumentMutator.isPresent()) {
+//            return transform(parameters, argumentMutator.get());
+//        } else {
             return parameters;
-        }
+//        }
     }
 
     protected static final Function<String, String> TO_LOWERCASE = new Function<String, String>() {

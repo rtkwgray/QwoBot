@@ -1,7 +1,7 @@
 package com.sl5r0.qwobot.plugins.twitter;
 
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
-import com.sl5r0.qwobot.core.Format;
+import com.sl5r0.qwobot.core.IrcTextFormatter;
 import com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand;
 import com.sl5r0.qwobot.plugins.exceptions.CommandExecutionException;
 import org.pircbotx.hooks.events.MessageEvent;
@@ -22,9 +22,9 @@ public class ChangeTweetColor extends ParameterizedTriggerCommand {
 
     @Override
     public void execute(MessageEvent event, List<String> arguments) {
-        final Format newColor;
+        final IrcTextFormatter newColor;
         try {
-            newColor = Format.fromString(arguments.get(0));
+            newColor = IrcTextFormatter.fromString(arguments.get(0));
         } catch (IllegalArgumentException e) {
             throw new CommandExecutionException("I don't understand the color \"" + arguments.get(0) + "\"");
         }
@@ -33,6 +33,6 @@ public class ChangeTweetColor extends ParameterizedTriggerCommand {
 
     @Override
     public List<String> getHelp() {
-        return singletonList(TRIGGER + " <" + Joiner.on("|").join(Format.values()) + ">");
+        return singletonList(TRIGGER + " <" + Joiner.on("|").join(IrcTextFormatter.values()) + ">");
     }
 }

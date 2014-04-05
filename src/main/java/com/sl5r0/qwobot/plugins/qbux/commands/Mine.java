@@ -1,8 +1,6 @@
 package com.sl5r0.qwobot.plugins.qbux.commands;
 
-import com.google.common.base.Optional;
 import com.sl5r0.qwobot.plugins.commands.ParameterizedTriggerCommand;
-import com.sl5r0.qwobot.plugins.qbux.entities.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -11,7 +9,6 @@ import org.pircbotx.hooks.events.MessageEvent;
 import java.util.List;
 import java.util.Random;
 
-import static com.sl5r0.qwobot.plugins.qbux.entities.User.findByNick;
 import static java.lang.Math.*;
 
 public class Mine extends ParameterizedTriggerCommand {
@@ -63,15 +60,15 @@ public class Mine extends ParameterizedTriggerCommand {
         try {
             final Transaction transaction = session.beginTransaction();
 
-            final Optional<User> toUser = findByNick(event.getUser().getNick(), session);
-            if (!toUser.isPresent()) {
-                event.getChannel().send().message("Oh, you don't seem to be registered. Let me just blow your QBUX away into digital oblivion.");
-                return;
-            }
-
-            toUser.get().modifyBalance(1);
-
-            session.save(toUser.get());
+//            final Optional<User> toUser = findByNick(event.getUser().getNick(), session);
+//            if (!toUser.isPresent()) {
+//                event.getChannel().send().message("Oh, you don't seem to be registered. Let me just blow your QBUX away into digital oblivion.");
+//                return;
+//            }
+//
+//            toUser.get().modifyBalance(1);
+//
+//            session.save(toUser.get());
             transaction.commit();
         } catch (Exception e) {
             event.getChannel().send().message("Oops. They vanished into nothing. :S");
