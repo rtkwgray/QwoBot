@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.plugins.reddit;
+package com.sl5r0.qwobot.thirdparty.reddit;
 
 import com.google.api.client.util.Key;
 

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 
@@ -12,7 +13,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class ConfigurationProvider implements Provider<Configuration> {
     private static final Logger log = getLogger(ConfigurationProvider.class);
-    private final Configuration configuration;
+    private final XMLConfiguration configuration;
 
     @Inject
     public ConfigurationProvider(@ConfigurationFilename String filename) throws ConfigurationException {
@@ -22,6 +23,6 @@ public class ConfigurationProvider implements Provider<Configuration> {
 
     @Override
     public Configuration get() {
-        return configuration;
+        return new HierarchicalConfiguration(configuration);
     }
 }

@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.plugins.reddit;
+package com.sl5r0.qwobot.thirdparty.reddit;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -8,21 +8,21 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 class RedditRequestInitializer implements HttpRequestInitializer {
+    private final String userAgent;
     private String cookie;
     private String modHash;
 
     RedditRequestInitializer(String redditUser) {
-        this.redditUser = checkNotNull(redditUser);
+        this.userAgent = "QwoBot Reddit/IRC Bot (v.1.0) for user: " + checkNotNull(redditUser, "redditUser must not be null");
     }
 
-    private final String redditUser;
-
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
+    void setHeaders(String cookie, String modHash) {
+        this.cookie = checkNotNull(cookie, "cookie must not be null");
+        this.modHash = checkNotNull(modHash, "modHash must not be null");
     }
 
-    public void setModHash(String modHash) {
-        this.modHash = modHash;
+    boolean hasHeaders() {
+        return cookie != null && modHash != null;
     }
 
     @Override
@@ -33,7 +33,8 @@ class RedditRequestInitializer implements HttpRequestInitializer {
         if (modHash != null) {
             request.getHeaders().set("X-Modhash", modHash);
         }
-        request.getHeaders().setUserAgent("QwoBot Reddit/IRC Bot (v.1.0) for user: " + redditUser);
+
+        request.getHeaders().setUserAgent(userAgent);
         request.setParser(new JsonObjectParser(new JacksonFactory()));
     }
 }

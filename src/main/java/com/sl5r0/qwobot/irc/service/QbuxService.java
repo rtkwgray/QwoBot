@@ -193,7 +193,7 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
             userRepository.save(to);
 
             for (Channel channel : bot.getUserChannelDao().getUser(to.getNick()).getChannels()) {
-                channel.send().message(from.getNick() + " tipped " + to.getNick() + " " + amount + " QBUX " + reason);
+                channel.send().message(to.getNick() + " was tipped " + amount + " QBUX by " + from.getNick() + " " + reason);
             }
         }
     }
