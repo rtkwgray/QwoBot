@@ -3,6 +3,7 @@ package com.sl5r0.qwobot.plugins.twitter;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Longs;
 import com.sl5r0.qwobot.core.IrcTextFormatter;
+import org.pircbotx.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import twitter4j.*;
@@ -24,8 +25,7 @@ public class TwitterState {
     private boolean showingReplies = false;
     private IrcTextFormatter tweetColor = BLUE;
 
-
-    TwitterState(Twitter twitter, TwitterStream twitterStream) {
+    public TwitterState(Twitter twitter, TwitterStream twitterStream) {
         this.twitter = twitter;
         this.twitterStream = twitterStream;
     }
@@ -82,5 +82,9 @@ public class TwitterState {
 
     String followsToString() {
         return Joiner.on(FOLLOWS_SEPARATOR).join(follows.values());
+    }
+
+    public Channel getChannel() {
+        return null;
     }
 }

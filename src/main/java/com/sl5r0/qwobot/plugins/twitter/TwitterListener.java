@@ -8,19 +8,17 @@ import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
 
-class TwitterListener implements StatusListener {
+public class TwitterListener implements StatusListener {
     private static final Logger log = LoggerFactory.getLogger(TwitterListener.class);
-    private final Channel channel;
     private final TwitterState twitterState;
 
-    TwitterListener(TwitterState twitterState, Channel channel) {
-        this.channel = channel;
-        this.twitterState = twitterState;
-    }
+        public TwitterListener(TwitterState twitterState) {
+            this.twitterState = twitterState;
+        }
 
-    @Override
-    public void onStatus(Status status) {
-        // If this is a retweet and we're not showing retweets, don't send anything to the channel.
+        @Override
+        public void onStatus(Status status) {
+            // If this is a retweet and we're not showing retweets, don't send anything to the channel.
         if (!twitterState.isShowingRetweets() && status.isRetweet()) {
             return;
         }
@@ -31,7 +29,7 @@ class TwitterListener implements StatusListener {
         }
 
         // If we didn't filter out this message, send it to the channel.
-        channel.send().message(twitterState.getTweetColor().format(status.getUser().getScreenName() + ": " + status.getText()));
+        twitterState.getChannel().send().message(twitterState.getTweetColor().format(status.getUser().getScreenName() + ": " + status.getText()));
     }
 
     @Override
