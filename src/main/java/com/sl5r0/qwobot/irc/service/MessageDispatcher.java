@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.irc.service;
 
+import com.google.common.base.Predicate;
 import com.google.common.eventbus.Subscribe;
 import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
 import org.pircbotx.PircBotX;
@@ -10,7 +11,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +45,7 @@ public class MessageDispatcher {
     public static Predicate<GenericMessageEvent<PircBotX>> startingWith(final String string) {
         return new Predicate<GenericMessageEvent<PircBotX>>() {
             @Override
-            public boolean test(GenericMessageEvent<PircBotX> event) {
+            public boolean apply(GenericMessageEvent<PircBotX> event) {
                 return event.getMessage().equals(string) ||
                         event.getMessage().startsWith(string + " ");
             }
@@ -55,7 +55,7 @@ public class MessageDispatcher {
     private void doDispatch(Map<Predicate<GenericMessageEvent<PircBotX>>, MessageRunnable> handlerMap, GenericMessageEvent<PircBotX> event) {
         final Set<Map.Entry<Predicate<GenericMessageEvent<PircBotX>>, MessageRunnable>> handlers = handlerMap.entrySet();
         for (Map.Entry<Predicate<GenericMessageEvent<PircBotX>>, MessageRunnable> handler : handlers) {
-            if (handler.getKey().test(event)) {
+            if (handler.getKey().apply(event)) {
                 handler.getValue().run(event, parseArguments(event.getMessage()));
             }
         }

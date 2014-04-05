@@ -8,8 +8,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Singleton
@@ -29,16 +27,6 @@ public class QwobotUserRepository {
                 session.saveOrUpdate(oldQwobotUser);
                 transaction.commit();
                 return oldQwobotUser;
-            }
-        }.execute().get();
-    }
-
-    public List<QwobotUser> allUsers() {
-        return new DatabaseOperation<List<QwobotUser>>(sessionFactory) {
-            @Override
-            protected List<QwobotUser> doExecute(Session session) {
-                //noinspection unchecked
-                return session.createQuery("from QwobotUser").list();
             }
         }.execute().get();
     }

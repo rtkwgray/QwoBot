@@ -7,8 +7,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.sl5r0.qwobot.irc.service.IrcBotService;
 import com.sl5r0.qwobot.irc.service.MessageDispatcher;
 import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
 import com.sl5r0.qwobot.persistence.SettingsRepository;
@@ -49,11 +49,11 @@ public class TwitterService extends AbstractIdleService {
     private final BiMap<Long, String> following = HashBiMap.create();
 
     @Inject
-    public TwitterService(Provider<PircBotX> botProvider, MessageDispatcher messageDispatcher, EventBus eventBus, SettingsRepository settingsRepository, Configuration configuration) {
+    public TwitterService(IrcBotService ircBotService, MessageDispatcher messageDispatcher, EventBus eventBus, SettingsRepository settingsRepository, Configuration configuration) {
         this.settingsRepository = checkNotNull(settingsRepository, "settingsRepository must not be null");
         this.messageDispatcher = checkNotNull(messageDispatcher, "messageDispatcher must not be null");
         this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
-        this.bot = botProvider.get();
+        this.bot = ircBotService.get();
 
         if (configurationIsValid(configuration)) {
             this.messageDispatcher
@@ -67,7 +67,7 @@ public class TwitterService extends AbstractIdleService {
             this.twitter = new TwitterFactory(twitterConfig).getInstance();
             this.stream.addListener(new NewTweetListener(this));
         } else {
-            log.error("Twitter configuration missing or invalid.");
+            log.error("Twitter integration has been disabled. Twitter configuration missing or invalid.");
         }
     }
 

@@ -2,6 +2,7 @@ package com.sl5r0.qwobot.core;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Singleton
 public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
     private static final Logger log = getLogger(IrcEventDispatcher.class);
     private final EventBus eventBus;

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
 import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
+import com.sl5r0.qwobot.irc.service.twitter.TwitterService;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -16,7 +17,8 @@ public class QwoBot {
                    QbuxService qbuxService,
                    LoggingService loggingService,
                    UrlScanningService urlScanningService,
-                   BitCoinService bitCoinService) {
+                   BitCoinService bitCoinService,
+                   TwitterService twitterService) {
 
         checkNotNull(shutdownNotifier, "shutdownNotifier must not be null");
         ams.startAsync();
@@ -25,6 +27,7 @@ public class QwoBot {
         loggingService.startAsync();
         urlScanningService.startAsync();
         bitCoinService.startAsync();
+        twitterService.startAsync();
         shutdownNotifier.awaitShutdown();
     }
 

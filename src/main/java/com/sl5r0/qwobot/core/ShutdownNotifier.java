@@ -1,18 +1,18 @@
 package com.sl5r0.qwobot.core;
 
+import com.google.common.util.concurrent.SettableFuture;
 import org.slf4j.Logger;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ShutdownNotifier {
     private static final Logger log = getLogger(ShutdownNotifier.class);
-    private final CompletableFuture<String> future = new CompletableFuture<>();
+    private final SettableFuture<String> future = SettableFuture.create();
 
     public void shutdown(String reason) {
-        future.complete(reason);
+        future.set(reason);
     }
 
     public void awaitShutdown() {

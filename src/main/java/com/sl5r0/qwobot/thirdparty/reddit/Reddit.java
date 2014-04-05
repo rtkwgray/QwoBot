@@ -34,7 +34,7 @@ public class Reddit {
         this.redditSession = new RedditSession();
 
         try {
-            this.redditSession.login(username, password);
+//            this.redditSession.login(username, password);
         } catch (Exception e) {
             log.error("Couldn't login to reddit.", e);
         }

@@ -4,6 +4,8 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.*;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.spi.ProvisionListener;
 import com.sl5r0.qwobot.domain.ChatLog;
 import com.sl5r0.qwobot.domain.QwobotUser;
 import org.h2.Driver;
