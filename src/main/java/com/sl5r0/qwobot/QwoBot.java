@@ -3,7 +3,6 @@ package com.sl5r0.qwobot;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
-import com.sl5r0.qwobot.guice.QwobotModule;
 import com.sl5r0.qwobot.irc.service.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;

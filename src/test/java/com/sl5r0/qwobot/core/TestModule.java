@@ -1,6 +1,5 @@
 package com.sl5r0.qwobot.core;
 
-import com.sl5r0.qwobot.guice.QwobotModule;
 import org.hibernate.cfg.Configuration;
 
 public class TestModule extends QwobotModule {
