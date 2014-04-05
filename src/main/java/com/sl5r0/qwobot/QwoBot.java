@@ -3,6 +3,7 @@ package com.sl5r0.qwobot;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
+import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -14,7 +15,8 @@ public class QwoBot {
                    AccountManagementService ams,
                    QbuxService qbuxService,
                    LoggingService loggingService,
-                   UrlScanningService urlScanningService) {
+                   UrlScanningService urlScanningService,
+                   BitCoinService bitCoinService) {
 
         checkNotNull(shutdownNotifier, "shutdownNotifier must not be null");
         ams.startAsync();
@@ -22,10 +24,11 @@ public class QwoBot {
         qbuxService.startAsync();
         loggingService.startAsync();
         urlScanningService.startAsync();
+        bitCoinService.startAsync();
         shutdownNotifier.awaitShutdown();
     }
 
     public static void main(String[] args) throws Exception {
-        Guice.createInjector(new QwobotModule()).getInstance(QwoBot.class);
+        Guice.createInjector(new QwoBotModule()).getInstance(QwoBot.class);
     }
 }
