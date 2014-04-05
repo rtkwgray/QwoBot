@@ -32,12 +32,12 @@ public class MessageDispatcher {
         doDispatch(privateMessageHandlers, event);
     }
 
-    MessageDispatcher subscribeToMessage(Predicate<GenericMessageEvent<PircBotX>> predicate, MessageRunnable runnable) {
+    public MessageDispatcher subscribeToMessage(Predicate<GenericMessageEvent<PircBotX>> predicate, MessageRunnable runnable) {
         messageHandlers.put(predicate, runnable);
         return this;
     }
 
-    MessageDispatcher subscribeToPrivateMessage(Predicate<GenericMessageEvent<PircBotX>> predicate, MessageRunnable runnable) {
+    public MessageDispatcher subscribeToPrivateMessage(Predicate<GenericMessageEvent<PircBotX>> predicate, MessageRunnable runnable) {
         privateMessageHandlers.put(predicate, runnable);
         return this;
     }
@@ -46,7 +46,8 @@ public class MessageDispatcher {
         return new Predicate<GenericMessageEvent<PircBotX>>() {
             @Override
             public boolean test(GenericMessageEvent<PircBotX> event) {
-                return event.getMessage().startsWith(string);
+                return event.getMessage().equals(string) ||
+                        event.getMessage().startsWith(string + " ");
             }
         };
     }
