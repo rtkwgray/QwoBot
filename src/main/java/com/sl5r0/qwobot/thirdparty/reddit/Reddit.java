@@ -3,7 +3,6 @@ package com.sl5r0.qwobot.thirdparty.reddit;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.plugins.exceptions.LoginFailedException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.slf4j.Logger;
 
@@ -28,11 +27,7 @@ public class Reddit {
         final Optional<String> username = readConfigurationValue(configuration, "reddit.username");
         final Optional<String> password = readConfigurationValue(configuration, "reddit.password");
         if (username.isPresent() && password.isPresent() && subReddit.isPresent()) {
-            try {
-                this.redditSession.login(username.get(), password.get());
-            } catch (LoginFailedException e) {
-                log.error("Reddit authentication failed for user \"" + username.get() + "\"");
-            }
+            this.redditSession.login(username.get(), password.get());
         } else {
             log.error("Reddit integration has been disabled because configuration is missing or incorrect.");
         }

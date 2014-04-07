@@ -66,7 +66,7 @@ public class TwitterService extends AbstractIdleService {
 
         if (configurationIsValid(configuration)) {
             this.messageDispatcher
-                    .subscribeToMessage(startingWithTrigger("!following"), new ShowFollows())
+                    .subscribeToMessage(startingWithTrigger("?following"), new ShowFollows())
                     .subscribeToMessage(startingWithTrigger("!follow"), new FollowUser())
                     .subscribeToMessage(startingWithTrigger("!statuscolor"), new ChangeStatusColor())
                     .subscribeToMessage(startingWithTrigger("!unfollow"), new UnfollowUser());

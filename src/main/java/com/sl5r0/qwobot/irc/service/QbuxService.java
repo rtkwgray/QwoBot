@@ -27,10 +27,8 @@ import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
 
-//TODO: tipping should be a private message and only the result should be posted to the channel (if successful).
-
 @Singleton
-public class QbuxService extends AbstractScheduledService implements TransientIrcService {
+public class QbuxService extends AbstractScheduledService {
     private static final Logger log = getLogger(QbuxService.class);
     private final PircBotX bot;
     private final QwobotUserRepository userRepository;
@@ -48,8 +46,8 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
 
         this.messageDispatcher
             .subscribeToPrivateMessage(startingWithTrigger("!tip"), new ProcessTip())
-            .subscribeToPrivateMessage(startingWithTrigger("!balance"), new GetBalance())
-            .subscribeToMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToPrivateMessage(startingWithTrigger("?balance"), new GetBalance())
+            .subscribeToMessage(startingWithTrigger("?balance"), new GetBalance())
             .subscribeToMessage(startingWithTrigger("!sharethewealth"), new ShareTheWealth());
     }
 
@@ -85,27 +83,17 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
 
     @Override
     protected void startUp() throws Exception {
-        enable();
+        eventBus.register(messageDispatcher);
     }
 
     @Override
     protected void shutDown() throws Exception {
-        disable();
+        eventBus.unregister(messageDispatcher);
     }
 
     @Override
     protected Scheduler scheduler() {
         return newFixedRateSchedule(1, 60, MINUTES);
-    }
-
-    @Override
-    public void enable() {
-        eventBus.register(messageDispatcher);
-    }
-
-    @Override
-    public void disable() {
-        eventBus.unregister(messageDispatcher);
     }
 
     private class ShareTheWealth implements MessageRunnable {

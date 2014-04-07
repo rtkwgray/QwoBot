@@ -21,10 +21,6 @@ class RedditRequestInitializer implements HttpRequestInitializer {
         this.modHash = checkNotNull(modHash, "modHash must not be null");
     }
 
-    boolean hasHeaders() {
-        return cookie != null && modHash != null;
-    }
-
     @Override
     public void initialize(HttpRequest request) {
         if (cookie != null) {

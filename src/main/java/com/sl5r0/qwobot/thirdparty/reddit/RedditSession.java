@@ -6,7 +6,6 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.util.concurrent.RateLimiter;
-import com.sl5r0.qwobot.plugins.exceptions.LoginFailedException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ class RedditSession {
 
     private HttpRequestFactory requestFactory;
 
-    void login(String username, String password) throws LoginFailedException {
+    void login(String username, String password) {
         log.info("Attempting to log in to Reddit with username \"" + username + "\"");
         final RedditLoginRequest loginRequest = new RedditLoginRequest(username, password);
         try {

@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class QwoBot {
     @Inject
+    @SuppressWarnings("UnusedDeclaration") // Guice is using this in main()
     private QwoBot(ShutdownNotifier shutdownNotifier,
                    IrcBotService ircBotService,
                    AccountManagementService ams,

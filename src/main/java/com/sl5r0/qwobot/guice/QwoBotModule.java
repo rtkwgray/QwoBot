@@ -15,7 +15,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.H2Dialect;
 import org.pircbotx.PircBotX;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -83,7 +82,4 @@ public class QwoBotModule extends AbstractModule {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ConfigurationFilename {
     }
-
-    @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
-    @interface RequiresAuthentication {}
 }

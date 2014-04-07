@@ -44,10 +44,6 @@ public class QwobotUser {
         setBalance(getBalance() + change);
     }
 
-    public long getId() {
-        return id;
-    }
-
     @PersistenceConstructor
     private QwobotUser() { }
 }

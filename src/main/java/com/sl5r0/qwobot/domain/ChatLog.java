@@ -52,10 +52,6 @@ public class ChatLog {
         return channel;
     }
 
-    public DateTime getCreated() {
-        return created;
-    }
-
     public String getMessage() {
         return message;
     }
