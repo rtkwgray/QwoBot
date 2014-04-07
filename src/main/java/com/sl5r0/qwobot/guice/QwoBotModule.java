@@ -6,6 +6,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.*;
 import com.sl5r0.qwobot.domain.ChatLog;
 import com.sl5r0.qwobot.domain.QwobotUser;
+import com.sl5r0.qwobot.domain.TwitterFollow;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.h2.Driver;
 import org.hibernate.SessionFactory;
@@ -64,6 +65,7 @@ public class QwoBotModule extends AbstractModule {
 
     private Configuration addEntities(Configuration configuration) {
         return configuration
+                .addAnnotatedClass(TwitterFollow.class)
                 .addAnnotatedClass(ChatLog.class)
                 .addAnnotatedClass(QwobotUser.class);
     }

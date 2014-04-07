@@ -64,7 +64,7 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
                     final Optional<QwobotUser> qwobotUser = userRepository.findByNick(user.getNick());
                     if (qwobotUser.isPresent()) {
                         qwobotUser.get().modifyBalance(BALANCE_INCREASE);
-                        userRepository.save(qwobotUser.get());
+                        userRepository.saveOrUpdate(qwobotUser.get());
                     }
                 }
                 channel.send().message("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX");
@@ -124,11 +124,11 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
                     if (receiver.isPresent()) {
                         receiver.get().modifyBalance(giveToEach);
                         sender.get().modifyBalance(-giveToEach);
-                        userRepository.save(receiver.get());
+                        userRepository.saveOrUpdate(receiver.get());
                     }
                 }
 
-                userRepository.save(sender.get());
+                userRepository.saveOrUpdate(sender.get());
                 event.respond("Everybody got " + giveToEach + " QBUX!");
             }
         }
@@ -189,8 +189,8 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
             from.modifyBalance(-amount);
             to.modifyBalance(amount);
 
-            userRepository.save(from);
-            userRepository.save(to);
+            userRepository.saveOrUpdate(from);
+            userRepository.saveOrUpdate(to);
 
             for (Channel channel : bot.getUserChannelDao().getUser(to.getNick()).getChannels()) {
                 channel.send().message(to.getNick() + " was tipped " + amount + " QBUX by " + from.getNick() + " " + reason);
