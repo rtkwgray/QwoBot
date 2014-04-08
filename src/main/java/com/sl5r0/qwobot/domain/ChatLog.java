@@ -30,7 +30,7 @@ public class ChatLog {
     @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime created;
 
-    @Column
+    @Column(length = 512)
     private String message;
 
     public ChatLog(String nick, String channel, String message) {

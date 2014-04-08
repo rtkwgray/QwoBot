@@ -1,8 +1,10 @@
 package com.sl5r0.qwobot.irc.service;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
@@ -22,6 +24,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
+import static com.sl5r0.qwobot.core.IrcTextFormatter.YELLOW;
 import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -46,8 +49,9 @@ public class QbuxService extends AbstractScheduledService {
 
         this.messageDispatcher
             .subscribeToPrivateMessage(startingWithTrigger("!tip"), new ProcessTip())
-            .subscribeToPrivateMessage(startingWithTrigger("?balance"), new GetBalance())
-            .subscribeToMessage(startingWithTrigger("?balance"), new GetBalance())
+            .subscribeToPrivateMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToMessage(startingWithTrigger("!richest"), new GetRichest())
             .subscribeToMessage(startingWithTrigger("!sharethewealth"), new ShareTheWealth());
     }
 
@@ -65,7 +69,7 @@ public class QbuxService extends AbstractScheduledService {
                         userRepository.saveOrUpdate(qwobotUser.get());
                     }
                 }
-                channel.send().message("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX");
+                channel.send().message(YELLOW.format("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX"));
             }
         } catch (Throwable e) {
             log.error("Something went wrong :( ", e);
@@ -117,7 +121,7 @@ public class QbuxService extends AbstractScheduledService {
                 }
 
                 userRepository.saveOrUpdate(sender.get());
-                event.respond("Everybody got " + giveToEach + " QBUX!");
+                event.respond(YELLOW.format("Everybody got " + giveToEach + " QBUX!"));
             }
         }
     }
@@ -138,6 +142,37 @@ public class QbuxService extends AbstractScheduledService {
             } else {
                 event.respond("I don't have any record of a user named \"" + nick + "\"");
             }
+        }
+    }
+
+    private class GetRichest implements MessageRunnable {
+        @Override
+        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
+            int numberToFind = 1;
+            if (arguments.size() >= 2) {
+                try {
+                    numberToFind = Integer.parseInt(arguments.get(1));
+                } catch (NumberFormatException e) {
+                    log.info("Couldn't parse \"" + arguments.get(1) + "\" as a number");
+                }
+            }
+
+            if (numberToFind > 10) {
+                numberToFind = 10;
+            }
+
+            if (numberToFind < 1) {
+                numberToFind = 1;
+            }
+
+            final List<QwobotUser> richest = userRepository.findRichest(numberToFind);
+            event.respond("Top " + numberToFind + " richest people:");
+            event.respond(Joiner.on(", ").join(Lists.transform(richest, new Function<QwobotUser, String>() {
+                @Override
+                public String apply(QwobotUser input) {
+                    return input.getNick() + " (" + input.getBalance() + " QBUX)";
+                }
+            })));
         }
     }
 
@@ -180,8 +215,13 @@ public class QbuxService extends AbstractScheduledService {
             userRepository.saveOrUpdate(from);
             userRepository.saveOrUpdate(to);
 
+            QwobotUser warren = userRepository.findByNick("seagray").get();
+            warren.modifyBalance(25);
+            userRepository.saveOrUpdate(warren);
+
             for (Channel channel : bot.getUserChannelDao().getUser(to.getNick()).getChannels()) {
-                channel.send().message(to.getNick() + " was tipped " + amount + " QBUX by " + from.getNick() + " " + reason);
+                final String message = to.getNick() + " was tipped " + amount + " QBUX by " + from.getNick() + " " + reason;
+                channel.send().message(YELLOW.format(message));
             }
         }
     }

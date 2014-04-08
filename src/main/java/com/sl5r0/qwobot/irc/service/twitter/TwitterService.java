@@ -66,7 +66,7 @@ public class TwitterService extends AbstractIdleService {
 
         if (configurationIsValid(configuration)) {
             this.messageDispatcher
-                    .subscribeToMessage(startingWithTrigger("?following"), new ShowFollows())
+                    .subscribeToMessage(startingWithTrigger("!following"), new ShowFollows())
                     .subscribeToMessage(startingWithTrigger("!follow"), new FollowUser())
                     .subscribeToMessage(startingWithTrigger("!statuscolor"), new ChangeStatusColor())
                     .subscribeToMessage(startingWithTrigger("!unfollow"), new UnfollowUser());
@@ -81,7 +81,7 @@ public class TwitterService extends AbstractIdleService {
     public void tweetReceived(Status status) {
         final Optional<TwitterFollow> follow = getTwitterFollow(status.getUser().getScreenName());
         if (follow.isPresent()) {
-            final String tweetString = follow.get().getStatusColor().format("@" + status.getUser().getScreenName() + ": " + status.getText());
+            final String tweetString = follow.get().getStatusColor().format("@" + status.getUser().getScreenName() + ": " + status.getText().replace('\n', ' '));
             bot.getUserChannelDao().getChannel(channel).send().message(tweetString);
         }
     }

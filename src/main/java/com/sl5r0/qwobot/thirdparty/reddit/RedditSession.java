@@ -1,9 +1,6 @@
 package com.sl5r0.qwobot.thirdparty.reddit;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.UrlEncodedContent;
+import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.util.concurrent.RateLimiter;
 import org.slf4j.Logger;
@@ -53,7 +50,11 @@ class RedditSession {
         final HttpRequest request = requestFactory.buildPostRequest(SUBMIT_URL, new UrlEncodedContent(submitRequest));
         log.debug("Submitting Reddit post for " + uri.toASCIIString() + " to executor.");
         rateLimiter.acquire();
-        request.execute();
-        log.debug("Posted reddit link: " + uri.toASCIIString());
+        final HttpResponse httpResponse = request.execute();
+        if (httpResponse.getStatusCode() != 200) {
+            log.error("Couldn't post to reddit for some reason. Response was: " + httpResponse.parseAsString());
+        } else {
+            log.debug("Posted reddit link: " + uri.toASCIIString());
+        }
     }
 }

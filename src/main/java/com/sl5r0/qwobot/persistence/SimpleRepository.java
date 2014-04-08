@@ -55,9 +55,9 @@ public class SimpleRepository<T> {
 
     public List<T> findAll(final Class<T> entityType) {
         return new DatabaseOperation<List<T>>(sessionFactory) {
+            @SuppressWarnings("unchecked")
             @Override
             protected List<T> doExecute(Session session) {
-                //noinspection unchecked
                 return session.createCriteria(entityType).list();
             }
         }.execute().get();

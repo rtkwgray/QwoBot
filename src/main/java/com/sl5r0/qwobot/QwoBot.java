@@ -12,23 +12,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class QwoBot {
     @Inject
     @SuppressWarnings("UnusedDeclaration") // Guice is using this in main()
-    private QwoBot(ShutdownNotifier shutdownNotifier,
-                   IrcBotService ircBotService,
-                   AccountManagementService ams,
-                   QbuxService qbuxService,
-                   LoggingService loggingService,
-                   UrlScanningService urlScanningService,
-                   BitCoinService bitCoinService,
-                   TwitterService twitterService) {
-
+    private QwoBot(ShutdownNotifier shutdownNotifier, IrcServiceManager serviceManager) {
         checkNotNull(shutdownNotifier, "shutdownNotifier must not be null");
-        ams.startAsync();
-        ircBotService.startAsync();
-        qbuxService.startAsync();
-        loggingService.startAsync();
-        urlScanningService.startAsync();
-        bitCoinService.startAsync();
-        twitterService.startAsync();
+        checkNotNull(serviceManager, "serviceManager must not be null");
+
+        serviceManager
+                .registerService(IrcBotService.class)
+                .registerService(AccountManagementService.class)
+                .registerService(LoggingService.class)
+                .registerService(UrlScanningService.class)
+                .registerService(BitCoinService.class)
+                .registerService(TwitterService.class)
+                .registerService(ManagementService.class)
+                .registerService(QbuxService.class);
+
+        serviceManager.startAllUnstartedServices();
         shutdownNotifier.awaitShutdown();
     }
 

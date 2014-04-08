@@ -7,6 +7,8 @@ import com.sl5r0.qwobot.domain.QwobotUser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import java.util.List;
+
 @Singleton
 public class QwobotUserRepository extends SimpleRepository<QwobotUser> {
     @Inject
@@ -22,5 +24,15 @@ public class QwobotUserRepository extends SimpleRepository<QwobotUser> {
                         .setString("nick", nick).uniqueResult();
             }
         }.execute();
+    }
+
+    public List<QwobotUser> findRichest(final int limit) {
+        return new DatabaseOperation<List<QwobotUser>>(sessionFactory) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected List<QwobotUser> doExecute(Session session) {
+                return session.createQuery("from QwobotUser user order by user.balance desc").setMaxResults(limit).list();
+            }
+        }.execute().get();
     }
 }

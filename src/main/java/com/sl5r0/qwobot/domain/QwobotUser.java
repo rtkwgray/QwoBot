@@ -36,7 +36,7 @@ public class QwobotUser {
     }
 
     public void setBalance(int balance) {
-        checkArgument(balance > 0, "balance must be positive");
+        checkArgument(balance >= 0, "balance must be positive");
         this.balance = balance;
     }
 
