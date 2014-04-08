@@ -2,38 +2,63 @@ package com.sl5r0.qwobot.irc.service;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.slf4j.Logger;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
+import static org.joda.time.DateTime.now;
+import static org.joda.time.Duration.standardSeconds;
 import static org.pircbotx.PircBotX.State.CONNECTED;
 import static org.pircbotx.PircBotX.State.INIT;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
-public class IrcBotService extends AbstractExecutionThreadService implements Provider<PircBotX> {
+public class IrcBotService extends AbstractExecutionThreadService {
     private static final Logger log = getLogger(IrcBotService.class);
-    private final Provider<Configuration<PircBotX>> configurationProvider;
-    private QwoBot bot;
+
+    private final Duration maximumReconnectBackoff = standardSeconds(30);
+    private DateTime lastDisconnect = new DateTime();
+
+    private final QwoBot bot;
 
     @Inject
-    public IrcBotService(Provider<Configuration<PircBotX>> configurationProvider) {
-        this.configurationProvider = checkNotNull(configurationProvider, "configurationProvider must not be null");
-        bot = new QwoBot(configurationProvider.get());
+    public IrcBotService(Configuration<PircBotX> configuration) {
+        this.bot = new QwoBot(configuration);
     }
 
     @Override
     protected void run() throws Exception {
         while (isRunning()){
             try {
+                log.info("Connecting to IRC");
                 bot.startBot();
             } catch (Exception e) {
-                log.warn("Bot disconnected.", e);
+                log.warn("IRC bot was disconnected", e);
             }
+
+            waitForBackoff();
         }
+    }
+
+    private void waitForBackoff() {
+        final Duration duration = new Duration(lastDisconnect, now());
+        log.trace("Time since last disconnect is " + duration.getStandardSeconds() + " seconds");
+
+        final Duration timeToWait = maximumReconnectBackoff.minus(duration);
+        lastDisconnect = now();
+
+        log.debug("Waiting " + timeToWait.getStandardSeconds() + " seconds to reconnect");
+        try {
+            sleep(timeToWait.getMillis());
+        } catch (InterruptedException ignored) {
+            currentThread().interrupt();
+        }
+
     }
 
     @Override
@@ -49,12 +74,7 @@ public class IrcBotService extends AbstractExecutionThreadService implements Pro
         }
     }
 
-    @Override
-    public PircBotX get() {
-        if (bot == null) {
-            throw new IllegalStateException("No bot has been created. Is IrcBotService running?");
-        }
-
+    public PircBotX getBot() {
         return bot;
     }
 

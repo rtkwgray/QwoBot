@@ -8,12 +8,10 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.util.concurrent.RateLimiter;
 import com.sl5r0.qwobot.plugins.exceptions.LoginFailedException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -43,8 +41,12 @@ class RedditSession {
         }
     }
 
+    boolean isAuthenticated() {
+        return requestFactory != null;
+    }
+
     void postLink(String subReddit, String title, URI uri) throws IOException {
-        checkState(requestFactory != null, "must be logged in to post links to reddit.");
+        checkState(isAuthenticated(), "must be logged in to post links to reddit.");
 
         final RedditSubmitRequest submitRequest = new RedditSubmitRequest(subReddit, title, uri.toASCIIString());
         log.trace(submitRequest.toString());

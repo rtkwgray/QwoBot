@@ -24,7 +24,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWith;
+import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 
 @Singleton
 public class BitCoinService extends AbstractIdleService {
@@ -37,7 +37,7 @@ public class BitCoinService extends AbstractIdleService {
     public BitCoinService(EventBus eventBus, MessageDispatcher messageDispatcher) {
         this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
         this.messageDispatcher = checkNotNull(messageDispatcher, "messageDispatcher must not be null");
-        this.messageDispatcher.subscribeToMessage(startingWith("!btc"), new CheckBitCoinPrices());
+        this.messageDispatcher.subscribeToMessage(startingWithTrigger("!btc"), new CheckBitCoinPrices());
     }
 
     private class CheckBitCoinPrices implements MessageRunnable {

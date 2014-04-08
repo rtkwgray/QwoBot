@@ -22,7 +22,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
-import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWith;
+import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -43,14 +43,14 @@ public class QbuxService extends AbstractScheduledService implements TransientIr
     public QbuxService(IrcBotService ircBotService, QwobotUserRepository userRepository, EventBus eventBus, MessageDispatcher messageDispatcher) {
         this.userRepository = userRepository;
         this.eventBus = eventBus;
-        this.bot = ircBotService.get();
+        this.bot = ircBotService.getBot();
         this.messageDispatcher = messageDispatcher;
 
         this.messageDispatcher
-            .subscribeToPrivateMessage(startingWith("!tip"), new ProcessTip())
-            .subscribeToPrivateMessage(startingWith("!balance"), new GetBalance())
-            .subscribeToMessage(startingWith("!balance"), new GetBalance())
-            .subscribeToMessage(startingWith("!sharethewealth"), new ShareTheWealth());
+            .subscribeToPrivateMessage(startingWithTrigger("!tip"), new ProcessTip())
+            .subscribeToPrivateMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToMessage(startingWithTrigger("!sharethewealth"), new ShareTheWealth());
     }
 
     @Override

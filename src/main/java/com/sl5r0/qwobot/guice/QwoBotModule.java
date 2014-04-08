@@ -4,10 +4,9 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.*;
-import com.google.inject.matcher.Matchers;
-import com.google.inject.spi.ProvisionListener;
 import com.sl5r0.qwobot.domain.ChatLog;
 import com.sl5r0.qwobot.domain.QwobotUser;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.h2.Driver;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -23,6 +22,7 @@ import java.lang.annotation.Target;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static java.lang.System.getProperty;
+import static java.lang.System.setProperty;
 import static java.lang.annotation.ElementType.*;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -32,7 +32,8 @@ public class QwoBotModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(org.apache.commons.configuration.Configuration.class).toProvider(ConfigurationProvider.class).asEagerSingleton();
+        setProperty("org.jboss.logging.provider", "slf4j");
+        bind(HierarchicalConfiguration.class).toProvider(ConfigurationProvider.class).asEagerSingleton();
         bind(new TypeLiteral<org.pircbotx.Configuration<PircBotX>>(){}).toProvider(PircBotConfigurationProvider.class).asEagerSingleton();
         bindInterceptor(any(), annotatedWith(Subscribe.class), new EventBusExceptionHandler());
     }

@@ -42,7 +42,7 @@ public class MessageDispatcher {
         return this;
     }
 
-    public static Predicate<GenericMessageEvent<PircBotX>> startingWith(final String string) {
+    public static Predicate<GenericMessageEvent<PircBotX>> startingWithTrigger(final String string) {
         return new Predicate<GenericMessageEvent<PircBotX>>() {
             @Override
             public boolean apply(GenericMessageEvent<PircBotX> event) {

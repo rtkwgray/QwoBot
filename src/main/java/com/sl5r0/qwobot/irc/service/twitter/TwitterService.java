@@ -13,6 +13,7 @@ import com.sl5r0.qwobot.irc.service.MessageDispatcher;
 import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
 import com.sl5r0.qwobot.persistence.SettingsRepository;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
@@ -21,11 +22,13 @@ import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.List;
 
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.primitives.Longs.toArray;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
-import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWith;
+import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 import static com.sl5r0.qwobot.util.ExtraPredicates.matchesCaseInsensitiveString;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -42,54 +45,62 @@ public class TwitterService extends AbstractIdleService {
     private final SettingsRepository settingsRepository;
     private final MessageDispatcher messageDispatcher;
     private final EventBus eventBus;
-    private TwitterStream stream;
+    private Optional<TwitterStream> stream = absent();
     private Twitter twitter;
     private String channel;
 
     private final BiMap<Long, String> following = HashBiMap.create();
 
     @Inject
-    public TwitterService(IrcBotService ircBotService, MessageDispatcher messageDispatcher, EventBus eventBus, SettingsRepository settingsRepository, Configuration configuration) {
+    public TwitterService(IrcBotService ircBotService, MessageDispatcher messageDispatcher, EventBus eventBus, SettingsRepository settingsRepository, HierarchicalConfiguration configuration) {
         this.settingsRepository = checkNotNull(settingsRepository, "settingsRepository must not be null");
         this.messageDispatcher = checkNotNull(messageDispatcher, "messageDispatcher must not be null");
         this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
-        this.bot = ircBotService.get();
+        this.bot = ircBotService.getBot();
 
         if (configurationIsValid(configuration)) {
             this.messageDispatcher
-                    .subscribeToMessage(startingWith("!following"), new ShowFollows())
-                    .subscribeToMessage(startingWith("!follow"), new FollowUser())
-                    .subscribeToMessage(startingWith("!unfollow"), new UnfollowUser());
+                    .subscribeToMessage(startingWithTrigger("!following"), new ShowFollows())
+                    .subscribeToMessage(startingWithTrigger("!follow"), new FollowUser())
+                    .subscribeToMessage(startingWithTrigger("!unfollow"), new UnfollowUser());
 
             final twitter4j.conf.Configuration twitterConfig = twitterConfig(configuration);
             this.channel = configuration.getString(CHANNEL);
-            this.stream = new TwitterStreamFactory(twitterConfig).getInstance();
+            this.stream = of(new TwitterStreamFactory(twitterConfig).getInstance());
             this.twitter = new TwitterFactory(twitterConfig).getInstance();
-            this.stream.addListener(new NewTweetListener(this));
+            this.stream.get().addListener(new NewTweetListener(this));
         } else {
-            log.error("Twitter integration has been disabled. Twitter configuration missing or invalid.");
+            log.error("Twitter integration has been disabled because configuration missing or invalid.");
         }
     }
 
     private void updateStreamFilter() {
         log.debug("Restarting twitter status stream.");
         if (following.isEmpty()) {
-            stream.shutdown();
+            stream.get().shutdown();
         } else {
-            stream.filter(new FilterQuery(toArray(following.keySet())));
+            stream.get().filter(new FilterQuery(toArray(following.keySet())));
         }
     }
 
     @Override
     protected void startUp() throws Exception {
-        eventBus.register(messageDispatcher);
-        updateStreamFilter();
+        if (stream.isPresent()) {
+            eventBus.register(messageDispatcher);
+            log.info("Starting service.");
+            updateStreamFilter();
+        } else {
+            log.warn("Not starting service because configuration is incorrect.");
+            this.stopAsync();
+        }
     }
 
     @Override
     protected void shutDown() throws Exception {
-        eventBus.unregister(messageDispatcher);
-        stream.shutdown();
+        if (stream.isPresent()) {
+            eventBus.unregister(messageDispatcher);
+            stream.get().shutdown();
+        }
     }
 
     public void tweetReceived(Status status) {
