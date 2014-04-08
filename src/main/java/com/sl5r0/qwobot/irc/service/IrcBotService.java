@@ -3,16 +3,12 @@ package com.sl5r0.qwobot.irc.service;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.slf4j.Logger;
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
-import static org.joda.time.DateTime.now;
-import static org.joda.time.Duration.standardSeconds;
 import static org.pircbotx.PircBotX.State.CONNECTED;
 import static org.pircbotx.PircBotX.State.INIT;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -20,9 +16,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class IrcBotService extends AbstractExecutionThreadService {
     private static final Logger log = getLogger(IrcBotService.class);
-
-    private final Duration maximumReconnectBackoff = standardSeconds(30);
-    private DateTime lastDisconnect = new DateTime();
 
     private final QwoBot bot;
 
@@ -41,24 +34,14 @@ public class IrcBotService extends AbstractExecutionThreadService {
                 log.warn("IRC bot was disconnected", e);
             }
 
-            waitForBackoff();
+            log.debug("Waiting 5 seconds to reconnect");
+            try {
+                sleep(5000);
+            } catch (InterruptedException ignored) {
+                currentThread().interrupt();
+            }
+
         }
-    }
-
-    private void waitForBackoff() {
-        final Duration duration = new Duration(lastDisconnect, now());
-        log.trace("Time since last disconnect is " + duration.getStandardSeconds() + " seconds");
-
-        final Duration timeToWait = maximumReconnectBackoff.minus(duration);
-        lastDisconnect = now();
-
-        log.debug("Waiting " + timeToWait.getStandardSeconds() + " seconds to reconnect");
-        try {
-            sleep(timeToWait.getMillis());
-        } catch (InterruptedException ignored) {
-            currentThread().interrupt();
-        }
-
     }
 
     @Override

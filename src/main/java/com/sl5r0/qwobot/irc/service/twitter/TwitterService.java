@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.primitives.Longs.toArray;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
+import static com.sl5r0.qwobot.guice.ConfigurationProvider.readConfigurationValue;
 import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 import static com.sl5r0.qwobot.util.ExtraPredicates.matchesCaseInsensitiveString;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -58,7 +59,19 @@ public class TwitterService extends AbstractIdleService {
         this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
         this.bot = ircBotService.getBot();
 
-        if (configurationIsValid(configuration)) {
+        final Optional<String> channel = readConfigurationValue(configuration, CHANNEL);
+        final Optional<String> oathConsumerKey = readConfigurationValue(configuration, OAUTH_CONSUMER_KEY);
+        final Optional<String> oathAccessToken = readConfigurationValue(configuration, OAUTH_ACCESS_TOKEN);
+        final Optional<String> oathAccessTokenSecret = readConfigurationValue(configuration, OAUTH_ACCESS_TOKEN_SECRET);
+        final Optional<String> oathConsumerSecret = readConfigurationValue(configuration, OAUTH_CONSUMER_SECRET);
+
+        final boolean configurationIsValid = channel.isPresent()
+                && oathAccessToken.isPresent()
+                && oathConsumerSecret.isPresent()
+                && oathConsumerKey.isPresent()
+                && oathAccessTokenSecret.isPresent();
+
+        if (configurationIsValid) {
             this.messageDispatcher
                     .subscribeToMessage(startingWithTrigger("!following"), new ShowFollows())
                     .subscribeToMessage(startingWithTrigger("!follow"), new FollowUser())
@@ -90,7 +103,7 @@ public class TwitterService extends AbstractIdleService {
             log.info("Starting service.");
             updateStreamFilter();
         } else {
-            log.warn("Not starting service because configuration is incorrect.");
+            log.warn("Not starting service because configuration is invalid.");
             this.stopAsync();
         }
     }
@@ -172,13 +185,5 @@ public class TwitterService extends AbstractIdleService {
 
     private Optional<String> getFollow(String handle) {
         return tryFind(following.values(), matchesCaseInsensitiveString(handle));
-    }
-
-    private boolean configurationIsValid(Configuration configuration) {
-        return configuration.containsKey(CHANNEL)
-                && configuration.containsKey(OAUTH_CONSUMER_KEY)
-                && configuration.containsKey(OAUTH_ACCESS_TOKEN)
-                && configuration.containsKey(OAUTH_ACCESS_TOKEN_SECRET)
-                && configuration.containsKey(OAUTH_CONSUMER_SECRET);
     }
 }
