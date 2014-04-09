@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.ChatLog;
 import com.sl5r0.qwobot.persistence.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
@@ -23,6 +24,11 @@ public class LoggingService extends AbstractIrcEventService {
 
     @Subscribe
     public void createChatLog(MessageEvent<PircBotX> event) {
+        doLog(event);
+    }
+
+    @RequiresPermissions("logging")
+    public void doLog(MessageEvent<PircBotX> event) {
         chatLogRepository.save(ChatLog.fromMessageEvent(event));
     }
 }

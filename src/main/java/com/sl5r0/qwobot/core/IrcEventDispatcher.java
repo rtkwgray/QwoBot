@@ -3,9 +3,14 @@ package com.sl5r0.qwobot.core;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sl5r0.qwobot.security.IrcAuthenticationToken;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.pircbotx.PircBotX;
+import org.pircbotx.User;
 import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericUserEvent;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -24,6 +29,13 @@ public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
     @Override
     public void onEvent(Event<PircBotX> event) throws Exception {
         log.trace("Received IRC event: " + event);
+
+        if (event instanceof GenericUserEvent) {
+            final User user = ((GenericUserEvent) event).getUser();
+            final Subject subject = SecurityUtils.getSubject();
+            subject.login(new IrcAuthenticationToken(user));
+        }
+
         super.onEvent(event);
         eventBus.post(event);
     }
