@@ -7,6 +7,7 @@ import com.sl5r0.qwobot.core.ShutdownNotifier;
 import com.sl5r0.qwobot.core.UserManager;
 import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
+import com.sl5r0.qwobot.irc.service.twitter.TwitterService;
 import com.sl5r0.qwobot.security.QwoBotRealm;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.guice.ShiroModule;
@@ -26,11 +27,11 @@ public class QwoBot {
                 .registerService(IrcBotService.class)
                 .registerService(AccountManagementService.class)
                 .registerService(LoggingService.class)
-//                .registerService(UrlScanningService.class)
-//                .registerService(BitCoinService.class)
-//                .registerService(TwitterService.class)
-                .registerService(ManagementService.class);
-//                .registerService(QbuxService.class);
+                .registerService(UrlScanningService.class)
+                .registerService(BitCoinService.class)
+                .registerService(TwitterService.class)
+                .registerService(ManagementService.class)
+                .registerService(QbuxService.class);
 
         serviceManager.startAllUnstartedServices();
         shutdownNotifier.awaitShutdown();
