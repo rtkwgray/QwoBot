@@ -18,7 +18,7 @@ public class EventBusExceptionHandler implements MethodInterceptor {
             if (methodInvocation.getArguments().length == 1) {
                 final Object argument = methodInvocation.getArguments()[0];
                 if (argument instanceof GenericEvent) {
-                    ((GenericEvent) argument).respond("You're not authorized to do that.");
+                    ((GenericEvent) argument).respond("Can't let you do that, Star Fox.");
                 }
             }
         } catch (Throwable throwable) {

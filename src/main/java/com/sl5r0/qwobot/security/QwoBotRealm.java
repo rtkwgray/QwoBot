@@ -1,10 +1,8 @@
 package com.sl5r0.qwobot.security;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.core.UserManager;
-import com.sl5r0.qwobot.domain.QwobotUser;
+import com.sl5r0.qwobot.core.AccountManager;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -13,18 +11,17 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
-import org.pircbotx.User;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sl5r0.qwobot.domain.Role.securedAccount;
+import static com.sl5r0.qwobot.security.Permissions.ACCOUNT;
 
 @Singleton
 public class QwoBotRealm extends AuthorizingRealm {
-    private final UserManager userManager;
+    private final AccountManager accountManager;
 
     @Inject
-    public QwoBotRealm(UserManager userManager) {
-        this.userManager = checkNotNull(userManager, "userManager must not be null");
+    public QwoBotRealm(AccountManager accountManager) {
+        this.accountManager = checkNotNull(accountManager, "accountManager must not be null");
     }
 
     @Override
@@ -38,12 +35,11 @@ public class QwoBotRealm extends AuthorizingRealm {
             return null;
         }
 
-        final QwobotUser user = (QwobotUser) principals.getPrimaryPrincipal();
-        final boolean accountIsInsecure = !user.hasRole(securedAccount());
+        final String nickname = (String) principals.getPrimaryPrincipal();
 
         final SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-        if (accountIsInsecure || userManager.hasVerifiedUser(user.getId())) {
-            authorizationInfo.addStringPermission("account");
+        if (accountManager.isVerified(nickname)) {
+            authorizationInfo.addStringPermission(ACCOUNT);
         }
 
         return authorizationInfo;
@@ -51,22 +47,16 @@ public class QwoBotRealm extends AuthorizingRealm {
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(final AuthenticationToken token) throws AuthenticationException {
-        if (token.getPrincipal() instanceof User) {
-            final Optional<QwobotUser> user = userManager.getUser((User) token.getPrincipal());
-            if (user.isPresent()) {
-                return new AuthenticationInfo() {
-                    @Override
-                    public PrincipalCollection getPrincipals() {
-                        return new SimplePrincipalCollection(user.get(), getName());
-                    }
-
-                    @Override
-                    public Object getCredentials() {
-                        return token.getCredentials();
-                    }
-                };
+        return new AuthenticationInfo() {
+            @Override
+            public PrincipalCollection getPrincipals() {
+                return new SimplePrincipalCollection(token.getPrincipal(), getName());
             }
-        }
-        return null;
+
+            @Override
+            public Object getCredentials() {
+                return token.getCredentials();
+            }
+        };
     }
 }

@@ -4,9 +4,10 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
-import com.sl5r0.qwobot.core.UserManager;
+import com.sl5r0.qwobot.core.AccountManager;
 import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
+import com.sl5r0.qwobot.irc.service.account.AccountSecurityService;
 import com.sl5r0.qwobot.irc.service.twitter.TwitterService;
 import com.sl5r0.qwobot.security.QwoBotRealm;
 import org.apache.shiro.SecurityUtils;
@@ -25,12 +26,12 @@ public class QwoBot {
 
         serviceManager
                 .registerService(IrcBotService.class)
-                .registerService(AccountManagementService.class)
                 .registerService(LoggingService.class)
                 .registerService(UrlScanningService.class)
                 .registerService(BitCoinService.class)
                 .registerService(TwitterService.class)
                 .registerService(ManagementService.class)
+                .registerService(AccountSecurityService.class)
                 .registerService(QbuxService.class);
 
         serviceManager.startAllUnstartedServices();
@@ -43,7 +44,7 @@ public class QwoBot {
                     @Override
                     protected void configureShiro() {
                         try {
-                            bindRealm().toConstructor(QwoBotRealm.class.getConstructor(UserManager.class));
+                            bindRealm().toConstructor(QwoBotRealm.class.getConstructor(AccountManager.class));
                         } catch (NoSuchMethodException e) {
                             addError(e);
                         }

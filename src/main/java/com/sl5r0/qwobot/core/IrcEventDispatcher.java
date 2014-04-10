@@ -7,7 +7,6 @@ import com.sl5r0.qwobot.security.IrcAuthenticationToken;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.pircbotx.PircBotX;
-import org.pircbotx.User;
 import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericUserEvent;
@@ -31,9 +30,8 @@ public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
         log.trace("Received IRC event: " + event);
 
         if (event instanceof GenericUserEvent) {
-            final User user = ((GenericUserEvent) event).getUser();
             final Subject subject = SecurityUtils.getSubject();
-            subject.login(new IrcAuthenticationToken(user));
+            subject.login(new IrcAuthenticationToken(((GenericUserEvent) event).getUser().getNick()));
         }
 
         super.onEvent(event);

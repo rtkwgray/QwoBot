@@ -78,7 +78,7 @@ public class BitCoinService extends AbstractIdleService {
         eventBus.unregister(messageDispatcher);
     }
 
-    private static class BitCoinPrices extends ArrayList<BitCoinPrice> {
+    public static class BitCoinPrices extends ArrayList<BitCoinPrice> {
         @Override
         public String toString() {
             return "1BTC = " + Joiner.on(" | ").join(this);
@@ -95,7 +95,7 @@ public class BitCoinService extends AbstractIdleService {
         }
     }
 
-    private static class BitCoinPrice {
+    public static class BitCoinPrice {
         @Key String code;
         @Key String name;
         @Key double rate;

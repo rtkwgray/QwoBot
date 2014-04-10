@@ -2,29 +2,28 @@ package com.sl5r0.qwobot.security;
 
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.RememberMeAuthenticationToken;
-import org.pircbotx.User;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class IrcAuthenticationToken implements AuthenticationToken, RememberMeAuthenticationToken {
-    private final User user;
+    private final String nickname;
 
-    public IrcAuthenticationToken(User user) {
-        this.user = checkNotNull(user, "user must not be null");
+    public IrcAuthenticationToken(String nickname) {
+        this.nickname = checkNotNull(nickname, "nickname must not be null");
     }
 
     @Override
     public Object getPrincipal() {
-        return user;
+        return nickname;
     }
 
     @Override
     public Object getCredentials() {
-        return user;
+        return nickname;
     }
 
     @Override
     public boolean isRememberMe() {
-        return true;
+        return false;
     }
 }

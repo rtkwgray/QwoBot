@@ -6,26 +6,32 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.domain.QwobotUser;
+import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
-import com.sl5r0.qwobot.persistence.QwobotUserRepository;
+import com.sl5r0.qwobot.persistence.AccountRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.pircbotx.Channel;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
+import org.pircbotx.hooks.events.PrivateMessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.YELLOW;
+import static com.sl5r0.qwobot.irc.service.AbstractIrcEventService.argumentsFor;
 import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
+import static com.sl5r0.qwobot.security.Permissions.MODIFY_ACCOUNT;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -34,22 +40,23 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class QbuxService extends AbstractScheduledService {
     private static final Logger log = getLogger(QbuxService.class);
     private final PircBotX bot;
-    private final QwobotUserRepository userRepository;
+    private final AccountRepository userRepository;
     private final EventBus eventBus;
     private final MessageDispatcher messageDispatcher;
+    private final Map<Long, Long> jackpot = newHashMap();
 
     private static final int BALANCE_INCREASE = 1;
 
     @Inject
-    public QbuxService(IrcBotService ircBotService, QwobotUserRepository userRepository, EventBus eventBus, MessageDispatcher messageDispatcher) {
+    public QbuxService(IrcBotService ircBotService, AccountRepository userRepository, EventBus eventBus, MessageDispatcher messageDispatcher) {
         this.userRepository = userRepository;
         this.eventBus = eventBus;
         this.bot = ircBotService.getBot();
         this.messageDispatcher = messageDispatcher;
 
         this.messageDispatcher
-            .subscribeToPrivateMessage(startingWithTrigger("!tip"), new ProcessTip())
             .subscribeToPrivateMessage(startingWithTrigger("!balance"), new GetBalance())
+            .subscribeToPrivateMessage(startingWithTrigger("!jackpot"), new PlayLottery())
             .subscribeToMessage(startingWithTrigger("!balance"), new GetBalance())
             .subscribeToMessage(startingWithTrigger("!richest"), new GetRichest())
             .subscribeToMessage(startingWithTrigger("!sharethewealth"), new ShareTheWealth());
@@ -57,27 +64,58 @@ public class QbuxService extends AbstractScheduledService {
 
     @Override
     protected void runOneIteration() throws Exception {
+        // TODO: clean this up, please.....
+        String message = null;
+        try {
+            if (jackpot.size() > 0) {
+                List<Long> playerSlots = newArrayList();
+                for (Map.Entry<Long, Long> playerSlot : jackpot.entrySet()) {
+                    for (int i = 0; i < playerSlot.getValue(); i++) {
+                        playerSlots.add(playerSlot.getKey());
+                    }
+                }
+
+                Collections.shuffle(playerSlots);
+
+                long userId = playerSlots.get(new Random().nextInt(playerSlots.size()));
+                final Optional<Account> user = userRepository.findById(userId);
+                if (user.isPresent()) {
+                    user.get().modifyBalance(playerSlots.size());
+                    userRepository.saveOrUpdate(user.get());
+                    message = YELLOW.format(user.get().getUsername() + " wins " + playerSlots.size() + " QBUX in the lottery!");
+                }
+
+                jackpot.clear();
+            }
+        } catch (RuntimeException e) {
+            log.error("Jackpot failed", e);
+        }
+
         try {
             final ImmutableSortedSet<Channel> allChannels = bot.getUserChannelDao().getAllChannels();
             for (Channel channel : allChannels) {
 
                 // TODO: this means that if a user is in multiple channels, they'll get the bonus twice.
                 for (User user : channel.getUsers()) {
-                    final Optional<QwobotUser> qwobotUser = userRepository.findByNick(user.getNick());
+                    final Optional<Account> qwobotUser = userRepository.findByNick(user.getNick());
                     if (qwobotUser.isPresent()) {
                         qwobotUser.get().modifyBalance(BALANCE_INCREASE);
                         userRepository.saveOrUpdate(qwobotUser.get());
                     }
                 }
                 channel.send().message(YELLOW.format("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX"));
+                if (message != null) {
+                    channel.send().message(message);
+                }
             }
+
         } catch (Throwable e) {
             log.error("Something went wrong :( ", e);
         }
     }
 
-    private QwobotUser getQwobotUser(String nickname) {
-        final Optional<QwobotUser> user = userRepository.findByNick(nickname);
+    private Account getQwobotUser(String nickname) {
+        final Optional<Account> user = userRepository.findByNick(nickname);
         if (user.isPresent()) {
             return user.get();
         }
@@ -88,11 +126,13 @@ public class QbuxService extends AbstractScheduledService {
     @Override
     protected void startUp() throws Exception {
         eventBus.register(messageDispatcher);
+        eventBus.register(this);
     }
 
     @Override
     protected void shutDown() throws Exception {
         eventBus.unregister(messageDispatcher);
+        eventBus.unregister(this);
     }
 
     @Override
@@ -104,7 +144,13 @@ public class QbuxService extends AbstractScheduledService {
         @Override
         public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
             final String nick = event.getUser().getNick();
-            final Optional<QwobotUser> sender = userRepository.findByNick(nick);
+            final Optional<Account> sender = userRepository.findByNick(nick);
+//            try {
+//                runOneIteration();
+//            } catch (Exception e) {
+//               throw new RuntimeException(e);
+//            }
+//            return;
             if (sender.isPresent()) {
                 int wealth = sender.get().getBalance();
                 final Set<User> allUsers = newHashSet(bot.getUserChannelDao().getAllUsers());
@@ -112,7 +158,7 @@ public class QbuxService extends AbstractScheduledService {
 
                 int giveToEach = wealth / (allUsers.size());
                 for (User thisUser : allUsers) {
-                    final Optional<QwobotUser> receiver = userRepository.findByNick(thisUser.getNick());
+                    final Optional<Account> receiver = userRepository.findByNick(thisUser.getNick());
                     if (receiver.isPresent()) {
                         receiver.get().modifyBalance(giveToEach);
                         sender.get().modifyBalance(-giveToEach);
@@ -136,7 +182,7 @@ public class QbuxService extends AbstractScheduledService {
                 nick = event.getUser().getNick();
             }
 
-            final Optional<QwobotUser> user = userRepository.findByNick(nick);
+            final Optional<Account> user = userRepository.findByNick(nick);
             if (user.isPresent()) {
                 event.respond(nick + " has " + user.get().getBalance() + " QBUX");
             } else {
@@ -165,64 +211,91 @@ public class QbuxService extends AbstractScheduledService {
                 numberToFind = 1;
             }
 
-            final List<QwobotUser> richest = userRepository.findRichest(numberToFind);
+            final List<Account> richest = userRepository.findRichest(numberToFind);
             event.respond("Top " + numberToFind + " richest people:");
-            event.respond(Joiner.on(", ").join(Lists.transform(richest, new Function<QwobotUser, String>() {
+            event.respond(Joiner.on(", ").join(Lists.transform(richest, new Function<Account, String>() {
                 @Override
-                public String apply(QwobotUser input) {
-                    return input.getNick() + " (" + input.getBalance() + " QBUX)";
+                public String apply(Account input) {
+                    return input.getUsername() + " (" + input.getBalance() + " QBUX)";
                 }
             })));
         }
     }
 
-    private class ProcessTip implements MessageRunnable {
+    private class PlayLottery implements MessageRunnable {
         @Override
         public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            if (arguments.size() < 3) {
-                return;
+            int betAmount = 1;
+            if (arguments.size() >= 2) {
+                try {
+                    betAmount = Integer.parseInt(arguments.get(1));
+                } catch (NumberFormatException e) {
+                    log.info("Couldn't parse \"" + arguments.get(1) + "\" as a number");
+                }
             }
 
-            final String toNick = arguments.get(1);
-            final String reason = Joiner.on(" ").join(arguments.subList(3, arguments.size()));
-            final String fromNick = event.getUser().getNick();
+            // TODO: maybe we just get the current subject instead of the user from events.
+            final Optional<Account> user = userRepository.findByNick(event.getUser().getNick());
+            if (user.isPresent() && user.get().getBalance() >= betAmount) {
+                user.get().modifyBalance(-betAmount);
+                userRepository.saveOrUpdate(user.get());
 
-            final int amount;
-            try {
-                amount = parseInt(arguments.get(2));
-            } catch (NumberFormatException e) {
-                event.respond("\"" + arguments.get(2) + "\" doesn't look like a valid number to me.");
-                return;
-            }
-
-            try {
-                processTip(fromNick, toNick, amount, reason);
-            } catch (RuntimeException e) {
-                event.respond(e.getMessage());
+                long previousBet = Optional.fromNullable(jackpot.get(user.get().getId())).or(0L);
+                final long totalBet = previousBet + betAmount;
+                jackpot.put(user.get().getId(), totalBet);
+                event.respond("You've got " + totalBet + " riding on this.");
+            } else {
+                event.respond("Nice try. Begone, peasant!");
             }
         }
+    }
 
+    @Subscribe
+    public void tip(PrivateMessageEvent<PircBotX> event) {
+        List<String> arguments = argumentsFor("!tip", event.getMessage());
+        if (arguments.size() < 3) {
+            return;
+        }
 
-        private void processTip(String fromNick, String toNick, int amount, String reason) {
-            checkArgument(amount > 0, "tip amount must be positive");
-            checkArgument(!fromNick.equals(toNick), "you can't tip yourself");
-            final QwobotUser from = getQwobotUser(fromNick);
-            final QwobotUser to = getQwobotUser(toNick);
+        final String toNick = arguments.get(1);
+        final String reason = Joiner.on(" ").join(arguments.subList(3, arguments.size()));
+        final String fromNick = event.getUser().getNick();
 
-            from.modifyBalance(-amount);
-            to.modifyBalance(amount);
+        final int amount;
+        try {
+            amount = parseInt(arguments.get(2));
+        } catch (NumberFormatException e) {
+            event.respond("\"" + arguments.get(2) + "\" doesn't look like a valid number to me.");
+            return;
+        }
 
-            userRepository.saveOrUpdate(from);
-            userRepository.saveOrUpdate(to);
+        try {
+            processTip(fromNick, toNick, amount, reason);
+        } catch (IllegalArgumentException e) {
+            event.respond(e.getMessage());
+        }
+    }
 
-            QwobotUser warren = userRepository.findByNick("seagray").get();
-            warren.modifyBalance(25);
-            userRepository.saveOrUpdate(warren);
+    @RequiresPermissions(MODIFY_ACCOUNT) // TODO: make this not public
+    public void processTip(String fromNick, String toNick, int amount, String reason) {
+        checkArgument(amount > 0, "tip amount must be positive");
+        checkArgument(!fromNick.equals(toNick), "you can't tip yourself");
+        final Account from = getQwobotUser(fromNick);
+        final Account to = getQwobotUser(toNick);
 
-            for (Channel channel : bot.getUserChannelDao().getUser(to.getNick()).getChannels()) {
-                final String message = to.getNick() + " was tipped " + amount + " QBUX by " + from.getNick() + " " + reason;
-                channel.send().message(YELLOW.format(message));
-            }
+        from.modifyBalance(-amount);
+        to.modifyBalance(amount);
+
+        userRepository.saveOrUpdate(from);
+        userRepository.saveOrUpdate(to);
+
+        Account warren = userRepository.findByNick("seagray").get();
+        warren.modifyBalance(25);
+        userRepository.saveOrUpdate(warren);
+
+        for (Channel channel : bot.getUserChannelDao().getUser(to.getUsername()).getChannels()) {
+            final String message = to.getUsername() + " was tipped " + amount + " QBUX by " + from.getUsername() + " " + reason;
+            channel.send().message(YELLOW.format(message));
         }
     }
 }

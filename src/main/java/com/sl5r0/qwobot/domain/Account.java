@@ -1,11 +1,13 @@
 package com.sl5r0.qwobot.domain;
 
+import com.google.common.base.Optional;
 import com.sl5r0.qwobot.persistence.PersistenceConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Set;
 
+import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
@@ -13,10 +15,10 @@ import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.EAGER;
 
 @Entity
-@Table(name = "users")
-public class QwobotUser {
+@Table(name = "account")
+public class Account {
     @Column(unique = true)
-    private String nick;
+    private String username;
 
     @Column(nullable = false)
     private int balance;
@@ -24,23 +26,25 @@ public class QwobotUser {
     @ManyToMany(fetch = EAGER, cascade = ALL)
     private Set<Role> roles;
 
+    @Column
+    private String password;
+
     @Id
     @GeneratedValue(generator = "increment")
     @GenericGenerator(name = "increment", strategy = "increment")
     private long id;
 
-    public QwobotUser(String nick) {
-        this.nick = checkNotNull(nick, "nick must not be null");
-        this.balance = 100;
+    public Account(String username) {
+        this.username = checkNotNull(username, "username must not be null");
         this.roles = newHashSet();
     }
 
     @PersistenceConstructor
-    private QwobotUser() {
+    private Account() {
     }
 
-    public String getNick() {
-        return nick;
+    public String getUsername() {
+        return username;
     }
 
     public int getBalance() {
@@ -68,10 +72,28 @@ public class QwobotUser {
         return id;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Optional<String> getPassword() {
+        return fromNullable(password);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username != null ? username.hashCode() : 0;
+        result = 31 * result + balance;
+        result = 31 * result + (roles != null ? roles.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (int) (id ^ (id >>> 32));
+        return result;
+    }
+
     @Override
     public String toString() {
-        return "QwobotUser{" +
-                "nick='" + nick + '\'' +
+        return "Account{" +
+                "username='" + username + '\'' +
                 ", balance=" + balance +
                 ", roles=" + roles +
                 ", id=" + id +

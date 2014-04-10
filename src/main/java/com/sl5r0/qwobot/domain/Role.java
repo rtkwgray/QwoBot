@@ -10,8 +10,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Entity
 @Table(name = "roles")
 public class Role {
-    public static final String SECURED_ACCOUNT = "securedAccount";
-
     @Id
     @GeneratedValue(generator = "increment")
     @GenericGenerator(name = "increment", strategy = "increment")
@@ -35,10 +33,6 @@ public class Role {
     @Override
     public String toString() {
         return name;
-    }
-
-    public static Role securedAccount() {
-        return new Role(SECURED_ACCOUNT);
     }
 
     @Override

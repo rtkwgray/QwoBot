@@ -48,6 +48,14 @@ public enum IrcTextFormatter {
         return formatter.apply(string);
     }
 
+    public static String format(boolean bool) {
+        if (bool) {
+            return GREEN.format("YES");
+        } else {
+            return RED.format("NO");
+        }
+    }
+
     private IrcTextFormatter(String ircCode) {
         this.formatter = applySingleColor(ircCode);
     }

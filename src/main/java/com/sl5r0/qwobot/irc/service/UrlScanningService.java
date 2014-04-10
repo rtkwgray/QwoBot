@@ -41,7 +41,11 @@ public class UrlScanningService extends AbstractIrcEventService {
             }
 
             final String channelMessage = pageTitle.length() > 400 ? pageTitle.substring(0, 400) + "..." : pageTitle;
-            event.getChannel().send().message(BOLD.format(channelMessage));
+            // TODO: keep a cache of recent links (i.e. within the last 20 minutes or so) and don't repost them.
+            // TODO: clean this up too
+            if (!pageTitle.equals(url)) {
+                event.getChannel().send().message(BOLD.format(channelMessage));
+            }
 
             try {
                 reddit.post(pageTitle, url);

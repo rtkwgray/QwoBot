@@ -33,7 +33,7 @@ class RedditSession {
             requestFactory = httpRequestFactory;
             log.info("Successfully logged in to Reddit with username \"" + username + "\"");
         } catch (IOException | NullPointerException e) {
-            log.error("Reddit login failed. Please check your credentials.", e);
+            log.error("Reddit accountLogin failed. Please check your credentials.", e);
         }
     }
 

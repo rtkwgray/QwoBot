@@ -33,13 +33,13 @@ public class IrcServiceManager {
     }
 
     public void startService(Class<? extends Service> service) {
-        checkState(services.containsKey(service), "service is not registered");
+        checkState(services.containsKey(service), "service (" + service.getSimpleName() + ") is not registered");
         services.get(service).startAsync();
         services.get(service).awaitRunning();
     }
 
     public void stopService(Class<? extends Service> service) {
-        checkState(services.containsKey(service), "service is not registered");
+        checkState(services.containsKey(service), "service (" + service.getSimpleName() + ") is not registered");
         services.get(service).stopAsync();
         services.get(service).awaitTerminated();
     }
