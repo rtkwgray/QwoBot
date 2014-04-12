@@ -1,6 +1,8 @@
 package com.sl5r0.qwobot.domain;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.sl5r0.qwobot.persistence.PersistenceConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -10,6 +12,7 @@ import java.util.Set;
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.EAGER;
@@ -80,6 +83,15 @@ public class Account {
         return fromNullable(password);
     }
 
+    public Set<String> getRoles() {
+        return ImmutableSet.copyOf(transform(roles, new Function<Role, String>() {
+            @Override
+            public String apply(Role input) {
+                return input.getName();
+            }
+        }));
+    }
+
     @Override
     public int hashCode() {
         int result = username != null ? username.hashCode() : 0;
@@ -98,10 +110,5 @@ public class Account {
                 ", roles=" + roles +
                 ", id=" + id +
                 '}';
-    }
-
-    public boolean hasRole(Role role) {
-        checkNotNull(role, "role must not be null");
-        return roles.contains(role);
     }
 }

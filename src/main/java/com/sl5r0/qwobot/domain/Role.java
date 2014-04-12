@@ -23,8 +23,7 @@ public class Role {
     }
 
     @PersistenceConstructor
-    private Role() {
-    }
+    private Role() { }
 
     public String getName() {
         return name;

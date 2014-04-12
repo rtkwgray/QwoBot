@@ -28,6 +28,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
+import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.YELLOW;
 import static com.sl5r0.qwobot.irc.service.AbstractIrcEventService.argumentsFor;
 import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
@@ -82,7 +83,7 @@ public class QbuxService extends AbstractScheduledService {
                 if (user.isPresent()) {
                     user.get().modifyBalance(playerSlots.size());
                     userRepository.saveOrUpdate(user.get());
-                    message = YELLOW.format(user.get().getUsername() + " wins " + playerSlots.size() + " QBUX in the lottery!");
+                    message = GREEN.format(user.get().getUsername() + " wins " + playerSlots.size() + " QBUX in the lottery!");
                 }
 
                 jackpot.clear();
@@ -103,7 +104,7 @@ public class QbuxService extends AbstractScheduledService {
                         userRepository.saveOrUpdate(qwobotUser.get());
                     }
                 }
-                channel.send().message(YELLOW.format("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX"));
+                channel.send().message(GREEN.format("Makin' it rain! Everybody gets " + BALANCE_INCREASE + " QBUX"));
                 if (message != null) {
                     channel.send().message(message);
                 }
@@ -145,12 +146,6 @@ public class QbuxService extends AbstractScheduledService {
         public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
             final String nick = event.getUser().getNick();
             final Optional<Account> sender = userRepository.findByNick(nick);
-//            try {
-//                runOneIteration();
-//            } catch (Exception e) {
-//               throw new RuntimeException(e);
-//            }
-//            return;
             if (sender.isPresent()) {
                 int wealth = sender.get().getBalance();
                 final Set<User> allUsers = newHashSet(bot.getUserChannelDao().getAllUsers());
@@ -184,7 +179,9 @@ public class QbuxService extends AbstractScheduledService {
 
             final Optional<Account> user = userRepository.findByNick(nick);
             if (user.isPresent()) {
+                user.get().modifyBalance(100);
                 event.respond(nick + " has " + user.get().getBalance() + " QBUX");
+//                userRepository.saveOrUpdate(user.get());
             } else {
                 event.respond("I don't have any record of a user named \"" + nick + "\"");
             }
@@ -236,7 +233,7 @@ public class QbuxService extends AbstractScheduledService {
 
             // TODO: maybe we just get the current subject instead of the user from events.
             final Optional<Account> user = userRepository.findByNick(event.getUser().getNick());
-            if (user.isPresent() && user.get().getBalance() >= betAmount) {
+            if (user.isPresent() && user.get().getBalance() >= betAmount && betAmount > 0) {
                 user.get().modifyBalance(-betAmount);
                 userRepository.saveOrUpdate(user.get());
 
@@ -252,13 +249,10 @@ public class QbuxService extends AbstractScheduledService {
 
     @Subscribe
     public void tip(PrivateMessageEvent<PircBotX> event) {
-        List<String> arguments = argumentsFor("!tip", event.getMessage());
-        if (arguments.size() < 3) {
-            return;
-        }
+        List<String> arguments = argumentsFor("!tip", event.getMessage(), 2);
 
         final String toNick = arguments.get(1);
-        final String reason = Joiner.on(" ").join(arguments.subList(3, arguments.size()));
+        final String reason = Joiner.on(" ").join(arguments.subList(2, arguments.size()));
         final String fromNick = event.getUser().getNick();
 
         final int amount;

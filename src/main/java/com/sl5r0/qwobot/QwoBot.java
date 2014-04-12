@@ -4,10 +4,10 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
-import com.sl5r0.qwobot.core.AccountManager;
+import com.sl5r0.qwobot.irc.service.account.AccountService;
+import com.sl5r0.qwobot.security.AccountManager;
 import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
-import com.sl5r0.qwobot.irc.service.account.AccountSecurityService;
 import com.sl5r0.qwobot.irc.service.twitter.TwitterService;
 import com.sl5r0.qwobot.security.QwoBotRealm;
 import org.apache.shiro.SecurityUtils;
@@ -31,7 +31,7 @@ public class QwoBot {
                 .registerService(BitCoinService.class)
                 .registerService(TwitterService.class)
                 .registerService(ManagementService.class)
-                .registerService(AccountSecurityService.class)
+                .registerService(AccountService.class)
                 .registerService(QbuxService.class);
 
         serviceManager.startAllUnstartedServices();

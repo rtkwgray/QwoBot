@@ -11,11 +11,11 @@ public class AccountCredentials {
         this.password = checkNotNull(password, "password must not be null");
     }
 
-    public String getUsername() {
+    public String username() {
         return username;
     }
 
-    public String getPassword() {
+    public String password() {
         return password;
     }
 }

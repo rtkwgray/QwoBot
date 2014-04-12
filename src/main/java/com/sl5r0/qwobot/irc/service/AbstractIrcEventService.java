@@ -2,6 +2,7 @@ package com.sl5r0.qwobot.irc.service;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.AbstractService;
+import com.sl5r0.qwobot.irc.service.exceptions.CommandNotApplicableException;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractIrcEventService extends AbstractService {
@@ -35,7 +35,15 @@ public abstract class AbstractIrcEventService extends AbstractService {
         notifyStarted();
     }
 
-    public static List<String> argumentsFor(String trigger, String message) {
+    /**
+     * Parses arguments for if a command begins with a certain trigger
+     * @param trigger the trigger to match
+     * @param message the input to parse
+     * @param argumentCount the minimum number of arguments for the command to be considered valid (not including the trigger)
+     * @return a parsed list of arguments with size at least argumentCount
+     * @throws CommandNotApplicableException if the command doesn't meet the minimum argument count
+     */
+    public static List<String> argumentsFor(String trigger, String message, int argumentCount) {
         final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
         final Matcher matcher = PARAMETER_PATTERN.matcher(message);
         final List<String> parameters = newArrayList();
@@ -47,10 +55,11 @@ public abstract class AbstractIrcEventService extends AbstractService {
             }
         }
 
-        if (!parameters.isEmpty() && parameters.get(0).equals(trigger)) {
+        if (parameters.size() >= argumentCount + 1 && parameters.get(0).equals(trigger)) {
+            parameters.remove(0);
             return parameters;
-        } else {
-            return emptyList();
         }
+
+        throw new CommandNotApplicableException(message);
     }
 }

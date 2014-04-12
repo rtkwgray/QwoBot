@@ -1,12 +1,11 @@
 package com.sl5r0.qwobot.guice;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.*;
+import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.domain.ChatLog;
 import com.sl5r0.qwobot.domain.Role;
-import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.domain.TwitterFollow;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.h2.Driver;
@@ -25,7 +24,6 @@ import static com.google.inject.matcher.Matchers.any;
 import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
 import static java.lang.annotation.ElementType.*;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class QwoBotModule extends AbstractModule {
     private static final String CONFIG_FILE_PROPERTY = "config.file";
@@ -60,7 +58,7 @@ public class QwoBotModule extends AbstractModule {
     }
 
     protected EventBus getEventBus() {
-        return new AsyncEventBus(newFixedThreadPool(25));
+        return new EventBus();
     }
 
     private Configuration addEntities(Configuration configuration) {

@@ -1,6 +1,7 @@
 package com.sl5r0.qwobot.core;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import org.pircbotx.Colors;
 
@@ -88,5 +89,9 @@ public enum IrcTextFormatter {
                 return color + input + Colors.NORMAL;
             }
         };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Joiner.on(", ").join(IrcTextFormatter.values()));
     }
 }
