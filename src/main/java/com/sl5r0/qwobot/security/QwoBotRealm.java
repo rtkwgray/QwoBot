@@ -13,11 +13,14 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.pircbotx.User;
+import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
 public class QwoBotRealm extends AuthorizingRealm {
+    private static final Logger log = getLogger(QwoBotRealm.class);
     private final AccountManager accountManager;
 
     @Inject
@@ -43,8 +46,10 @@ public class QwoBotRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(final AuthenticationToken token) throws AuthenticationException {
         // We're only ever going to be passed an IrcAuthenticationToken here because of the supports() method above.
-        final Optional<Account> account = accountManager.getAccount((User) token.getPrincipal());
+        final User user = (User) token.getPrincipal();
+        final Optional<Account> account = accountManager.getAccount(user);
         if (account.isPresent()) {
+            log.debug("Authenticated user \"" + account.get().getUsername() + "\" with nickname \"" + user.getNick() + "\"");
             return new AuthenticationInfo() {
                 @Override
                 public PrincipalCollection getPrincipals() {

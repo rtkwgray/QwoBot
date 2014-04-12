@@ -9,73 +9,49 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.api.client.util.Key;
-import com.google.common.eventbus.EventBus;
-import com.google.common.util.concurrent.AbstractIdleService;
-import com.google.inject.Inject;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
+import com.sl5r0.qwobot.domain.help.Command;
 import org.pircbotx.PircBotX;
-import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.hooks.events.MessageEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
+import static java.util.Collections.singleton;
 
 @Singleton
-public class BitCoinService extends AbstractIdleService {
+public class BitCoinService extends AbstractIrcEventService {
+    private static final Command CHECK_BTC = new Command("!btc", "Show current value of BTC in the specified currencies").addUnboundedParameter("currency code");
     private static final GenericUrl BITPAY_URL = new GenericUrl("https://bitpay.com/api/rates");
-
-    private final MessageDispatcher messageDispatcher;
-    private final EventBus eventBus;
-
-    @Inject
-    public BitCoinService(EventBus eventBus, MessageDispatcher messageDispatcher) {
-        this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
-        this.messageDispatcher = checkNotNull(messageDispatcher, "messageDispatcher must not be null");
-        this.messageDispatcher.subscribeToMessage(startingWithTrigger("!btc"), new CheckBitCoinPrices());
-    }
-
-    private class CheckBitCoinPrices implements MessageRunnable {
-        private final HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory(new HttpRequestInitializer() {
-            @Override
-            public void initialize(HttpRequest request) throws IOException {
-                request.setParser(new JsonObjectParser(new JacksonFactory()));
-            }
-        });
-
+    private final HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory(new HttpRequestInitializer() {
         @Override
-        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            try {
-                final Set<String> currencies = copyOf(arguments);
-                final BitCoinPrices bitCoinPrices = fetchBitCoinPrices().filterBy(currencies);
-                if (bitCoinPrices.isEmpty()) {
-                    event.respond("Sorry, I couldn't find any data.");
-                } else {
-                    event.respond(bitCoinPrices.toString());
-                }
-            } catch (IOException e) {
-                event.respond("Couldn't fetch prices right now. Try again later.");
-            }
+        public void initialize(HttpRequest request) throws IOException {
+            request.setParser(new JsonObjectParser(new JacksonFactory()));
         }
+    });
 
-        private BitCoinPrices fetchBitCoinPrices() throws IOException {
-            return requestFactory.buildGetRequest(BITPAY_URL).execute().parseAs(BitCoinPrices.class);
-        }
+    protected BitCoinService() {
+        super(singleton(CHECK_BTC));
     }
 
-    @Override
-    protected void startUp() throws Exception {
-        eventBus.register(messageDispatcher);
-    }
+    @Subscribe
+    public void btc(MessageEvent<PircBotX> event) {
+        final List<String> currencies = argumentsFor(CHECK_BTC, event.getMessage());
 
-    @Override
-    protected void shutDown() throws Exception {
-        eventBus.unregister(messageDispatcher);
+        BitCoinPrices bitCoinPrices = new BitCoinPrices();
+        try {
+            bitCoinPrices = requestFactory.buildGetRequest(BITPAY_URL).execute().parseAs(BitCoinPrices.class).filterBy(currencies);
+        } catch (IOException e) {
+            event.respond("BTC conversion failed. Try again later.");
+        }
+
+        if (bitCoinPrices.isEmpty()) {
+            event.respond("Sorry, I couldn't find any data.");
+        } else {
+            event.respond(bitCoinPrices.toString());
+        }
     }
 
     public static class BitCoinPrices extends ArrayList<BitCoinPrice> {
@@ -84,7 +60,7 @@ public class BitCoinService extends AbstractIdleService {
             return "1BTC = " + Joiner.on(" | ").join(this);
         }
 
-        public BitCoinPrices filterBy(Set<String> currencies) {
+        public BitCoinPrices filterBy(List<String> currencies) {
             BitCoinPrices filtered = new BitCoinPrices();
             for (BitCoinPrice bitCoinPrice : this) {
                 if (currencies.contains(bitCoinPrice.code.toLowerCase())) {

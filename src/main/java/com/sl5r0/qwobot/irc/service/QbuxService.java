@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.Account;
+import com.sl5r0.qwobot.domain.help.Command;
 import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
 import com.sl5r0.qwobot.persistence.AccountRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -40,6 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class QbuxService extends AbstractScheduledService {
     private static final Logger log = getLogger(QbuxService.class);
+    private final Command tipCommand = new Command("!tip", "Give QBUX to the specified user").addParameter("nickname").addParameter("amount").addParameter("reason");
     private final PircBotX bot;
     private final AccountRepository userRepository;
     private final EventBus eventBus;
@@ -249,7 +251,7 @@ public class QbuxService extends AbstractScheduledService {
 
     @Subscribe
     public void tip(PrivateMessageEvent<PircBotX> event) {
-        List<String> arguments = argumentsFor("!tip", event.getMessage(), 2);
+        List<String> arguments = argumentsFor(tipCommand, event.getMessage());
 
         final String toNick = arguments.get(1);
         final String reason = Joiner.on(" ").join(arguments.subList(2, arguments.size()));

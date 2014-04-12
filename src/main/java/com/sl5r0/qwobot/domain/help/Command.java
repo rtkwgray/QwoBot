@@ -7,6 +7,7 @@ import com.google.common.collect.Ordering;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
@@ -23,15 +24,38 @@ public class Command {
     private final String trigger;
     private final String description;
     private final List<String> parameters = newArrayList();
+    private int parameterCount = 0;
 
     public Command(String trigger, String description) {
         this.trigger = checkNotNull(trigger, "trigger must not be null");
         this.description = checkNotNull(description, "description must not be null");
     }
 
+    public int parameterCount() {
+        return parameterCount;
+    }
+
     public Command addParameter(String parameter) {
         parameters.add(parameter);
+        parameterCount++;
         return this;
+    }
+
+    public Command addParameter(String parameter, int parameterLimit) {
+        checkNotNull(parameter, "parameter must not be null");
+        checkArgument(parameterLimit > 0, "parameterLimit must be > 0");
+
+        for (int i = 1; i <= parameterLimit; i++) {
+            parameters.add(parameter + i);
+        }
+
+        parameterCount++;
+        return this;
+    }
+
+    public Command addUnboundedParameter(String parameter) {
+        checkNotNull(parameter, "parameter must not be null");
+        return addParameter(parameter + " 1> ... <" + parameter + " N");
     }
 
     public String trigger() {

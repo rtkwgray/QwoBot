@@ -1,5 +1,6 @@
 package com.sl5r0.qwobot.domain.help;
 
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,9 +16,7 @@ public class CommandDirectoryTest {
     @Before
     public void setUp() throws Exception {
         directory = new CommandDirectory();
-        directory.register(new Command("!z:c", "z:c"));
-        directory.register(new Command("!a:b", "a:b"));
-        directory.register(new Command("!a", "a"));
+        directory.register(Sets.newHashSet(new Command("!z:c", "z:c"), new Command("!a:b", "a:b"), new Command("!a", "a")));
     }
 
     @Test

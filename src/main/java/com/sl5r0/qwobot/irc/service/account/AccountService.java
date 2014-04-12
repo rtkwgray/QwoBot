@@ -1,11 +1,11 @@
 package com.sl5r0.qwobot.irc.service.account;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.core.AccountCredentials;
 import com.sl5r0.qwobot.domain.Account;
+import com.sl5r0.qwobot.domain.help.Command;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.security.AccountManager;
 import com.sl5r0.qwobot.security.exceptions.AccountHasPasswordException;
@@ -22,17 +22,22 @@ import org.pircbotx.hooks.events.UserListEvent;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.*;
 import static com.sl5r0.qwobot.security.AccountManager.getActingAccount;
 
 @Singleton
 public class AccountService extends AbstractIrcEventService {
+    private static final Command logInCommand = new Command("!account:login", "Log in to the specified account").addParameter("username").addParameter("password");
+    private static final Command whoAmICommand = new Command("!account:whoami", "Show the currently logged in user.");
+    private static final Command passwordCommand = new Command("!account:password", "Set or remove account password").addParameter("password");
     private final AccountManager accountManager;
 
     @Inject
-    public AccountService(EventBus eventBus, AccountManager accountManager) {
-        super(eventBus);
+    public AccountService(AccountManager accountManager) {
+        super(newHashSet(logInCommand, whoAmICommand, passwordCommand));
         this.accountManager = checkNotNull(accountManager, "accountManager must not be null");
+
     }
 
     @Subscribe
@@ -42,7 +47,7 @@ public class AccountService extends AbstractIrcEventService {
 
     @Subscribe
     public void login(PrivateMessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor("!account:login", event.getMessage(), 2);
+        final List<String> arguments = argumentsFor(logInCommand, event.getMessage());
 
         try {
             accountManager.login(event.getUser(), new AccountCredentials(arguments.get(0), arguments.get(1)));
@@ -66,14 +71,14 @@ public class AccountService extends AbstractIrcEventService {
 
     @Subscribe
     public void whoAmI(PrivateMessageEvent<PircBotX> event) {
-        argumentsFor("!account:whoami", event.getMessage(), 0);
+        argumentsFor(whoAmICommand, event.getMessage());
         final Account account = getActingAccount();
         event.respond("You're currently logged in as " + CYAN.format(account.getUsername()) + ".");
     }
 
     @Subscribe
     public void password(PrivateMessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor("!account:password", event.getMessage(), 0);
+        final List<String> arguments = argumentsFor(passwordCommand, event.getMessage());
         if (arguments.size() >= 1) {
             try {
                 final String password = arguments.get(0);

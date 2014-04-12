@@ -69,9 +69,20 @@ public class AccountManager {
 
         final Optional<Account> account = accountRepository.findByUsernamePassword(credentials.username(), credentials.password());
         if (account.isPresent()) {
+            notifyPreviouslyLoggedInUser(user, account);
+            verifiedUsers.inverse().remove(user);
             verifiedUsers.put(account.get().getId(), user);
+            log.info("Logged in " + account.get().getUsername() + " with nickname " + user.getNick());
         } else {
             throw new IncorrectPasswordException();
+        }
+    }
+
+    private void notifyPreviouslyLoggedInUser(User user, Optional<Account> account) {
+        final Optional<User> previouslyLoggedInUser = fromNullable(verifiedUsers.remove(account.get().getId()));
+        if (previouslyLoggedInUser.isPresent() && !previouslyLoggedInUser.get().equals(user)) {
+            previouslyLoggedInUser.get().send().message("You have been logged out by a user with the nickname \"" + user.getNick() + "\"");
+            log.info("User " + previouslyLoggedInUser.get() + " was logged out nickname " + user.getNick());
         }
     }
 
@@ -86,7 +97,10 @@ public class AccountManager {
             if (account.get().getPassword().isPresent()) {
                 throw new AccountHasPasswordException();
             } else {
+                notifyPreviouslyLoggedInUser(user, account);
+                verifiedUsers.inverse().remove(user);
                 verifiedUsers.put(account.get().getId(), user);
+                log.info("Logged in " + account.get().getUsername() + " with nickname " + user.getNick());
             }
         } else {
             throw new IncorrectPasswordException();

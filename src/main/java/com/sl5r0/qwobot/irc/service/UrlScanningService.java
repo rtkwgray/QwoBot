@@ -1,10 +1,10 @@
 package com.sl5r0.qwobot.irc.service;
 
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sl5r0.qwobot.domain.help.Command;
 import com.sl5r0.qwobot.thirdparty.reddit.Reddit;
 import com.sl5r0.qwobot.thirdparty.reddit.RedditPostFailedException;
 import org.jsoup.Jsoup;
@@ -12,6 +12,7 @@ import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,8 +26,8 @@ public class UrlScanningService extends AbstractIrcEventService {
     private final Reddit reddit;
 
     @Inject
-    public UrlScanningService(EventBus eventBus, Reddit reddit) {
-        super(eventBus);
+    public UrlScanningService(Reddit reddit) {
+        super(Collections.<Command>emptySet());
         this.reddit = checkNotNull(reddit, "reddit must not be null");
     }
 
