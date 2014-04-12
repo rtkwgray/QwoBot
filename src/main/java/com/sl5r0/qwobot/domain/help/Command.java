@@ -7,7 +7,6 @@ import com.google.common.collect.Ordering;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
@@ -41,15 +40,9 @@ public class Command {
         return this;
     }
 
-    public Command addParameter(String parameter, int parameterLimit) {
+    public Command addOptionalParameter(String parameter) {
         checkNotNull(parameter, "parameter must not be null");
-        checkArgument(parameterLimit > 0, "parameterLimit must be > 0");
-
-        for (int i = 1; i <= parameterLimit; i++) {
-            parameters.add(parameter + i);
-        }
-
-        parameterCount++;
+        parameters.add(parameter);
         return this;
     }
 

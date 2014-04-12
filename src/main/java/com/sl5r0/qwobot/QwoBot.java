@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.sl5r0.qwobot.core.ShutdownNotifier;
 import com.sl5r0.qwobot.irc.service.account.AccountService;
+import com.sl5r0.qwobot.irc.service.qbux.QbuxDistributionService;
+import com.sl5r0.qwobot.irc.service.qbux.QbuxService;
 import com.sl5r0.qwobot.security.AccountManager;
 import com.sl5r0.qwobot.guice.QwoBotModule;
 import com.sl5r0.qwobot.irc.service.*;
@@ -33,7 +35,8 @@ public class QwoBot {
                 .registerService(ManagementService.class)
                 .registerService(AccountService.class)
                 .registerService(HelpService.class)
-                .registerService(QbuxService.class);
+                .registerService(QbuxService.class)
+                .registerService(QbuxDistributionService.class);
 
         serviceManager.startAllUnstartedServices();
         shutdownNotifier.awaitShutdown();

@@ -19,10 +19,13 @@ import org.apache.shiro.subject.Subject;
 import org.pircbotx.User;
 import org.slf4j.Logger;
 
+import java.util.Set;
+
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
@@ -34,6 +37,19 @@ public class AccountManager {
     @Inject
     public AccountManager(AccountRepository accountRepository) {
         this.accountRepository = checkNotNull(accountRepository, "accountRepository must not be null");
+    }
+
+    public Set<Long> getAuthenticatedUserIds() {
+        return copyOf(verifiedUsers.keySet());
+    }
+
+    public static Account getActingAccount() {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.isAuthenticated() && subject.getPrincipal() instanceof Account) {
+            return (Account) subject.getPrincipal();
+        }
+
+        throw new AuthenticationException("Not logged in");
     }
 
     Optional<Account> getAccount(User user) {
@@ -133,14 +149,5 @@ public class AccountManager {
         }
 
         accountRepository.saveOrUpdate(account);
-    }
-
-    public static Account getActingAccount() {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.isAuthenticated() && subject.getPrincipal() instanceof Account) {
-            return (Account)subject.getPrincipal();
-        }
-
-        throw new AuthenticationException("Not logged in");
     }
 }

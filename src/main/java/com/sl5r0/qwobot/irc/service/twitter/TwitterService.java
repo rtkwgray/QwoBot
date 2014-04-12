@@ -3,20 +3,19 @@ package com.sl5r0.qwobot.irc.service.twitter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.eventbus.EventBus;
-import com.google.common.util.concurrent.AbstractIdleService;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.core.IrcTextFormatter;
 import com.sl5r0.qwobot.domain.TwitterFollow;
+import com.sl5r0.qwobot.domain.help.Command;
+import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.irc.service.IrcBotService;
-import com.sl5r0.qwobot.irc.service.MessageDispatcher;
-import com.sl5r0.qwobot.irc.service.runnables.MessageRunnable;
 import com.sl5r0.qwobot.persistence.SimpleRepository;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.PircBotX;
-import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.hooks.events.MessageEvent;
 import org.slf4j.Logger;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
@@ -34,13 +33,16 @@ import static com.google.common.primitives.Longs.toArray;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
 import static com.sl5r0.qwobot.domain.TwitterFollow.*;
 import static com.sl5r0.qwobot.guice.ConfigurationProvider.readConfigurationValue;
-import static com.sl5r0.qwobot.irc.service.MessageDispatcher.startingWithTrigger;
 import static com.sl5r0.qwobot.util.ExtraPredicates.matchesCaseInsensitiveString;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
-public class TwitterService extends AbstractIdleService {
+public class TwitterService extends AbstractIrcEventService {
     private static final Logger log = getLogger(TwitterService.class);
+    private static final Command followCommand = new Command("!twitter:follow", "Follow one or more users").addUnboundedParameter("twitter handle");
+    private static final Command followingCommand = new Command("!twitter:following", "Show currently followed users");
+    private static final Command unfollowCommand = new Command("!twitter:unfollow", "Unfollow one or more users").addUnboundedParameter("twitter handle");
+    private static final Command colorCommand = new Command("!twitter:color", "Change the color of a user's tweets").addParameter("twitter handle").addParameter("color");
     private static final String OAUTH_CONSUMER_KEY = "twitter.oauth.consumer-key";
     private static final String OAUTH_CONSUMER_SECRET = "twitter.oauth.consumer-secret";
     private static final String OAUTH_ACCESS_TOKEN = "twitter.oauth.access-token";
@@ -49,8 +51,6 @@ public class TwitterService extends AbstractIdleService {
 
     private final PircBotX bot;
     private final SimpleRepository<TwitterFollow> twitterRepository;
-    private final MessageDispatcher messageDispatcher;
-    private final EventBus eventBus;
     private Optional<TwitterStream> stream = absent();
     private Twitter twitter;
     private String channel;
@@ -58,19 +58,12 @@ public class TwitterService extends AbstractIdleService {
     private final Set<TwitterFollow> following = newHashSet();
 
     @Inject
-    public TwitterService(IrcBotService ircBotService, MessageDispatcher messageDispatcher, EventBus eventBus, SimpleRepository<TwitterFollow> twitterRepository, HierarchicalConfiguration configuration) {
+    public TwitterService(IrcBotService ircBotService, SimpleRepository<TwitterFollow> twitterRepository, HierarchicalConfiguration configuration) {
+        super(newHashSet(followCommand, followingCommand, unfollowCommand, colorCommand));
         this.twitterRepository = checkNotNull(twitterRepository, "twitterRepository must not be null");
-        this.messageDispatcher = checkNotNull(messageDispatcher, "messageDispatcher must not be null");
-        this.eventBus = checkNotNull(eventBus, "eventBus must not be null");
         this.bot = ircBotService.getBot();
 
         if (configurationIsValid(configuration)) {
-            this.messageDispatcher
-                    .subscribeToMessage(startingWithTrigger("!following"), new ShowFollows())
-                    .subscribeToMessage(startingWithTrigger("!follow"), new FollowUser())
-                    .subscribeToMessage(startingWithTrigger("!statuscolor"), new ChangeStatusColor())
-                    .subscribeToMessage(startingWithTrigger("!unfollow"), new UnfollowUser());
-
             initializeTwitter(configuration);
             loadTwitterFollows();
         } else {
@@ -128,10 +121,9 @@ public class TwitterService extends AbstractIdleService {
     }
 
     @Override
-    protected void startUp() throws Exception {
+    protected void doStart() {
         if (stream.isPresent()) {
-            eventBus.register(messageDispatcher);
-            log.info("Starting service.");
+            super.doStart();
             updateStreamFilter();
         } else {
             log.warn("Not starting service because configuration is invalid.");
@@ -140,11 +132,11 @@ public class TwitterService extends AbstractIdleService {
     }
 
     @Override
-    protected void shutDown() throws Exception {
+    protected void doStop() {
         if (stream.isPresent()) {
-            eventBus.unregister(messageDispatcher);
             stream.get().shutdown();
         }
+        super.doStop();
     }
 
     private twitter4j.conf.Configuration twitterConfig(Configuration configuration) {
@@ -162,83 +154,73 @@ public class TwitterService extends AbstractIdleService {
                 .build();
     }
 
-    private class FollowUser implements MessageRunnable {
-        @Override
-        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            if (arguments.size() >= 2) {
-                final String handle = arguments.get(1).replace("@", "");
-                if (!getTwitterFollow(handle).isPresent()) {
-                    try {
-                        final User user = twitter.showUser(handle);
-                        final TwitterFollow follow = new TwitterFollow(user.getId(), user.getScreenName(), BLUE);
-                        if (!following.contains(follow)) {
-                            following.add(follow);
-                            twitterRepository.save(follow);
-                            updateStreamFilter();
-                            event.respond("Added " + toPrettyString.apply(follow) + " to the list of followed users.");
-                        }
-                    } catch (TwitterException e) {
-                        event.respond("Sorry, I couldn't find a Twitter user with that name.");
-                    }
-                }
-            }
-        }
-    }
-
-    private class UnfollowUser implements MessageRunnable {
-        @Override
-        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            if (arguments.size() >= 2) {
-                final String handle = arguments.get(1).replace("@", "");
-                final Optional<TwitterFollow> follow = getTwitterFollow(handle);
-                if (follow.isPresent()) {
-                    log.info("Removing " + follow.get().getHandle() + " from follows.");
-                    following.remove(follow.get());
-                    twitterRepository.delete(follow.get());
+    @Subscribe
+    public void run(MessageEvent<PircBotX> event) {
+        final List<String> arguments  = argumentsFor(followCommand, event.getMessage());
+        final String handle = arguments.get(0).replace("@", "");
+        if (!getTwitterFollow(handle).isPresent()) {
+            try {
+                final User user = twitter.showUser(handle);
+                final TwitterFollow follow = new TwitterFollow(user.getId(), user.getScreenName(), BLUE);
+                if (!following.contains(follow)) {
+                    following.add(follow);
+                    twitterRepository.save(follow);
                     updateStreamFilter();
-                    event.respond("Removed " + toPrettyString.apply(follow.get()) + " from the list of followed users.");
-                } else {
-                    event.respond("It doesn't look like I'm following them.");
+                    event.respond("Added " + toPrettyString.apply(follow) + " to the list of followed users.");
                 }
+            } catch (TwitterException e) {
+                event.respond("Sorry, I couldn't find a Twitter user with that name.");
             }
         }
     }
 
-    private class ShowFollows implements MessageRunnable {
-        @Override
-        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            if (following.isEmpty()) {
-                event.respond("I'm not following anybody!");
-            } else {
-                final String follows = Joiner.on(", ").join(transform(following, toPrettyString));
-                event.respond("I'm currently following: " + follows);
-            }
+    @Subscribe
+    public void unfollowUser(MessageEvent<PircBotX> event) {
+        final List<String> arguments = argumentsFor(unfollowCommand, event.getMessage());
+        final String handle = arguments.get(0).replace("@", "");
+        final Optional<TwitterFollow> follow = getTwitterFollow(handle);
+        if (follow.isPresent()) {
+            log.info("Removing " + follow.get().getHandle() + " from follows.");
+            following.remove(follow.get());
+            twitterRepository.delete(follow.get());
+            updateStreamFilter();
+            event.respond("Removed " + toPrettyString.apply(follow.get()) + " from the list of followed users.");
+        } else {
+            event.respond("It doesn't look like I'm following them.");
         }
     }
 
-    private class ChangeStatusColor implements MessageRunnable {
-        @Override
-        public void run(GenericMessageEvent<PircBotX> event, List<String> arguments) {
-            if (arguments.size() >= 3) {
-                final IrcTextFormatter newStatusColor;
-                try {
-                    newStatusColor = IrcTextFormatter.valueOf(arguments.get(2).toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    event.respond("I don't understand that color.");
-                    return;
-                }
+    @Subscribe
+    public void showFollows(MessageEvent<PircBotX> event) {
+        argumentsFor(followingCommand, event.getMessage());
+        if (following.isEmpty()) {
+            event.respond("I'm not following anybody!");
+        } else {
+            final String follows = Joiner.on(", ").join(transform(following, toPrettyString));
+            event.respond("I'm currently following: " + follows);
+        }
+    }
 
-                final String handle = arguments.get(1).replace("@", "");
-                final Optional<TwitterFollow> follow = getTwitterFollow(handle);
-                if (follow.isPresent()) {
-                    log.info("Changed " + follow.get().getHandle() + "'s status update color to " + newStatusColor);
-                    follow.get().setStatusColor(newStatusColor);
-                    twitterRepository.saveOrUpdate(follow.get());
-                    event.respond("Changed status update color for " + toPrettyString.apply(follow.get()));
-                } else {
-                    event.respond("It doesn't look like I'm following them.");
-                }
-            }
+    @Subscribe
+    public void changeTweetColor(MessageEvent<PircBotX> event) {
+        final List<String> arguments = argumentsFor(colorCommand, event.getMessage());
+        final IrcTextFormatter newStatusColor;
+        try {
+            newStatusColor = IrcTextFormatter.valueOf(arguments.get(1).toUpperCase());
+        } catch (IllegalArgumentException e) {
+            event.respond("I don't understand that color.");
+            return;
+        }
+
+        final String handle = arguments.get(0).replace("@", "");
+        final Optional<TwitterFollow> follow = getTwitterFollow(handle);
+        if (follow.isPresent()) {
+            log.info("Changed " + follow.get().getHandle() + "'s status update color to " + newStatusColor);
+            follow.get().setStatusColor(newStatusColor);
+            twitterRepository.saveOrUpdate(follow.get());
+            event.respond("Changed status update color for " + toPrettyString.apply(follow.get()));
+        } else {
+            event.respond("It doesn't look like I'm following them.");
         }
     }
 
