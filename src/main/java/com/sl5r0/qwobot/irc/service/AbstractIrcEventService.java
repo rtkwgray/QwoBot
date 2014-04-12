@@ -23,14 +23,14 @@ public abstract class AbstractIrcEventService extends AbstractService {
 
     @Override
     protected void doStart() {
-        log.info("Starting service.");
+        log.info("Starting service");
         eventBus.register(this);
         notifyStarted();
     }
 
     @Override
     protected void doStop() {
-        log.info("Stopping service.");
+        log.info("Stopping service");
         eventBus.unregister(this);
         notifyStarted();
     }

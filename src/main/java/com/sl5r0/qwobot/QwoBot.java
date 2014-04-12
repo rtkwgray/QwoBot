@@ -32,6 +32,7 @@ public class QwoBot {
                 .registerService(TwitterService.class)
                 .registerService(ManagementService.class)
                 .registerService(AccountService.class)
+                .registerService(HelpService.class)
                 .registerService(QbuxService.class);
 
         serviceManager.startAllUnstartedServices();
