@@ -37,8 +37,6 @@ public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
     @Override
     public void onEvent(final Event<PircBotX> event) throws Exception {
         super.onEvent(event);
-        log.trace("Received IRC event: " + event);
-
         // Rely on our own executor to deal with events. This means that commands will be processed synchronously, but
         // it's easier to maintain authentication state this way.
         executor.submit(new Runnable() {

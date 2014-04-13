@@ -1,6 +1,7 @@
 package com.sl5r0.qwobot.security;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.inject.Inject;
@@ -26,6 +27,7 @@ import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.Iterables.tryFind;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
@@ -120,6 +122,20 @@ public class AccountManager {
             }
         } else {
             throw new IncorrectPasswordException();
+        }
+    }
+
+    public void logOutUserIfNotVisible(final User user) {
+        final Optional<User> verifiedUser = tryFind(verifiedUsers.values(), new Predicate<User>() {
+            @Override
+            public boolean apply(User input) {
+                return input.getNick().equals(user.getNick()) && input.getChannels().isEmpty();
+            }
+        });
+
+        if (verifiedUser.isPresent()) {
+            final Long removedId = verifiedUsers.inverse().remove(verifiedUser.get());
+            log.info("Logged out user with id " + removedId + " and nickname \"" + user.getNick() + "\"");
         }
     }
 

@@ -127,7 +127,7 @@ public class TwitterService extends AbstractIrcEventService {
             updateStreamFilter();
         } else {
             log.warn("Not starting service because configuration is invalid.");
-            this.stopAsync();
+            throw new RuntimeException("Twitter service not configured");
         }
     }
 

@@ -15,9 +15,7 @@ import com.sl5r0.qwobot.security.exceptions.UsernameAlreadyExistsException;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
-import org.pircbotx.hooks.events.JoinEvent;
-import org.pircbotx.hooks.events.PrivateMessageEvent;
-import org.pircbotx.hooks.events.UserListEvent;
+import org.pircbotx.hooks.events.*;
 
 import java.util.List;
 
@@ -43,6 +41,21 @@ public class AccountService extends AbstractIrcEventService {
     @Subscribe
     public void handleJoins(JoinEvent<PircBotX> event) {
         greet(event.getUser());
+    }
+
+    @Subscribe
+    public void handleParts(PartEvent<PircBotX> event) {
+        accountManager.logOutUserIfNotVisible(event.getUser());
+    }
+
+    @Subscribe
+    public void handleQuits(QuitEvent<PircBotX> event) {
+        accountManager.logOutUserIfNotVisible(event.getUser());
+    }
+
+    @Subscribe
+    public void handleKicks(KickEvent<PircBotX> event) {
+        accountManager.logOutUserIfNotVisible(event.getUser());
     }
 
     @Subscribe
@@ -122,6 +135,7 @@ public class AccountService extends AbstractIrcEventService {
         } catch (IncorrectPasswordException e) {
             createNewAccount(user);
         } catch (AccountHasPasswordException e) {
+            // TODO: if a user logs in, leaves, and then immediately rejoins, they're still authenticated....
             user.send().message("The account associated with this nickname has set a password. Some commands have been disabled until you log in.");
         }
     }
