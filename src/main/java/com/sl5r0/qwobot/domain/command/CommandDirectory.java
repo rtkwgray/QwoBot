@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.domain.help;
+package com.sl5r0.qwobot.domain.command;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Singleton;
@@ -10,7 +10,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.sl5r0.qwobot.domain.help.Command.triggerOrdering;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
@@ -37,6 +36,6 @@ public class CommandDirectory {
             }
         });
 
-        return triggerOrdering.leastOf(matchingCommands, maxResults);
+        return Command.triggerOrdering.leastOf(matchingCommands, maxResults);
     }
 }

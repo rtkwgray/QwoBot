@@ -146,7 +146,9 @@ public class AccountManager {
             throw new UsernameAlreadyExistsException();
         }
 
-        accountRepository.save(new Account(username));
+        final Account account = new Account(username);
+        account.setBalance(10);
+        accountRepository.save(account);
         log.info("Created account for \"" + username + "\"");
     }
 

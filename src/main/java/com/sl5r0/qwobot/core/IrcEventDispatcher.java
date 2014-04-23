@@ -37,9 +37,10 @@ public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
     @Override
     public void onEvent(final Event<PircBotX> event) throws Exception {
         super.onEvent(event);
+
         // Rely on our own executor to deal with events. This means that commands will be processed synchronously, but
         // it's easier to maintain authentication state this way.
-        executor.submit(new Runnable() {
+        final Runnable handleEvent = new Runnable() {
             @Override
             public void run() {
                 // Don't try to authenticate during JoinEvents because we might not be logged in yet.
@@ -54,19 +55,29 @@ public class IrcEventDispatcher extends ListenerAdapter<PircBotX> {
 
                 eventBus.post(event);
             }
-        });
+        };
+
+        final Subject subject = new Subject.Builder().buildSubject();
+        subject.associateWith(handleEvent);
+
+        executor.submit(subject.associateWith(handleEvent));
     }
 
-    private void logInSubject(User user) {
+    private boolean logInSubject(User user) {
         final Subject subject = SecurityUtils.getSubject();
         try {
             subject.login(new IrcAuthenticationToken(user));
+            return true;
         } catch (BotCannotSeeUserException e) {
             log.trace("Ignoring failed authentication for nick \"" + user.getNick() + "\" because I can't see them.");
         } catch (UnknownAccountException e) {
-            log.trace("Ignoring unknown account " + user.getNick() + ". They need to log in first.");
+            log.trace("Ignoring unknown account for nickname \"" + user.getNick() + "\". They need to log in first.");
         } catch (AuthenticationException e) {
             log.warn("Authentication failed for user with nickname \"" + user.getNick() + "\"", e);
+        } catch (RuntimeException e) {
+            log.error("Something went really wrong....", e);
         }
+
+        return false;
     }
 }

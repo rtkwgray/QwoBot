@@ -4,70 +4,96 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.sl5r0.qwobot.domain.Account;
-import com.sl5r0.qwobot.domain.help.Command;
+import com.sl5r0.qwobot.domain.command.CommandHandler;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.persistence.AccountRepository;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.pircbotx.Channel;
-import org.pircbotx.PircBotX;
-import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.User;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
-import org.slf4j.Logger;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.sl5r0.qwobot.domain.command.Command.forEvent;
+import static com.sl5r0.qwobot.domain.command.Parameter.*;
 import static com.sl5r0.qwobot.security.AccountManager.getActingAccount;
-import static java.lang.Integer.parseInt;
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
-import static org.slf4j.LoggerFactory.getLogger;
+import static java.lang.Math.min;
 
 public class QbuxService extends AbstractIrcEventService {
-    private static final Logger log = getLogger(QbuxService.class);
-    private static final Command showBalance = new Command("!qbux:balance", "Show balance for a user").addOptionalParameter("nickname");
-    private static final Command tip = new Command("!qbux:tip", "Give QBUX to the specified user").addParameter("nickname").addParameter("amount").addParameter("reason");
-    private static final Command richest = new Command("!qbux:richest", "Show a selection of users with the highest account balance").addOptionalParameter("nickname");
-
     private final AccountRepository accountRepository;
 
     @Inject
     protected QbuxService(AccountRepository accountRepository) {
-        super(newHashSet(showBalance, tip, richest));
         this.accountRepository = checkNotNull(accountRepository);
     }
 
-    @Subscribe
-    public void showBalance(PrivateMessageEvent<PircBotX> event) {
-        doShowBalance(event);
+    @Override
+    protected void initialize() {
+        registerCommand(
+                forEvent(GenericMessageEvent.class)
+                        .addParameter(exactMatch("!qbux:balance"))
+                        .addParameter(string("nickname"))
+                        .description("Show balance for a user")
+                        .handler(new CommandHandler<GenericMessageEvent>() {
+                            @Override
+                            public void handle(GenericMessageEvent event, List<String> arguments) {
+                                if (arguments.size() > 1) {
+                                    showUserBalance(event, arguments.get(1));
+                                } else {
+                                    showPersonalBalance(event);
+                                }
+                            }
+                        })
+                        .build()
+        );
+
+        registerCommand(
+                forEvent(PrivateMessageEvent.class)
+                        .addParameter(exactMatch("!qbux:tip"))
+                        .addParameter(string("nickname"))
+                        .addParameter(number("amount"))
+                        .description("Tip a user")
+                        .handler(new CommandHandler<PrivateMessageEvent>() {
+                            @Override
+                            public void handle(PrivateMessageEvent event, List<String> arguments) {
+                                tip(event, arguments.get(1), Integer.parseInt(arguments.get(2)));
+                            }
+                        })
+                        .build()
+        );
+
+        registerCommand(
+                forEvent(GenericMessageEvent.class)
+                        .addParameter(exactMatch("!qbux:richest"))
+                        .addParameter(number("amount"))
+                        .description("Show the richest users")
+                        .handler(new CommandHandler<GenericMessageEvent>() {
+                            @Override
+                            public void handle(GenericMessageEvent event, List<String> arguments) {
+                                if (arguments.size() > 1) {
+                                    showRichest(event, min(Integer.parseInt(arguments.get(1)), 10));
+                                } else {
+                                    showRichest(event, 3);
+                                }
+                            }
+                        })
+                        .build()
+        );
     }
 
-    @Subscribe
-    public void showBalance(MessageEvent<PircBotX> event) {
-        doShowBalance(event);
-    }
-
-    private void doShowBalance(GenericMessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor(showBalance, event.getMessage());
-        if (arguments.isEmpty()) {
-            showPersonalBalance(event);
-        } else {
-            showUserBalance(event, arguments.get(0));
-        }
-    }
+    // TODO: listen for bot disconnects and log everybody out.
 
     @RequiresAuthentication
-    protected void showPersonalBalance(GenericMessageEvent<PircBotX> event) {
+    protected void showPersonalBalance(GenericMessageEvent event) {
         event.respond("You have " + getActingAccount().getBalance() + " QBUX.");
     }
 
-    private void showUserBalance(GenericMessageEvent<PircBotX> event, String nickname) {
+    private void showUserBalance(GenericMessageEvent event, String nickname) {
         final Optional<Account> account = accountRepository.findByNick(nickname);
         if (account.isPresent()) {
             event.respond(account.get().getUsername() + " has " + account.get().getBalance() + " QBUX.");
@@ -76,25 +102,24 @@ public class QbuxService extends AbstractIrcEventService {
         }
     }
 
-    @Subscribe
-    public void tip(PrivateMessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor(tip, event.getMessage());
-        final int amount;
-        try {
-            amount = parseInt(arguments.get(1));
-        } catch (NumberFormatException e) {
-            event.respond("\"" + arguments.get(1) + "\" doesn't look like a valid number to me.");
-            return;
-        }
-
-        doTip(event, arguments.get(0), amount, Joiner.on(" ").join(arguments.subList(2, arguments.size())));
+    public void tip(PrivateMessageEvent event, String nickname, int amount) {
+        doTip(event, nickname, amount);
     }
 
     @RequiresAuthentication
-    protected void doTip(PrivateMessageEvent<PircBotX> event, String nickToTip, int amount, String reason) {
+    protected void doTip(PrivateMessageEvent event, String nickToTip, int amount) {
         try {
             checkArgument(amount > 0, "tip amount must be positive");
             checkArgument(!nickToTip.equals(getActingAccount().getUsername()), "you can't tip yourself");
+
+            final User tippedUser = event.getBot().getUserChannelDao().getUser(nickToTip);
+            final String tippedHostString = tippedUser.getLogin() + "@" + tippedUser.getHostmask();
+            final String tipperHostString = event.getUser().getLogin() + "@" + event.getUser().getHostmask();
+
+            if (tippedHostString.equals(tipperHostString)) {
+                throw new IllegalArgumentException("you can't tip yourself");
+            }
+
             final Optional<Account> to = accountRepository.findByNick(nickToTip);
             if (to.isPresent()) {
                 final Account giver = getActingAccount();
@@ -103,7 +128,7 @@ public class QbuxService extends AbstractIrcEventService {
                 receiver.modifyBalance(amount);
                 accountRepository.saveOrUpdate(giver);
                 accountRepository.saveOrUpdate(receiver);
-                final String message = receiver.getUsername() + " was tipped " + amount + " QBUX by " + giver.getUsername() + " " + reason;
+                final String message = nickToTip + " was tipped " + amount + " QBUX by " + giver.getUsername();
                 for (Channel channel : event.getBot().getUserChannelDao().getUser(receiver.getUsername()).getChannels()) {
                     channel.send().message(message);
                 }
@@ -115,18 +140,7 @@ public class QbuxService extends AbstractIrcEventService {
         }
     }
 
-    @Subscribe
-    public void showRichest(MessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor(richest, event.getMessage());
-        int numberToFind = 1;
-        if (!arguments.isEmpty()) {
-            try {
-                numberToFind = max(abs(parseInt(arguments.get(1))), 10);
-            } catch (NumberFormatException e) {
-                log.info("Couldn't parse \"" + arguments.get(1) + "\" as a number");
-            }
-        }
-
+    public void showRichest(GenericMessageEvent event, int numberToFind) {
         final List<Account> richest = accountRepository.findRichest(numberToFind);
         event.respond("Top " + numberToFind + " richest people:");
         event.respond(Joiner.on(", ").join(Lists.transform(richest, new Function<Account, String>() {

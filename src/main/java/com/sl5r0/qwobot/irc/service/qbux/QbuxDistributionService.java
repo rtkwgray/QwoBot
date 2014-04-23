@@ -19,7 +19,7 @@ import static com.google.common.util.concurrent.AbstractScheduledService.Schedul
 import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.joda.time.DateTime.now;
-import static org.joda.time.Period.hours;
+import static org.joda.time.Duration.standardHours;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
@@ -64,6 +64,6 @@ public class QbuxDistributionService extends AbstractScheduledService {
         final DateTime nextHour = now().hourOfDay().roundCeilingCopy();
         final long secondsUntilNextHour = new Duration(now(), nextHour).getStandardSeconds();
         log.info("Next QBUX distribution will be at " + nextHour + " (in " + secondsUntilNextHour + " seconds)");
-        return newFixedRateSchedule(secondsUntilNextHour, hours(1).getSeconds(), SECONDS);
+        return newFixedRateSchedule(secondsUntilNextHour, standardHours(1).getStandardSeconds(), SECONDS);
     }
 }

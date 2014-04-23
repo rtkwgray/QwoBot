@@ -4,7 +4,6 @@ import com.sl5r0.qwobot.persistence.PersistenceConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import javax.persistence.*;
@@ -40,7 +39,7 @@ public class ChatLog {
         this.created = now();
     }
 
-    public static ChatLog fromMessageEvent(MessageEvent<PircBotX> event) {
+    public static ChatLog fromMessageEvent(MessageEvent event) {
         return new ChatLog(event.getUser().getNick(), event.getChannel().getName(), event.getMessage());
     }
 

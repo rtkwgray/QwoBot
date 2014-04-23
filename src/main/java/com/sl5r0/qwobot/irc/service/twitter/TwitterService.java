@@ -3,12 +3,11 @@ package com.sl5r0.qwobot.irc.service.twitter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.core.IrcTextFormatter;
 import com.sl5r0.qwobot.domain.TwitterFollow;
-import com.sl5r0.qwobot.domain.help.Command;
+import com.sl5r0.qwobot.domain.command.CommandHandler;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.irc.service.IrcBotService;
 import com.sl5r0.qwobot.persistence.SimpleRepository;
@@ -32,6 +31,9 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Longs.toArray;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
 import static com.sl5r0.qwobot.domain.TwitterFollow.*;
+import static com.sl5r0.qwobot.domain.command.Command.forEvent;
+import static com.sl5r0.qwobot.domain.command.Parameter.exactMatch;
+import static com.sl5r0.qwobot.domain.command.Parameter.string;
 import static com.sl5r0.qwobot.guice.ConfigurationProvider.readConfigurationValue;
 import static com.sl5r0.qwobot.util.ExtraPredicates.matchesCaseInsensitiveString;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -39,11 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class TwitterService extends AbstractIrcEventService {
     private static final Logger log = getLogger(TwitterService.class);
-    private static final Command followCommand = new Command("!twitter:follow", "Follow one or more users").addUnboundedParameter("twitter handle");
-    private static final Command followingCommand = new Command("!twitter:following", "Show currently followed users");
-    private static final Command unfollowCommand = new Command("!twitter:unfollow", "Unfollow one or more users").addUnboundedParameter("twitter handle");
-    private static final Command colorCommand = new Command("!twitter:color", "Change the color of a user's tweets").addParameter("twitter handle").addParameter("color");
-    private static final String OAUTH_CONSUMER_KEY = "twitter.oauth.consumer-key";
+     private static final String OAUTH_CONSUMER_KEY = "twitter.oauth.consumer-key";
     private static final String OAUTH_CONSUMER_SECRET = "twitter.oauth.consumer-secret";
     private static final String OAUTH_ACCESS_TOKEN = "twitter.oauth.access-token";
     private static final String OAUTH_ACCESS_TOKEN_SECRET = "twitter.oauth.access-token-secret";
@@ -59,7 +57,6 @@ public class TwitterService extends AbstractIrcEventService {
 
     @Inject
     public TwitterService(IrcBotService ircBotService, SimpleRepository<TwitterFollow> twitterRepository, HierarchicalConfiguration configuration) {
-        super(newHashSet(followCommand, followingCommand, unfollowCommand, colorCommand));
         this.twitterRepository = checkNotNull(twitterRepository, "twitterRepository must not be null");
         this.bot = ircBotService.getBot();
 
@@ -121,6 +118,65 @@ public class TwitterService extends AbstractIrcEventService {
     }
 
     @Override
+    protected void initialize() {
+        registerCommand(
+                forEvent(MessageEvent.class)
+                .addParameter(exactMatch("!twitter:follow"))
+                .addParameter(string("twitter handle"))
+                .description("Follow a twitter user")
+                .handler(new CommandHandler<MessageEvent>() {
+                    @Override
+                    public void handle(MessageEvent event, List<String> arguments) {
+                        run(event, arguments.get(1));
+                    }
+                })
+                .build()
+        );
+
+        registerCommand(
+                forEvent(MessageEvent.class)
+                        .addParameter(exactMatch("!twitter:unfollow"))
+                        .addParameter(string("twitter handle"))
+                        .description("Unfollow a twitter user")
+                        .handler(new CommandHandler<MessageEvent>() {
+                            @Override
+                            public void handle(MessageEvent event, List<String> arguments) {
+                                unfollowUser(event, arguments.get(1));
+                            }
+                        })
+                        .build()
+        );
+
+        registerCommand(
+                forEvent(MessageEvent.class)
+                        .addParameter(exactMatch("!twitter:color"))
+                        .addParameter(string("twitter handle"))
+                        .addParameter(string("color"))
+                        .description("Change the color of a twitter user's tweets")
+                        .handler(new CommandHandler<MessageEvent>() {
+                            @Override
+                            public void handle(MessageEvent event, List<String> arguments) {
+                                changeTweetColor(event, arguments.get(1), IrcTextFormatter.valueOf(arguments.get(2).toUpperCase()));
+                            }
+                        })
+                        .build()
+        );
+
+        registerCommand(
+                forEvent(MessageEvent.class)
+                        .addParameter(exactMatch("!twitter:following"))
+                        .description("Show what users are being followed")
+                        .handler(new CommandHandler<MessageEvent>() {
+                            @Override
+                            public void handle(MessageEvent event, List<String> arguments) {
+                                showFollows(event);
+                            }
+                        })
+                        .build()
+        );
+    }
+
+    @Override
     protected void doStart() {
         if (stream.isPresent()) {
             super.doStart();
@@ -154,10 +210,7 @@ public class TwitterService extends AbstractIrcEventService {
                 .build();
     }
 
-    @Subscribe
-    public void run(MessageEvent<PircBotX> event) {
-        final List<String> arguments  = argumentsFor(followCommand, event.getMessage());
-        final String handle = arguments.get(0).replace("@", "");
+    public void run(MessageEvent event, String handle) {
         if (!getTwitterFollow(handle).isPresent()) {
             try {
                 final User user = twitter.showUser(handle);
@@ -174,10 +227,7 @@ public class TwitterService extends AbstractIrcEventService {
         }
     }
 
-    @Subscribe
-    public void unfollowUser(MessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor(unfollowCommand, event.getMessage());
-        final String handle = arguments.get(0).replace("@", "");
+    public void unfollowUser(MessageEvent event, String handle) {
         final Optional<TwitterFollow> follow = getTwitterFollow(handle);
         if (follow.isPresent()) {
             log.info("Removing " + follow.get().getHandle() + " from follows.");
@@ -190,9 +240,7 @@ public class TwitterService extends AbstractIrcEventService {
         }
     }
 
-    @Subscribe
-    public void showFollows(MessageEvent<PircBotX> event) {
-        argumentsFor(followingCommand, event.getMessage());
+    public void showFollows(MessageEvent event) {
         if (following.isEmpty()) {
             event.respond("I'm not following anybody!");
         } else {
@@ -201,28 +249,19 @@ public class TwitterService extends AbstractIrcEventService {
         }
     }
 
-    @Subscribe
-    public void changeTweetColor(MessageEvent<PircBotX> event) {
-        final List<String> arguments = argumentsFor(colorCommand, event.getMessage());
-        final IrcTextFormatter newStatusColor;
-        try {
-            newStatusColor = IrcTextFormatter.valueOf(arguments.get(1).toUpperCase());
-        } catch (IllegalArgumentException e) {
-            event.respond("I don't understand that color.");
-            return;
-        }
-
-        final String handle = arguments.get(0).replace("@", "");
+    public void changeTweetColor(MessageEvent event, String handle, IrcTextFormatter color) {
         final Optional<TwitterFollow> follow = getTwitterFollow(handle);
         if (follow.isPresent()) {
-            log.info("Changed " + follow.get().getHandle() + "'s status update color to " + newStatusColor);
-            follow.get().setStatusColor(newStatusColor);
+            log.info("Changed " + follow.get().getHandle() + "'s status update color to " + color);
+            follow.get().setStatusColor(color);
             twitterRepository.saveOrUpdate(follow.get());
             event.respond("Changed status update color for " + toPrettyString.apply(follow.get()));
         } else {
             event.respond("It doesn't look like I'm following them.");
         }
     }
+
+
 
     private Optional<TwitterFollow> getTwitterFollow(final String handle) {
         return tryFind(following, new Predicate<TwitterFollow>() {

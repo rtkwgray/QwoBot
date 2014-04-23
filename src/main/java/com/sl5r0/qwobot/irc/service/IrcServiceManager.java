@@ -7,28 +7,43 @@ import com.google.common.util.concurrent.Service;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.util.concurrent.Service.State;
 import static com.google.common.util.concurrent.Service.State.NEW;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
 public class IrcServiceManager {
+    private static final Logger log = getLogger(IrcServiceManager.class);
     private final Injector injector;
     private final Map<Class<? extends Service>, Service> services = newHashMap();
+    private final ExecutorService listenerExecutor = newFixedThreadPool(5);
 
     @Inject
     public IrcServiceManager(Injector injector) {
         this.injector = injector;
     }
 
-    public IrcServiceManager registerService(Class<? extends Service> service) {
+    public IrcServiceManager registerService(final Class<? extends Service> service) {
         checkState(!services.containsKey(service), "service (" + service.getSimpleName() + ") is already registered");
-        services.put(service, injector.getInstance(service));
+
+        final Service instance = injector.getInstance(service);
+        instance.addListener(new Service.Listener() {
+            @Override
+            public void failed(State from, Throwable failure) {
+                log.error("Exception in service " + service.getName() + " while " + from, failure);
+            }
+        }, listenerExecutor);
+
+        services.put(service, instance);
         return this;
     }
 

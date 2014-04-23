@@ -9,21 +9,21 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.api.client.util.Key;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.domain.help.Command;
-import org.pircbotx.PircBotX;
-import org.pircbotx.hooks.events.MessageEvent;
+import com.sl5r0.qwobot.domain.command.CommandHandler;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singleton;
+import static com.sl5r0.qwobot.domain.command.Command.forEvent;
+import static com.sl5r0.qwobot.domain.command.Parameter.exactMatch;
+import static com.sl5r0.qwobot.domain.command.Parameter.string;
 
 @Singleton
 public class BitCoinService extends AbstractIrcEventService {
-    private static final Command CHECK_BTC = new Command("!btc", "Show current value of BTC in the specified currencies").addUnboundedParameter("currency code");
     private static final GenericUrl BITPAY_URL = new GenericUrl("https://bitpay.com/api/rates");
     private final HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory(new HttpRequestInitializer() {
         @Override
@@ -32,14 +32,24 @@ public class BitCoinService extends AbstractIrcEventService {
         }
     });
 
-    protected BitCoinService() {
-        super(singleton(CHECK_BTC));
+    @Override
+    protected void initialize() {
+        registerCommand(
+                forEvent(GenericMessageEvent.class)
+                        .addParameter(exactMatch("!btc"))
+                        .addParameter(string("currency code"))
+                        .description("Check bitcoin prices")
+                        .handler(new CommandHandler<GenericMessageEvent>() {
+                            @Override
+                            public void handle(GenericMessageEvent event, List<String> arguments) {
+                                getPrices(event, Collections.singletonList(arguments.get(1)));
+                            }
+                        })
+                        .build()
+        );
     }
 
-    @Subscribe
-    public void btc(MessageEvent<PircBotX> event) {
-        final List<String> currencies = argumentsFor(CHECK_BTC, event.getMessage());
-
+    public void getPrices(GenericMessageEvent event, List<String> currencies) {
         BitCoinPrices bitCoinPrices = new BitCoinPrices();
         try {
             bitCoinPrices = requestFactory.buildGetRequest(BITPAY_URL).execute().parseAs(BitCoinPrices.class).filterBy(currencies);
@@ -72,9 +82,12 @@ public class BitCoinService extends AbstractIrcEventService {
     }
 
     public static class BitCoinPrice {
-        @Key String code;
-        @Key String name;
-        @Key double rate;
+        @Key
+        String code;
+        @Key
+        String name;
+        @Key
+        double rate;
 
         @Override
         public String toString() {
