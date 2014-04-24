@@ -53,7 +53,7 @@ public class UrlScanningService extends AbstractIrcEventService {
     @Override
     protected void initialize() {
         registerCommand(Command.forEvent(GenericMessageEvent.class)
-                .addParameter(repeating(url()))
+                .addParameters(repeating(url()))
                 .description("Show the title for one or more URLs")
                 .handler(new CommandHandler<GenericMessageEvent>() {
                     @Override

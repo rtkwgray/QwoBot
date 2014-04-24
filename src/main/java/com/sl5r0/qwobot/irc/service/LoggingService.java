@@ -11,7 +11,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sl5r0.qwobot.domain.command.Command.forEvent;
-import static com.sl5r0.qwobot.domain.command.Parameter.string;
 
 @Singleton
 public class LoggingService extends AbstractIrcEventService {
@@ -30,7 +29,6 @@ public class LoggingService extends AbstractIrcEventService {
     protected void initialize() {
         registerCommand(
                 forEvent(MessageEvent.class)
-                        .addParameter(string("any valid string"))
                         .description("Create a chat log")
                         .handler(new CommandHandler<MessageEvent>() {
                             @Override

@@ -1,94 +1,102 @@
 package com.sl5r0.qwobot.domain.command;
 
 import com.google.common.base.Function;
+import com.sl5r0.qwobot.core.IrcTextFormatter;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.sl5r0.qwobot.domain.command.ParameterType.*;
 import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.quote;
 
 public class Parameter {
-    protected final String description;
-    private final Pattern pattern;
-    private final boolean repeating;
-    private final boolean optional;
+    public static final Pattern urlPattern = compile("(https?://\\S+\\.\\S+)");
+    private final ParameterType type;
+    private final String description;
+    private boolean optional = false;
+    private boolean repeating = false;
+    private boolean positional = true;
 
-    private Parameter(String description, String regex, boolean repeating, boolean optional) {
+    private Parameter(ParameterType type, String description) {
+        this.type = type;
         this.description = description;
-        this.repeating = repeating;
-        this.optional = optional;
-        this.pattern = compile(regex);
     }
 
-    public boolean isRepeating() {
+    public boolean isOptional() {
+        return optional;
+    }
+
+    public boolean repeats() {
         return repeating;
     }
 
-    public Pattern getPattern() {
-        return pattern;
+    public boolean isPositional() {
+        return positional;
     }
 
-    public static Parameter exactMatch(String string) {
-        return new Parameter(string, "(" + quote(string) + ")", false, false);
+    public ParameterType getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public static Parameter integer(String description) {
+        return new Parameter(INTEGER, description);
+    }
+
+    public static Parameter literal(String literal) {
+        return new Parameter(LITERAL, literal);
     }
 
     public static Parameter string(String description) {
-        return new Parameter("<" + description + ">", "(\\S+)", false, false);
-    }
-
-    public static Parameter number(String description) {
-        return new Parameter("<" + description + ">", "(\\d+)", false, false);
+        return new Parameter(STRING, description);
     }
 
     public static Parameter url() {
-        return new Parameter("<url>", "(https?://\\S+\\.\\S+)", false, false);
-    }
-
-    public static Parameter repeating(Parameter parameter) {
-        return new Parameter(parameter.description, parameter.pattern.pattern() + "+", true, parameter.optional);
+        return new Parameter(URL, "url");
     }
 
     public static Parameter optional(Parameter parameter) {
-        return new Parameter(parameter.description, "(?:" + parameter.pattern.pattern() + "+)?", parameter.repeating, true);
+        parameter.optional = true;
+        return parameter;
     }
 
-    public String find(String string, List<String> matches) {
-        final Matcher matcher = pattern.matcher(string);
-        if (repeating) {
-            int endIndex = 0;
-            while(matcher.find()) {
-                matches.add(matcher.group(1));
-                endIndex = matcher.end();
-            }
-            return string.substring(endIndex);
-        } else {
-            if (matcher.find()) {
-                matches.add(matcher.group(1));
-                return string.substring(matcher.end());
-            }
-        }
-
-        if (optional) {
-            return string;
-        } else {
-            throw new NoSuchElementException();
-        }
+    public static Parameter repeating(Parameter parameter) {
+        parameter.repeating = true;
+        return parameter;
     }
 
-    public static final Function<Parameter, String> toRegex = new Function<Parameter, String>() {
-        @Override
-        public String apply(Parameter input) {
-            return input.pattern.pattern();
-        }
-    };
+    public static Parameter anywhere(Parameter parameter) {
+        checkArgument(parameter.type == URL, "only URL parameters can be anywhere");
+        parameter.positional = false;
+        parameter.repeating = true;
+        return parameter;
+    }
 
-    public static final Function<Parameter, String> toDescription = new Function<Parameter, String>() {
+    public static Function<Parameter, String> toFormattedString = new Function<Parameter, String>() {
         @Override
         public String apply(Parameter input) {
-            return input.description;
+            String formattedString;
+            if (input.type == LITERAL) {
+                formattedString = input.getDescription();
+            } else if(input.isOptional()) {
+                formattedString = "[" + input.getDescription() + "]";
+            } else {
+                formattedString = "<" + input.getDescription() + ">";
+            }
+
+            if (input.repeats()) {
+                formattedString += " ... " + formattedString;
+            }
+
+            switch (input.getType()) {
+                case LITERAL:
+                    return IrcTextFormatter.GREEN.format(formattedString);
+                default:
+                    return IrcTextFormatter.CYAN.format(formattedString);
+            }
         }
     };
 }

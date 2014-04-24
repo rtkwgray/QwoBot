@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.sl5r0.qwobot.domain.command.NewParameter.*;
+import static com.sl5r0.qwobot.domain.command.Parameter.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.pircbotx.Colors.removeColors;
 
-public class NewCommandTest {
+public class CommandTest {
     TestableCommandHandler recordingHandler = new TestableCommandHandler();
 
     @Test
     public void ensureLiteralParametersAreParsedCorrectly() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(literal("literal")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(literal("literal")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("literal");
         command.handle(event);
 
@@ -32,7 +32,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureIntegerParametersAreParsedCorrectly() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(integer("integer")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(integer("integer")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("10");
         command.handle(event);
 
@@ -42,7 +42,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureUrlParametersAreParsedCorrectly() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(url()).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(url()).handler(recordingHandler).build();
         final MessageEvent<PircBotX> httpEvent = new PircBotTestableObjectFactory().messageEvent("http://example.com");
         final MessageEvent<PircBotX> httpsEvent = new PircBotTestableObjectFactory().messageEvent("https://example.com");
         command.handle(httpEvent);
@@ -56,7 +56,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureStringParametersAreParsedCorrectly() throws Exception {
-        final NewCommand<GenericMessageEvent> command =NewCommand.forEvent(GenericMessageEvent.class).addParameters(string("string")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(string("string")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("arbitraryString");
         command.handle(event);
 
@@ -66,7 +66,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureCompoundCommandsAreParsedCorrectlyStringParametersAreParsedCorrectly() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(literal("!trigger"), string("param1"), integer("param2")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(literal("!trigger"), string("param1"), integer("param2")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("!trigger arg1 10");
         command.handle(event);
 
@@ -76,7 +76,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureAllRepeatingParametersAreCaptured() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(repeating(string("param"))).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(repeating(string("param"))).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("string1 string2 string3");
         command.handle(event);
 
@@ -86,7 +86,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureOptionalParametersAreNotRequired() throws Exception {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(optional(string("trigger"))).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(optional(string("trigger"))).handler(recordingHandler).build();
         final MessageEvent<PircBotX> emptyEvent = new PircBotTestableObjectFactory().messageEvent("");
         final MessageEvent<PircBotX> nonEmptyEvent = new PircBotTestableObjectFactory().messageEvent("something");
         command.handle(emptyEvent);
@@ -100,7 +100,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureUrlsCanBeAnywhereInString() {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(anywhere(url())).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(anywhere(url())).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("*** http://google.com *** https://example.com ***");
         command.handle(event);
 
@@ -110,7 +110,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureCommandIsNotExecutedOnInvalidLiteral() {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(literal("right")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(literal("right")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("wrong");
         command.handle(event);
 
@@ -119,7 +119,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureCommandIsNotExecutedOnInvalidInteger() {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(integer("integer")).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(integer("integer")).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("not an integer");
         command.handle(event);
 
@@ -128,7 +128,7 @@ public class NewCommandTest {
 
     @Test
     public void ensureCommandIsNotExecutedOnInvalidUrl() {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(url()).handler(recordingHandler).build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(url()).handler(recordingHandler).build();
         final MessageEvent<PircBotX> event = new PircBotTestableObjectFactory().messageEvent("not a url");
         command.handle(event);
 
@@ -137,19 +137,19 @@ public class NewCommandTest {
 
     @Test (expected = IllegalStateException.class)
     public void ensureCannotAddMoreParametersAfterAddingOptionalParameter() {
-        NewCommand.forEvent(GenericMessageEvent.class).addParameters(optional(url()), url()).handler(recordingHandler).build();
+        Command.forEvent(GenericMessageEvent.class).addParameters(optional(url()), url()).handler(recordingHandler).build();
     }
 
     @Test (expected = IllegalStateException.class)
     public void ensureCannotAddMoreParametersAfterAddingRepeating() {
-        NewCommand.forEvent(GenericMessageEvent.class).addParameters(repeating(url()), url()).handler(recordingHandler).build();
+        Command.forEvent(GenericMessageEvent.class).addParameters(repeating(url()), url()).handler(recordingHandler).build();
     }
 
     @Test
     public void ensureUsageStringIsCorrect() {
-        final NewCommand<GenericMessageEvent> command = NewCommand.forEvent(GenericMessageEvent.class).addParameters(literal("!trigger"), string("param1"), integer("param2"), url()).handler(recordingHandler).description("description").build();
+        final Command<GenericMessageEvent> command = Command.forEvent(GenericMessageEvent.class).addParameters(literal("!trigger"), string("param1"), integer("param2"), url()).handler(recordingHandler).description("description").build();
 
-        final String usage = removeColors(command.prettyUsageString());
+        final String usage = removeColors(command.usageString());
         assertThat(usage, is("!trigger <param1> <param2> <url> - description"));
     }
 

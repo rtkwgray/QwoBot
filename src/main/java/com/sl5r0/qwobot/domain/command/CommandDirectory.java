@@ -10,6 +10,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.pircbotx.Colors.removeFormattingAndColors;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Singleton
@@ -32,10 +33,10 @@ public class CommandDirectory {
         final Iterable<Command> matchingCommands = filter(commands, new Predicate<Command>() {
             @Override
             public boolean apply(Command input) {
-                return input.trigger().startsWith(commandString);
+                return removeFormattingAndColors(input.usageString()).contains(commandString);
             }
         });
 
-        return Command.triggerOrdering.leastOf(matchingCommands, maxResults);
+        return Command.usageStringOrdering.leastOf(matchingCommands, maxResults);
     }
 }

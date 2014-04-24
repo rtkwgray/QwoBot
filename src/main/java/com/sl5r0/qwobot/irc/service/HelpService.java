@@ -6,12 +6,14 @@ import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.command.Command;
 import com.sl5r0.qwobot.domain.command.CommandDirectory;
 import com.sl5r0.qwobot.domain.command.CommandHandler;
-import com.sl5r0.qwobot.domain.command.Parameter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sl5r0.qwobot.domain.command.Parameter.literal;
+import static com.sl5r0.qwobot.domain.command.Parameter.optional;
+import static com.sl5r0.qwobot.domain.command.Parameter.string;
 
 @Singleton
 public class HelpService extends AbstractIrcEventService {
@@ -24,15 +26,15 @@ public class HelpService extends AbstractIrcEventService {
     }
 
     private void findHelp(GenericMessageEvent event, Optional<String> search, int maxResults) {
-        if (search.isPresent()) {
-            event.respond(helpCommand.prettyString());
+        if (!search.isPresent()) {
+            event.respond(helpCommand.usageString());
         } else {
             final List<Command> foundCommands = commandDirectory.search(search.get(), maxResults);
             if (foundCommands.isEmpty()) {
                 event.respond("No commands match the specified trigger");
             } else {
                 for (Command command : foundCommands) {
-                    event.respond(command.prettyString());
+                    event.respond(command.usageString());
                 }
             }
         }
@@ -42,7 +44,7 @@ public class HelpService extends AbstractIrcEventService {
     protected void initialize() {
         // TODO: this should be initialized in the constructor, but I can't do it right now because of how initialize is called.
         helpCommand = Command.forEvent(GenericMessageEvent.class)
-                .addParameter(Parameter.exactMatch("!help"))
+                .addParameters(literal("!help"), optional(string("command name")))
                 .description("Display usage for the specified command")
                 .handler(new CommandHandler<GenericMessageEvent>() {
                     @Override

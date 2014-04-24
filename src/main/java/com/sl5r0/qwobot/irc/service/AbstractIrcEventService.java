@@ -55,32 +55,4 @@ public abstract class AbstractIrcEventService extends AbstractService {
         }
         notifyStarted();
     }
-
-//    /**
-//     * Parses arguments for if a command begins with a certain trigger
-//     * @param command the command that will be executed
-//     * @param message the input to parse
-//     * @return a parsed list of arguments with size at least argumentCount
-//     * @throws CommandNotApplicableException if the command doesn't meet the minimum argument count
-//     */
-//    public List<String> argumentsFor(Command command, String message) {
-//        final Pattern PARAMETER_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-//        final Matcher matcher = PARAMETER_PATTERN.matcher(message);
-//        final List<String> parameters = newArrayList();
-//        while (matcher.find()) {
-//            if (matcher.group(1) != null) {
-//                parameters.add(matcher.group(1));
-//            } else {
-//                parameters.add(matcher.group(2));
-//            }
-//        }
-//
-//        if (parameters.size() > command.parameterCount() && parameters.get(0).equals(command.trigger())) {
-//            parameters.remove(0);
-//            log.debug("Executing command " + command + " with parameters " + parameters);
-//            return parameters;
-//        }
-//
-//        throw new CommandNotApplicableException(message, command);
-//    }
 }

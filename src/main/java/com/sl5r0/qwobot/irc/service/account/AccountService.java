@@ -137,9 +137,7 @@ public class AccountService extends AbstractIrcEventService {
     @Override
     protected void initialize() {
         registerCommand(forEvent(PrivateMessageEvent.class)
-                .addParameter(exactMatch("!account:login"))
-                .addParameter(string("username"))
-                .addParameter(string("password"))
+                .addParameters(literal("!account:login"), string("username"), string("password"))
                 .description("Log into an account")
                 .handler(new CommandHandler<PrivateMessageEvent>() {
                     public void handle(PrivateMessageEvent event, List<String> arguments) {
@@ -150,7 +148,7 @@ public class AccountService extends AbstractIrcEventService {
         );
 
         registerCommand(forEvent(PrivateMessageEvent.class)
-                        .addParameter(exactMatch("!account:whoami"))
+                        .addParameters(literal("!account:whoami"))
                         .description("Show the current user")
                         .handler(new CommandHandler<PrivateMessageEvent>() {
                             public void handle(PrivateMessageEvent event, List<String> arguments) {
@@ -161,8 +159,7 @@ public class AccountService extends AbstractIrcEventService {
         );
 
         registerCommand(forEvent(PrivateMessageEvent.class)
-                        .addParameter(exactMatch("!account:password"))
-                        .addParameter(string("password"))
+                        .addParameters(literal("!account:password"), optional(string("password")))
                         .description("Remove the account password if it matches the provided password, or set the account password if one doesn't exist.")
                         .handler(new CommandHandler<PrivateMessageEvent>() {
                             public void handle(PrivateMessageEvent event, List<String> arguments) {

@@ -2,7 +2,6 @@ package com.sl5r0.qwobot.irc.service;
 
 import com.google.inject.Inject;
 import com.sl5r0.qwobot.domain.command.CommandHandler;
-import com.sl5r0.qwobot.domain.command.Parameter;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 
 import java.util.List;
@@ -13,6 +12,7 @@ import static com.google.common.util.concurrent.Service.State.RUNNING;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.YELLOW;
 import static com.sl5r0.qwobot.domain.command.Command.forEvent;
+import static com.sl5r0.qwobot.domain.command.Parameter.literal;
 
 public class ManagementService extends AbstractIrcEventService {
     private final IrcServiceManager serviceManager;
@@ -37,7 +37,7 @@ public class ManagementService extends AbstractIrcEventService {
     @Override
     protected void initialize() {
         registerCommand(forEvent(PrivateMessageEvent.class)
-                .addParameter(Parameter.exactMatch("!services:list"))
+                .addParameters(literal("!services:list"))
                 .description("Display bot service status")
                 .handler(new CommandHandler<PrivateMessageEvent>() {
                     @Override

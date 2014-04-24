@@ -36,8 +36,7 @@ public class QbuxService extends AbstractIrcEventService {
     protected void initialize() {
         registerCommand(
                 forEvent(GenericMessageEvent.class)
-                        .addParameter(exactMatch("!qbux:balance"))
-                        .addParameter(string("nickname"))
+                        .addParameters(literal("!qbux:balance"), optional(string("nickname")))
                         .description("Show balance for a user")
                         .handler(new CommandHandler<GenericMessageEvent>() {
                             @Override
@@ -54,9 +53,7 @@ public class QbuxService extends AbstractIrcEventService {
 
         registerCommand(
                 forEvent(PrivateMessageEvent.class)
-                        .addParameter(exactMatch("!qbux:tip"))
-                        .addParameter(string("nickname"))
-                        .addParameter(number("amount"))
+                        .addParameters(literal("!qbux:tip"), string("nickname"), integer("amount"))
                         .description("Tip a user")
                         .handler(new CommandHandler<PrivateMessageEvent>() {
                             @Override
@@ -69,8 +66,7 @@ public class QbuxService extends AbstractIrcEventService {
 
         registerCommand(
                 forEvent(GenericMessageEvent.class)
-                        .addParameter(exactMatch("!qbux:richest"))
-                        .addParameter(number("amount"))
+                        .addParameters(literal("!qbux:richest"), integer("amount"))
                         .description("Show the richest users")
                         .handler(new CommandHandler<GenericMessageEvent>() {
                             @Override

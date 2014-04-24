@@ -15,12 +15,10 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.sl5r0.qwobot.domain.command.Command.forEvent;
-import static com.sl5r0.qwobot.domain.command.Parameter.exactMatch;
-import static com.sl5r0.qwobot.domain.command.Parameter.string;
+import static com.sl5r0.qwobot.domain.command.Parameter.*;
 
 @Singleton
 public class BitCoinService extends AbstractIrcEventService {
@@ -36,13 +34,12 @@ public class BitCoinService extends AbstractIrcEventService {
     protected void initialize() {
         registerCommand(
                 forEvent(GenericMessageEvent.class)
-                        .addParameter(exactMatch("!btc"))
-                        .addParameter(string("currency code"))
+                        .addParameters(literal("!btc"), repeating(string("currency code")))
                         .description("Check bitcoin prices")
                         .handler(new CommandHandler<GenericMessageEvent>() {
                             @Override
                             public void handle(GenericMessageEvent event, List<String> arguments) {
-                                getPrices(event, Collections.singletonList(arguments.get(1)));
+                                getPrices(event, arguments.subList(1, arguments.size()));
                             }
                         })
                         .build()

@@ -1,6 +1,5 @@
 package com.sl5r0.qwobot.guice;
 
-import com.sl5r0.qwobot.irc.service.exceptions.CommandNotApplicableException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.shiro.authc.AuthenticationException;
@@ -28,10 +27,8 @@ public class EventBusExceptionHandler implements MethodInterceptor {
                     }
                 }
             }
-        } catch (CommandNotApplicableException e) {
-//            log.trace("Command " + e.getCommand() + " not applicable to message: " + e.getMessage());
-        } catch (Throwable throwable) {
-            log.error("Exception caught during " + methodInvocation.getMethod().toGenericString(), throwable);
+        } catch (RuntimeException e) {
+            log.error("Exception caught during " + methodInvocation.getMethod().toGenericString(), e);
         }
 
         return null; // OK to return null here because subscribe methods are all void.

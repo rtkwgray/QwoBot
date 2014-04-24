@@ -32,7 +32,7 @@ import static com.google.common.primitives.Longs.toArray;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BLUE;
 import static com.sl5r0.qwobot.domain.TwitterFollow.*;
 import static com.sl5r0.qwobot.domain.command.Command.forEvent;
-import static com.sl5r0.qwobot.domain.command.Parameter.exactMatch;
+import static com.sl5r0.qwobot.domain.command.Parameter.literal;
 import static com.sl5r0.qwobot.domain.command.Parameter.string;
 import static com.sl5r0.qwobot.guice.ConfigurationProvider.readConfigurationValue;
 import static com.sl5r0.qwobot.util.ExtraPredicates.matchesCaseInsensitiveString;
@@ -41,7 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class TwitterService extends AbstractIrcEventService {
     private static final Logger log = getLogger(TwitterService.class);
-     private static final String OAUTH_CONSUMER_KEY = "twitter.oauth.consumer-key";
+    private static final String OAUTH_CONSUMER_KEY = "twitter.oauth.consumer-key";
     private static final String OAUTH_CONSUMER_SECRET = "twitter.oauth.consumer-secret";
     private static final String OAUTH_ACCESS_TOKEN = "twitter.oauth.access-token";
     private static final String OAUTH_ACCESS_TOKEN_SECRET = "twitter.oauth.access-token-secret";
@@ -49,11 +49,10 @@ public class TwitterService extends AbstractIrcEventService {
 
     private final PircBotX bot;
     private final SimpleRepository<TwitterFollow> twitterRepository;
+    private final Set<TwitterFollow> following = newHashSet();
     private Optional<TwitterStream> stream = absent();
     private Twitter twitter;
     private String channel;
-
-    private final Set<TwitterFollow> following = newHashSet();
 
     @Inject
     public TwitterService(IrcBotService ircBotService, SimpleRepository<TwitterFollow> twitterRepository, HierarchicalConfiguration configuration) {
@@ -121,22 +120,20 @@ public class TwitterService extends AbstractIrcEventService {
     protected void initialize() {
         registerCommand(
                 forEvent(MessageEvent.class)
-                .addParameter(exactMatch("!twitter:follow"))
-                .addParameter(string("twitter handle"))
-                .description("Follow a twitter user")
-                .handler(new CommandHandler<MessageEvent>() {
-                    @Override
-                    public void handle(MessageEvent event, List<String> arguments) {
-                        run(event, arguments.get(1));
-                    }
-                })
-                .build()
+                        .addParameters(literal("!twitter:follow"), string("twitter handle"))
+                        .description("Follow a twitter user")
+                        .handler(new CommandHandler<MessageEvent>() {
+                            @Override
+                            public void handle(MessageEvent event, List<String> arguments) {
+                                run(event, arguments.get(1));
+                            }
+                        })
+                        .build()
         );
 
         registerCommand(
                 forEvent(MessageEvent.class)
-                        .addParameter(exactMatch("!twitter:unfollow"))
-                        .addParameter(string("twitter handle"))
+                        .addParameters(literal("!twitter:unfollow"), string("twitter handle"))
                         .description("Unfollow a twitter user")
                         .handler(new CommandHandler<MessageEvent>() {
                             @Override
@@ -149,9 +146,7 @@ public class TwitterService extends AbstractIrcEventService {
 
         registerCommand(
                 forEvent(MessageEvent.class)
-                        .addParameter(exactMatch("!twitter:color"))
-                        .addParameter(string("twitter handle"))
-                        .addParameter(string("color"))
+                        .addParameters(literal("!twitter:color"), string("twitter handle"))
                         .description("Change the color of a twitter user's tweets")
                         .handler(new CommandHandler<MessageEvent>() {
                             @Override
@@ -164,7 +159,7 @@ public class TwitterService extends AbstractIrcEventService {
 
         registerCommand(
                 forEvent(MessageEvent.class)
-                        .addParameter(exactMatch("!twitter:following"))
+                        .addParameters(literal("!twitter:following"))
                         .description("Show what users are being followed")
                         .handler(new CommandHandler<MessageEvent>() {
                             @Override
@@ -260,7 +255,6 @@ public class TwitterService extends AbstractIrcEventService {
             event.respond("It doesn't look like I'm following them.");
         }
     }
-
 
 
     private Optional<TwitterFollow> getTwitterFollow(final String handle) {
