@@ -52,7 +52,7 @@ public class Parameter {
     }
 
     public static Parameter optional(Parameter parameter) {
-        return new Parameter(parameter.description, "(" + parameter.pattern.pattern() + "+)?", parameter.repeating, true);
+        return new Parameter(parameter.description, "(?:" + parameter.pattern.pattern() + "+)?", parameter.repeating, true);
     }
 
     public String find(String string, List<String> matches) {

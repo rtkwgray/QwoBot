@@ -48,8 +48,7 @@ public class Command<T extends GenericMessageEvent> {
         if (eventType.isAssignableFrom(event.getClass())) {
             try {
                 handler.handle(eventType.cast(event), parseArguments(event.getMessage()));
-            } catch (NoSuchElementException e) {
-                log.trace("Ignoring message: " + event.getMessage());
+            } catch (NoSuchElementException ignored) {
             } catch (RuntimeException e) {
                 log.error("Uncaught exception during handler execution", e);
             }
