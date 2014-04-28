@@ -9,7 +9,6 @@ import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.domain.command.CommandHandler;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.persistence.AccountRepository;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.pircbotx.Channel;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
@@ -58,7 +57,7 @@ public class QbuxService extends AbstractIrcEventService {
                         .handler(new CommandHandler<PrivateMessageEvent>() {
                             @Override
                             public void handle(PrivateMessageEvent event, List<String> arguments) {
-                                tip(event, arguments.get(1), Integer.parseInt(arguments.get(2)));
+                                doTip(event, arguments.get(1), Integer.parseInt(arguments.get(2)));
                             }
                         })
                         .build()
@@ -82,10 +81,7 @@ public class QbuxService extends AbstractIrcEventService {
         );
     }
 
-    // TODO: listen for bot disconnects and log everybody out.
-
-    @RequiresAuthentication
-    protected void showPersonalBalance(GenericMessageEvent event) {
+    private void showPersonalBalance(GenericMessageEvent event) {
         event.respond("You have " + getActingAccount().getBalance() + " QBUX.");
     }
 
@@ -98,12 +94,7 @@ public class QbuxService extends AbstractIrcEventService {
         }
     }
 
-    public void tip(PrivateMessageEvent event, String nickname, int amount) {
-        doTip(event, nickname, amount);
-    }
-
-    @RequiresAuthentication
-    protected void doTip(PrivateMessageEvent event, String nickToTip, int amount) {
+    private void doTip(PrivateMessageEvent event, String nickToTip, int amount) {
         try {
             checkArgument(amount > 0, "tip amount must be positive");
             checkArgument(!nickToTip.equals(getActingAccount().getUsername()), "you can't tip yourself");

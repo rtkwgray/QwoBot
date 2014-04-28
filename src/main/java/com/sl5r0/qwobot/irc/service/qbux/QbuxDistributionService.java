@@ -43,7 +43,7 @@ public class QbuxDistributionService extends AbstractScheduledService {
         try {
             for (Long userId : accountManager.getAuthenticatedUserIds()) {
                 final Optional<Account> qwobotUser = accountRepository.findById(userId);
-                if (qwobotUser.isPresent()) {
+                if (qwobotUser.isPresent() && qwobotUser.get().getPassword().isPresent()) {
                     qwobotUser.get().modifyBalance(BALANCE_INCREASE);
                     accountRepository.saveOrUpdate(qwobotUser.get());
                 }
@@ -61,7 +61,7 @@ public class QbuxDistributionService extends AbstractScheduledService {
     @Override
     protected Scheduler scheduler() {
         // Schedule the next distribution time to be on the hour and every hour after that.
-        final DateTime nextHour = now().hourOfDay().roundCeilingCopy();
+        final DateTime nextHour = now().hourOfDay().roundCeilingCopy().plusSeconds(1);
         final long secondsUntilNextHour = new Duration(now(), nextHour).getStandardSeconds();
         log.info("Next QBUX distribution will be at " + nextHour + " (in " + secondsUntilNextHour + " seconds)");
         return newFixedRateSchedule(secondsUntilNextHour, standardHours(1).getStandardSeconds(), SECONDS);
