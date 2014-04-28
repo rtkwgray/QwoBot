@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sl5r0.qwobot.core.IrcTextFormatter.BOLD;
-import static com.sl5r0.qwobot.domain.command.Parameter.repeating;
+import static com.sl5r0.qwobot.domain.command.Parameter.anywhere;
 import static com.sl5r0.qwobot.domain.command.Parameter.url;
 
 @Singleton
@@ -53,7 +53,7 @@ public class UrlScanningService extends AbstractIrcEventService {
     @Override
     protected void initialize() {
         registerCommand(Command.forEvent(GenericMessageEvent.class)
-                .addParameters(repeating(url()))
+                .addParameters(anywhere(url()))
                 .description("Show the title for one or more URLs")
                 .handler(new CommandHandler<GenericMessageEvent>() {
                     @Override
