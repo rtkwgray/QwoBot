@@ -168,4 +168,8 @@ public class AccountManager {
 
         accountRepository.saveOrUpdate(account);
     }
+
+    public void logOutAllUsers() {
+        verifiedUsers.clear();
+    }
 }

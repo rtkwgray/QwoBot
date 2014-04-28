@@ -53,6 +53,11 @@ public class AccountService extends AbstractIrcEventService {
         accountManager.logOutUserIfNotVisible(event.getUser());
     }
 
+    @Subscribe
+    public void handleDisconnects(DisconnectEvent<PircBotX> event) {
+        accountManager.logOutAllUsers();
+    }
+
     public void login(PrivateMessageEvent event, String username, String password) {
         try {
             accountManager.login(event.getUser(), new AccountCredentials(username, password));
