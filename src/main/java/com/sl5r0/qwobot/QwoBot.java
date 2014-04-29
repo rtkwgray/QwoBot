@@ -41,6 +41,7 @@ public class QwoBot {
                 .registerService(AccountService.class)
                 .registerService(HelpService.class)
                 .registerService(QbuxService.class)
+                .registerService(AdminService.class)
                 .registerService(QbuxDistributionService.class);
 
         serviceManager.startAllUnstartedServices();

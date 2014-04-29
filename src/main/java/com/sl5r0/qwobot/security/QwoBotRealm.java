@@ -49,7 +49,7 @@ public class QwoBotRealm extends AuthorizingRealm {
         final User user = (User) token.getPrincipal();
         final Optional<Account> account = accountManager.getAccount(user);
         if (account.isPresent()) {
-            log.debug("Authenticated user \"" + account.get().getUsername() + "\" with nickname \"" + user.getNick() + "\"");
+            log.trace("Authenticated user \"" + account.get().getUsername() + "\" with nickname \"" + user.getNick() + "\"");
             return new AuthenticationInfo() {
                 @Override
                 public PrincipalCollection getPrincipals() {

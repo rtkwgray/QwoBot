@@ -14,7 +14,7 @@ import com.sl5r0.qwobot.security.exceptions.BotCannotSeeUserException;
 import com.sl5r0.qwobot.security.exceptions.IncorrectPasswordException;
 import com.sl5r0.qwobot.security.exceptions.UsernameAlreadyExistsException;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.subject.Subject;
 import org.pircbotx.User;
@@ -51,7 +51,7 @@ public class AccountManager {
             return (Account) subject.getPrincipal();
         }
 
-        throw new AuthenticationException("Not logged in");
+        throw new UnauthenticatedException("Not logged in");
     }
 
     Optional<Account> getAccount(User user) {

@@ -35,7 +35,9 @@ public class AccountService extends AbstractIrcEventService {
 
     @Subscribe
     public void handleJoins(JoinEvent<PircBotX> event) {
-        greet(event.getUser());
+        final User user = event.getUser();
+        establishIdentity(user);
+        user.send().message("Welcome back, " + user.getNick() + "!");
     }
 
     @Subscribe
@@ -74,7 +76,7 @@ public class AccountService extends AbstractIrcEventService {
     public void logInChannelUsers(UserListEvent<PircBotX> event) {
         for (User user : event.getUsers()) {
             if (!user.equals(event.getBot().getUserBot())) {
-                greet(user);
+                establishIdentity(user);
             }
         }
     }
@@ -109,7 +111,7 @@ public class AccountService extends AbstractIrcEventService {
         event.respond("Your account currently has " + passwordStatus + " set.");
     }
 
-    private void greet(User user) {
+    private void establishIdentity(User user) {
         if (user.equals(user.getBot().getUserBot())) {
             log.trace("Ignoring request to greet the bot user");
             return;
@@ -117,11 +119,9 @@ public class AccountService extends AbstractIrcEventService {
 
         try {
             accountManager.login(user);
-            user.send().message("Welcome back, " + user.getNick() + "!");
         } catch (IncorrectPasswordException e) {
             createNewAccount(user);
         } catch (AccountHasPasswordException e) {
-            // TODO: if a user logs in, leaves, and then immediately rejoins, they're still authenticated....
             user.send().message("The account associated with this nickname has set a password. Some commands have been disabled until you log in.");
         }
     }

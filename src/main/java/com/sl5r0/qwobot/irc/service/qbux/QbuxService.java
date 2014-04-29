@@ -9,6 +9,7 @@ import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.domain.command.CommandHandler;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.persistence.AccountRepository;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.pircbotx.Channel;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
@@ -18,9 +19,11 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sl5r0.qwobot.domain.Roles.OWNER;
 import static com.sl5r0.qwobot.domain.command.Command.forEvent;
 import static com.sl5r0.qwobot.domain.command.Parameter.*;
 import static com.sl5r0.qwobot.security.AccountManager.getActingAccount;
+import static java.lang.Integer.parseInt;
 import static java.lang.Math.min;
 
 public class QbuxService extends AbstractIrcEventService {
@@ -57,7 +60,7 @@ public class QbuxService extends AbstractIrcEventService {
                         .handler(new CommandHandler<PrivateMessageEvent>() {
                             @Override
                             public void handle(PrivateMessageEvent event, List<String> arguments) {
-                                doTip(event, arguments.get(1), Integer.parseInt(arguments.get(2)));
+                                doTip(event, arguments.get(1), parseInt(arguments.get(2)));
                             }
                         })
                         .build()
@@ -65,16 +68,29 @@ public class QbuxService extends AbstractIrcEventService {
 
         registerCommand(
                 forEvent(GenericMessageEvent.class)
-                        .addParameters(literal("!qbux:richest"), integer("amount"))
+                        .addParameters(literal("!qbux:richest"), optional(integer("number of users to show")))
                         .description("Show the richest users")
                         .handler(new CommandHandler<GenericMessageEvent>() {
                             @Override
                             public void handle(GenericMessageEvent event, List<String> arguments) {
                                 if (arguments.size() > 1) {
-                                    showRichest(event, min(Integer.parseInt(arguments.get(1)), 10));
+                                    showRichest(event, min(parseInt(arguments.get(1)), 10));
                                 } else {
                                     showRichest(event, 3);
                                 }
+                            }
+                        })
+                        .build()
+        );
+
+        registerCommand(
+                forEvent(GenericMessageEvent.class)
+                        .addParameters(literal("!qbux:setbalance"), string("account name"), integer("amount"))
+                        .description("Set a user's balance")
+                        .handler(new CommandHandler<GenericMessageEvent>() {
+                            @Override
+                            public void handle(GenericMessageEvent event, List<String> arguments) {
+                                setBalance(event, arguments.get(1), parseInt(arguments.get(2)));
                             }
                         })
                         .build()
@@ -83,6 +99,19 @@ public class QbuxService extends AbstractIrcEventService {
 
     private void showPersonalBalance(GenericMessageEvent event) {
         event.respond("You have " + getActingAccount().getBalance() + " QBUX.");
+    }
+
+    @RequiresRoles(OWNER)
+    protected void setBalance(GenericMessageEvent event, String accountName, int balance) {
+        final Optional<Account> account = accountRepository.findByNick(accountName);
+        if (account.isPresent()) {
+            account.get().setBalance(balance);
+            accountRepository.saveOrUpdate(account.get());
+            event.respond(accountName + " now has a balance of " + balance + " QBUX");
+            event.getBot().getUserChannelDao().getUser(accountName).send().message("Hey, " + getActingAccount().getUsername() + " just set your account balance to " + balance + " QBUX");
+        } else {
+            event.respond("No user exists with that username");
+        }
     }
 
     private void showUserBalance(GenericMessageEvent event, String nickname) {
