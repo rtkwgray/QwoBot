@@ -1,0 +1,4 @@
+Design Considerations
+- Bot should be easy to use.
+- Bot should make a best-effort guess to identify users.
+- Could maybe have a flag on the account for security. Should be secure by default, and users can turn it off to loosen security on the account. Low security essentially means use nickname only as a method of authentication. High security would require a login each time the bot loses sight of a nickname.

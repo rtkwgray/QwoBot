@@ -2,12 +2,15 @@
 <project version="4">
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
-    <list size="5">
+    <list size="8">
       <item index="0" class="java.lang.String" itemvalue="com.google.api.client.util.Key" />
       <item index="1" class="java.lang.String" itemvalue="com.google.common.eventbus.Subscribe" />
-      <item index="2" class="java.lang.String" itemvalue="com.google.inject.Provides" />
-      <item index="3" class="java.lang.String" itemvalue="org.mockito.InjectMocks" />
-      <item index="4" class="java.lang.String" itemvalue="org.mockito.Mock" />
+      <item index="2" class="java.lang.String" itemvalue="com.google.inject.Inject" />
+      <item index="3" class="java.lang.String" itemvalue="com.google.inject.Provides" />
+      <item index="4" class="java.lang.String" itemvalue="com.sl5r0.qwobot.persistence.PersistenceConstructor" />
+      <item index="5" class="java.lang.String" itemvalue="org.hibernate.annotations.GenericGenerator" />
+      <item index="6" class="java.lang.String" itemvalue="org.mockito.InjectMocks" />
+      <item index="7" class="java.lang.String" itemvalue="org.mockito.Mock" />
     </list>
   </component>
   <component name="IdProvider" IDEtalkID="600AC60FE61A4DCA4CE69BFD1930A586" />
@@ -21,7 +24,7 @@
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />

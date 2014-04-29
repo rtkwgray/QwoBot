@@ -4,6 +4,7 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/pircbotx/pircbotx/2.0.1/pircbotx-2.0.1.jar!/" />
     </CLASSES>
     <JAVADOC>
+      <root url="http://site.pircbotx.googlecode.com/hg-history/2.0.1/apidocs/index.html" />
       <root url="jar://$MAVEN_REPOSITORY$/org/pircbotx/pircbotx/2.0.1/pircbotx-2.0.1-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>

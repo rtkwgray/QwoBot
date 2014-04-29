@@ -1,7 +1,7 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
+            <pattern>%d %-5p [%c{1}] [%thread] %m%n</pattern>
         </encoder>
     </appender>
 
@@ -19,8 +19,22 @@
         </encoder>
     </appender>
 
-    <logger name="com.sl5r0" level="DEBUG">
-        <appender-ref ref="debugLog"/>
-        <appender-ref ref="console" />
+    <logger name="com.sl5r0" level="TRACE" additivity="false">
+        <appender-ref ref="console"/>
     </logger>
+
+    <logger name="twitter4j" level="TRACE" additivity="false">
+        <appender-ref ref="debugLog"/>
+    </logger>
+
+    <!--<logger name="org.hibernate" level="OFF" additivity="false">-->
+        <!--<appender-ref ref="console"/>-->
+    <!--</logger>-->
+
+    <logger name="org.pircbotx" level="DEBUG" additivity="false">
+        <appender-ref ref="ircLog"/>
+    </logger>
+
+    <root/>
+        <!--<appender-ref ref="console"/>-->
 </configuration>

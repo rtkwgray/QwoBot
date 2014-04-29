@@ -1,5 +1,5 @@
 <configuration>
     <plugins>
-        <plugin class="com.sl5r0.qwobot.plugins.qbux.QBuxCasino"/>
+        <plugin class="com.sl5r0.qwobot.plugins.qbux.QBux"/>
     </plugins>
 </configuration>
