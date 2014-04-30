@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.domain.command;
+package com.sl5r0.qwobot.irc.command;
 
 import com.sl5r0.qwobot.helpers.PircBotTestableObjectFactory;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.sl5r0.qwobot.domain.command.Parameter.*;
+import static com.sl5r0.qwobot.irc.command.Parameter.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;

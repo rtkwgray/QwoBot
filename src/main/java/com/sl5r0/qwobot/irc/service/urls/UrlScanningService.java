@@ -1,9 +1,10 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc.service.urls;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.domain.command.Command;
-import com.sl5r0.qwobot.domain.command.CommandHandler;
+import com.sl5r0.qwobot.irc.command.Command;
+import com.sl5r0.qwobot.irc.command.CommandHandler;
+import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.thirdparty.reddit.Reddit;
 import com.sl5r0.qwobot.thirdparty.reddit.RedditPostFailedException;
 import org.jsoup.Jsoup;
@@ -13,9 +14,9 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.BOLD;
-import static com.sl5r0.qwobot.domain.command.Parameter.anywhere;
-import static com.sl5r0.qwobot.domain.command.Parameter.url;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.BOLD;
+import static com.sl5r0.qwobot.irc.command.Parameter.anywhere;
+import static com.sl5r0.qwobot.irc.command.Parameter.url;
 
 @Singleton
 public class UrlScanningService extends AbstractIrcEventService {

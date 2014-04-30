@@ -2,7 +2,7 @@ package com.sl5r0.qwobot.guice;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.sl5r0.qwobot.core.IrcEventDispatcher;
+import com.sl5r0.qwobot.irc.IrcEventDispatcher;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;

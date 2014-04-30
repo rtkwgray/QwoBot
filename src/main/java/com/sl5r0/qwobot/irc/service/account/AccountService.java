@@ -3,9 +3,9 @@ package com.sl5r0.qwobot.irc.service.account;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.core.AccountCredentials;
+import com.sl5r0.qwobot.security.AccountCredentials;
 import com.sl5r0.qwobot.domain.Account;
-import com.sl5r0.qwobot.domain.command.CommandHandler;
+import com.sl5r0.qwobot.irc.command.CommandHandler;
 import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.security.AccountManager;
 import com.sl5r0.qwobot.security.exceptions.AccountHasPasswordException;
@@ -19,9 +19,9 @@ import org.pircbotx.hooks.events.*;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.*;
-import static com.sl5r0.qwobot.domain.command.Command.forEvent;
-import static com.sl5r0.qwobot.domain.command.Parameter.*;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.*;
+import static com.sl5r0.qwobot.irc.command.Command.forEvent;
+import static com.sl5r0.qwobot.irc.command.Parameter.*;
 import static com.sl5r0.qwobot.security.AccountManager.getActingAccount;
 
 @Singleton

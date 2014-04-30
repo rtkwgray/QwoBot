@@ -1,16 +1,17 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc.service.logging;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.ChatLog;
-import com.sl5r0.qwobot.domain.command.CommandHandler;
+import com.sl5r0.qwobot.irc.command.CommandHandler;
+import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.persistence.SimpleRepository;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sl5r0.qwobot.domain.command.Command.forEvent;
+import static com.sl5r0.qwobot.irc.command.Command.forEvent;
 
 @Singleton
 public class LoggingService extends AbstractIrcEventService {

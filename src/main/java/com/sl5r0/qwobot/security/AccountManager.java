@@ -6,7 +6,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sl5r0.qwobot.core.AccountCredentials;
 import com.sl5r0.qwobot.domain.Account;
 import com.sl5r0.qwobot.persistence.AccountRepository;
 import com.sl5r0.qwobot.security.exceptions.AccountHasPasswordException;

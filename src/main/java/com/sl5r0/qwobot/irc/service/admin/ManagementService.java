@@ -1,7 +1,9 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc.service.admin;
 
 import com.google.inject.Inject;
-import com.sl5r0.qwobot.domain.command.CommandHandler;
+import com.sl5r0.qwobot.irc.command.CommandHandler;
+import com.sl5r0.qwobot.irc.IrcServiceManager;
+import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 
 import java.util.List;
@@ -9,10 +11,10 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Service.State.RUNNING;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.YELLOW;
-import static com.sl5r0.qwobot.domain.command.Command.forEvent;
-import static com.sl5r0.qwobot.domain.command.Parameter.literal;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.GREEN;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.YELLOW;
+import static com.sl5r0.qwobot.irc.command.Command.forEvent;
+import static com.sl5r0.qwobot.irc.command.Parameter.literal;
 
 public class ManagementService extends AbstractIrcEventService {
     private final IrcServiceManager serviceManager;

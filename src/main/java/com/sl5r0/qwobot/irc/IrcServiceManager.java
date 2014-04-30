@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;

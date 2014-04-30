@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.core;
+package com.sl5r0.qwobot.irc;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;

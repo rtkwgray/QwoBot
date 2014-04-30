@@ -1,8 +1,9 @@
 package com.sl5r0.qwobot.core;
 
+import com.sl5r0.qwobot.irc.IrcTextFormatter;
 import org.junit.Test;
 
-import static com.sl5r0.qwobot.core.IrcTextFormatter.RAINBOW;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.RAINBOW;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.pircbotx.Colors.*;

@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.inject.Inject;
@@ -34,7 +34,7 @@ public class IrcBotService extends AbstractExecutionThreadService {
                 log.warn("IRC bot was disconnected", e);
             }
 
-            log.debug("Waiting 5 seconds to reconnect");
+            log.info("Waiting 5 seconds to reconnect");
             try {
                 sleep(5000);
             } catch (InterruptedException ignored) {

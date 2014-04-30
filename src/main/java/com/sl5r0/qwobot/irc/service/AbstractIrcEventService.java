@@ -3,8 +3,8 @@ package com.sl5r0.qwobot.irc.service;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
-import com.sl5r0.qwobot.domain.command.Command;
-import com.sl5r0.qwobot.domain.command.CommandDirectory;
+import com.sl5r0.qwobot.irc.command.Command;
+import com.sl5r0.qwobot.irc.command.CommandDirectory;
 import org.slf4j.Logger;
 
 import java.util.Set;

@@ -1,10 +1,11 @@
-package com.sl5r0.qwobot.irc.service;
+package com.sl5r0.qwobot.irc.service.admin;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.sl5r0.qwobot.domain.Account;
-import com.sl5r0.qwobot.domain.command.Command;
-import com.sl5r0.qwobot.domain.command.CommandHandler;
+import com.sl5r0.qwobot.irc.command.Command;
+import com.sl5r0.qwobot.irc.command.CommandHandler;
+import com.sl5r0.qwobot.irc.service.AbstractIrcEventService;
 import com.sl5r0.qwobot.persistence.AccountRepository;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
@@ -13,7 +14,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sl5r0.qwobot.domain.Role.owner;
-import static com.sl5r0.qwobot.domain.command.Parameter.literal;
+import static com.sl5r0.qwobot.irc.command.Parameter.literal;
 import static com.sl5r0.qwobot.guice.ConfigurationProvider.readConfigurationValue;
 import static com.sl5r0.qwobot.security.AccountManager.getActingAccount;
 

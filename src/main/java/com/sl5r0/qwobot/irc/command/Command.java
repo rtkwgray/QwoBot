@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.domain.command;
+package com.sl5r0.qwobot.irc.command;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.WHITE;
-import static com.sl5r0.qwobot.domain.command.Parameter.toFormattedString;
-import static com.sl5r0.qwobot.domain.command.Parameter.urlPattern;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.WHITE;
+import static com.sl5r0.qwobot.irc.command.Parameter.toFormattedString;
+import static com.sl5r0.qwobot.irc.command.Parameter.urlPattern;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class Command<T extends GenericMessageEvent> {

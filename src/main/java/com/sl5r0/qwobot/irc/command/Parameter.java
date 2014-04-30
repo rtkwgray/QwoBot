@@ -1,12 +1,12 @@
-package com.sl5r0.qwobot.domain.command;
+package com.sl5r0.qwobot.irc.command;
 
 import com.google.common.base.Function;
-import com.sl5r0.qwobot.core.IrcTextFormatter;
+import com.sl5r0.qwobot.irc.IrcTextFormatter;
 
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.sl5r0.qwobot.domain.command.ParameterType.*;
+import static com.sl5r0.qwobot.irc.command.ParameterType.*;
 import static java.util.regex.Pattern.compile;
 
 public class Parameter {

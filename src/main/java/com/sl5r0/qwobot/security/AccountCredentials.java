@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.core;
+package com.sl5r0.qwobot.security;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

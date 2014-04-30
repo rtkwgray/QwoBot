@@ -1,7 +1,7 @@
 package com.sl5r0.qwobot.domain;
 
 import com.google.common.base.Function;
-import com.sl5r0.qwobot.core.IrcTextFormatter;
+import com.sl5r0.qwobot.irc.IrcTextFormatter;
 import com.sl5r0.qwobot.persistence.PersistenceConstructor;
 
 import javax.persistence.Column;

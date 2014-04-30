@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sl5r0.qwobot.domain.Account;
-import com.sl5r0.qwobot.irc.service.IrcBotService;
+import com.sl5r0.qwobot.irc.IrcBotService;
 import com.sl5r0.qwobot.persistence.AccountRepository;
 import com.sl5r0.qwobot.security.AccountManager;
 import org.joda.time.DateTime;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
-import static com.sl5r0.qwobot.core.IrcTextFormatter.GREEN;
+import static com.sl5r0.qwobot.irc.IrcTextFormatter.GREEN;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.joda.time.DateTime.now;
 import static org.joda.time.Duration.standardHours;

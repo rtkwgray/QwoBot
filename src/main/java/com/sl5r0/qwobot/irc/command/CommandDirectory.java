@@ -1,4 +1,4 @@
-package com.sl5r0.qwobot.domain.command;
+package com.sl5r0.qwobot.irc.command;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Singleton;
