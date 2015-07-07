@@ -4,8 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Ordering;
 import com.google.common.eventbus.Subscribe;
-import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
@@ -76,10 +74,6 @@ public class Command<T extends GenericMessageEvent> {
         if (eventType.isAssignableFrom(event.getClass())) {
             try {
                 handler.handle(eventType.cast(event), parseArguments(event.getMessage()));
-            } catch (UnauthenticatedException e) {
-                event.respond("You need to log in first. For help, type !help login.");
-            } catch (UnauthorizedException e) {
-                event.respond("No dice. Doesn't look like you're allowed to do that.");
             } catch (RuntimeException e) {
                 log.error("Uncaught exception during handler execution", e);
             } catch (CommandParseException ignored) {
